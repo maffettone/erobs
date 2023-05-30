@@ -1,0 +1,22 @@
+version: '3'
+
+services:
+  ursim:
+    image: ursim:latest
+    command: tail -f /dev/null
+    ports:
+      - 5900:5900
+      - 6080:6080
+
+    networks:
+      ursim_net:
+        ipv4_address: 192.168.56.101
+
+networks:
+  ursim_net:
+    ipam:
+      config:
+        - subnet: 192.168.56.0/24
+
+# Can be configured to use extrernal network as well
+# https://stackoverflow.com/questions/46461977/docker-compose-v3-static-ip
