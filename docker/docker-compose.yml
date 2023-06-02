@@ -7,19 +7,33 @@ services:
     ports:
       - 5900:5900
       - 6080:6080
+      - 50001:50001
     environment:
       - ROBOT_MODEL=UR3e
     networks:
       ursim_net:
         ipv4_address: 192.168.56.101
+
   urdriver:
     image: ur-driver:latest
     ports:
-      - 50001:50001
+      - 50002:50002
+    environment:
+      - ROBOT_IP=192.168.56.101
+    networks:
+      ursim_net:
+        ipv4_address: 192.168.56.1
+    depends_on:
+      - ursim
+
+  urexample:
+    image: ur-example:latest
     environment:
       - ROBOT_IP=192.168.56.101
     networks:
       - ursim_net
+    depends_on:
+      - urdriver
 
 networks:
   ursim_net:
