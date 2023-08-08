@@ -1,18 +1,19 @@
-FROM althack/ros2:humble-base
+FROM osrf/ros:humble-desktop-full
 
-ENV DEBIAN_FRONTEND=noninteractive
+
 RUN apt-get update \
-        && apt-get -y install --no-install-recommends \
+        && apt-get -y install \
+        python3-pip \
         ros-${ROS_DISTRO}-rclpy \
-        ros-${ROS_DISTRO}-ur-robot-driver \
+        ros-${ROS_DISTRO}-ur \
+        build-essential \
+        python3-colcon-common-extensions \
         #
         # Clean up
         && apt-get autoremove -y \
         && apt-get clean -y \
         && rm -rf /var/lib/apt/lists/*
-ENV DEBIAN_FRONTEND=dialog
+RUN pip3 install rosdep && \
+        rosdep update
 
-RUN . /opt/ros/${ROS_DISTRO}/setup.sh
-
-ENV ROBOT_IP=192.168.56.101
-CMD ["/bin/bash", "-c", ".  /opt/ros/${ROS_DISTRO}/setup.sh && ros2 launch ur_robot_driver test_scaled_joint_trajectory_controller.launch.py"]
+CMD ["/bin/sh", "-c", ".  /opt/ros/${ROS_DISTRO}/setup.sh && ros2 launch ur_robot_driver test_scaled_joint_trajectory_controller.launch.py"]

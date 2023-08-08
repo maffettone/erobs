@@ -7,7 +7,7 @@ services:
     ports:
       - 5900:5900
       - 6080:6080
-      - 50001:50001
+      #- 50001:50001
     environment:
       - ROBOT_MODEL=UR3e
     networks:
@@ -17,7 +17,10 @@ services:
   urdriver:
     image: ur-driver:latest
     ports:
+      - 50001:50001
       - 50002:50002
+      - 50003:50003
+      - 50004:50004
     environment:
       - ROBOT_IP=192.168.56.101
     networks:
