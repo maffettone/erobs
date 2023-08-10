@@ -8,7 +8,7 @@
 	},
 	"remoteUser": "ros",
 	"runArgs": [
-		"--network=host",
+		"--network=docker_ursim_net",
 		"--cap-add=SYS_PTRACE",
 		"--security-opt=seccomp:unconfined",
 		"--security-opt=apparmor:unconfined",
