@@ -18,4 +18,5 @@ RUN pip3 install rosdep && \
 
 ENV ROBOT_IP=192.168.56.101
 ENV REVERSE_IP=192.168.56.102
-CMD ["/bin/sh", "-c", ".  /opt/ros/${ROS_DISTRO}/setup.sh &&  ros2 launch ur_robot_driver ur_control.launch.py ur_type:=ur3e robot_ip:=${ROBOT_IP} launch_rviz:=false"]
+ENV UR_TYPE="ur3e"
+CMD ["/bin/sh", "-c", ".  /opt/ros/${ROS_DISTRO}/setup.sh &&  ros2 launch ur_robot_driver ur_control.launch.py ur_type:=${UR_TYPE} robot_ip:=${ROBOT_IP} launch_rviz:=false & ros2 launch ur_moveit_config ur_moveit.launch.py ur_type:=${UR_TYPE} launch_rviz:=false"]
