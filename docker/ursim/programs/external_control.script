@@ -1,0 +1,40 @@
+def external_control():
+  global _hidden_verificationVariable=0
+  step_count_f5a459b7_2bb2_4594_8738_035315bfaff6 = 0.0
+  thread Step_Counter_Thread_6550d4f6_5043_4092_b4a9_f13f73548dcd():
+    while (True):
+      step_count_f5a459b7_2bb2_4594_8738_035315bfaff6 = step_count_f5a459b7_2bb2_4594_8738_035315bfaff6 + 1.0
+      sync()
+    end
+  end
+  run Step_Counter_Thread_6550d4f6_5043_4092_b4a9_f13f73548dcd()
+  set_target_payload(0.000000, [0.000000, 0.000000, 0.000000], [0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000])
+  set_tool_communication(False, 115200, 0, 1, 1.5, 3.5)
+  set_tool_output_mode(0)
+  set_tool_digital_output_mode(0, 1)
+  set_tool_digital_output_mode(1, 1)
+  set_tool_voltage(0)
+  set_safety_mode_transition_hardness(1)
+  set_tcp(p[0.0,0.0,0.0,0.0,0.0,0.0])
+  set_gravity([0.0, 0.0, 9.82])
+  set_standard_analog_input_domain(0, 1)
+  set_standard_analog_input_domain(1, 1)
+  set_tool_analog_input_domain(0, 1)
+  set_tool_analog_input_domain(1, 1)
+  set_analog_outputdomain(0, 0)
+  set_analog_outputdomain(1, 0)
+  set_input_actions_to_default()
+  # begin: URCap Installation Node
+  #   Source: External Control, 1.0.5, FZI Research Center for Information Technology
+  #   Type: External Control
+  # end: URCap Installation Node
+  while (True):
+    $ 2 "Robot Program"
+    # begin: URCap Program Node
+    #   Source: External Control, 1.0.5, FZI Research Center for Information Technology
+    #   Type: External Control
+    $ 3 "Control by 192.168.56.102"
+popup("The connection to the remote PC at 192.168.56.102:50002 could not be established. Reason: No route to host (Host unreachable)","Receive program failed", False, True, blocking=True)
+sync()    # end: URCap Program Node
+  end
+end
