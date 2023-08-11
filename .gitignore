@@ -1,5 +1,5 @@
-*/build/*
-*/install/*
-*/log/*
-site/*
+build
+install
+log
+site
 erobs.code-workspace
