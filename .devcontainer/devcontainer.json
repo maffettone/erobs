@@ -34,6 +34,7 @@
 				"ms-iot.vscode-ros",
 				"ms-python.python",
 				"ms-vscode.cpptools",
+				"ms-vscode.cpptools-extension-pack",
 				"redhat.vscode-yaml",
 				"smilerobotics.urdf",
 				"streetsidesoftware.code-spell-checker",
