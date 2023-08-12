@@ -19,51 +19,23 @@ has a class member that is a node.
 /doc/tutorials/pick_and_place_with_moveit_task_constructor/src/minimal.cpp)
 */
 
-class PoseSubscriberNode : public rclcpp::Node
+class PoseSubscriberNode
 {
 public:
-  PoseSubscriberNode(const std::string & move_group_name = "ur_manipulator")
-  : Node("pose_subscriber",
-      rclcpp::NodeOptions().automatically_declare_parameters_from_overrides(true)),
-    move_group_interface_(move_group_name)
+  PoseSubscriberNode(
+    const std::string & move_group_name = "ur_manipulator",
+    const rclcpp::NodeOptions & options = rclcpp::NodeOptions())
+  : node_(std::make_shared<rclcpp::Node>("pose_subscriber_node", options)),
+    move_group_interface_(node_, move_group_name)
   {
-    subscriber_ = create_subscription<geometry_msgs::msg::Pose>(
+    subscriber_ = node_->create_subscription<geometry_msgs::msg::Pose>(
       "pose", 10, std::bind(&PoseSubscriberNode::callback, this, _1));
-
-
-    auto parent_parameters_client =
-      std::make_shared<rclcpp::SyncParametersClient>(this, "move_group");
-    // Boiler plate wait block
-    while (!parent_parameters_client->wait_for_service(1s)) {
-      if (!rclcpp::ok()) {
-        RCLCPP_ERROR(
-          get_logger(), "Interrupted while waiting for the service. Exiting.");
-        return;
-      }
-      RCLCPP_INFO(get_logger(), "move_group service not available, waiting again...");
-    }
-    // Get robot config parameters from parameter server
-    auto parameters = parent_parameters_client->get_parameters(
-      {"robot_description_semantic",
-        "robot_description"});
-    declare_parameter<std::string>("robot_description_semantic", parameters[0].value_to_string());
-    declare_parameter<std::string>("robot_description", parameters[1].value_to_string());
-
-
-    RCLCPP_INFO(get_logger(), "re-assembling move_group_interface");
-    declare_parameter<std::string>("move_group_name", move_group_name);
-    move_group_interface_ =
-      moveit::planning_interface::MoveGroupInterface(
-      shared_from_this(),
-      this->get_parameter(
-        "move_group_name").as_string());
-
-
   }
 
   void callback(const geometry_msgs::msg::Pose::SharedPtr msg)
+  // Callback for when a new message is received.
   {
-    RCLCPP_INFO(get_logger(), "I heard: '%f'", msg->position.x);
+    RCLCPP_INFO(logger, "I heard a new message with x: '%f'", msg->position.x);
     move_group_interface_.setPoseTarget(*msg);
     // Create a plan to that target pose
     auto const [success, plan] = [this] {
@@ -75,22 +47,61 @@ public:
     if (success) {
       this->move_group_interface_.execute(plan);
     } else {
-      RCLCPP_ERROR(get_logger(), "Planning failed!");
+      RCLCPP_ERROR(logger, "Planning failed!");
     }
 
   }
 
-private:
-  rclcpp::Subscription<geometry_msgs::msg::Pose>::SharedPtr subscriber_;
-  moveit::planning_interface::MoveGroupInterface move_group_interface_;
+  rclcpp::node_interfaces::NodeBaseInterface::SharedPtr getNodeBaseInterface()
+  // Expose the node base interface so that the node can be added to a component manager.
+  {
+    return node_->get_node_base_interface();
+  }
 
+  rclcpp::Logger logger = rclcpp::get_logger("pose_subscriber_node");
+
+private:
+  rclcpp::Node::SharedPtr node_;
+  moveit::planning_interface::MoveGroupInterface move_group_interface_;
+  rclcpp::Subscription<geometry_msgs::msg::Pose>::SharedPtr subscriber_;
 };
+
 
 int main(int argc, char * argv[])
 {
   rclcpp::init(argc, argv);
-  auto node = std::make_shared<PoseSubscriberNode>();
-  rclcpp::spin(node);
+
+  // Create a ROS logger for main scope
+  auto const logger = rclcpp::get_logger("hello_moveit");
+  // Create a node for synchronously grabbing params
+  auto parameter_client_node = rclcpp::Node::make_shared("param_client");
+  auto parent_parameters_client =
+    std::make_shared<rclcpp::SyncParametersClient>(parameter_client_node, "move_group");
+  // Boiler plate wait block
+  while (!parent_parameters_client->wait_for_service(1s)) {
+    if (!rclcpp::ok()) {
+      RCLCPP_ERROR(
+        logger, "Interrupted while waiting for the service. Exiting.");
+      return 0;
+    }
+    RCLCPP_INFO(logger, "move_group service not available, waiting again...");
+  }
+  // Get robot config parameters from parameter server
+  auto parameters = parent_parameters_client->get_parameters(
+    {"robot_description_semantic",
+      "robot_description"});
+
+  // Set node parameters using NodeOptions
+  rclcpp::NodeOptions node_options;
+  node_options.automatically_declare_parameters_from_overrides(true);
+  node_options.parameter_overrides(
+  {
+    {"robot_description_semantic", parameters[0].value_to_string()},
+    {"robot_description", parameters[1].value_to_string()}
+  });
+
+  auto parent_node = std::make_shared<PoseSubscriberNode>("ur_manipulator", node_options);
+  rclcpp::spin(parent_node->getNodeBaseInterface());
   rclcpp::shutdown();
   return 0;
 }
