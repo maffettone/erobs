@@ -21,6 +21,17 @@ ament_target_dependencies(
   "rclcpp"
 )
 
+add_executable(pose_subscriber src/pose_subscriber.cpp)
+target_include_directories(pose_subscriber PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>)
+target_compile_features(pose_subscriber PUBLIC c_std_99 cxx_std_17)  # Require C99 and C++17
+ament_target_dependencies(
+  pose_subscriber
+  "moveit_ros_planning_interface"
+  "rclcpp"
+)
+
 add_executable(parameter_demo src/parameter_demo.cpp)
 target_include_directories(parameter_demo PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
@@ -34,6 +45,7 @@ ament_target_dependencies(
 install(TARGETS 
   hello_moveit
   parameter_demo
+  pose_subscriber
   DESTINATION lib/${PROJECT_NAME})
 
 if(BUILD_TESTING)
