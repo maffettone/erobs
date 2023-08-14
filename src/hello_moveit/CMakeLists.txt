@@ -12,6 +12,7 @@ find_package(rclcpp REQUIRED)
 find_package(hello_moveit_interfaces REQUIRED)
 find_package(rclcpp_action REQUIRED)
 find_package(rclcpp_components REQUIRED)
+find_package(yaml-cpp REQUIRED)
 
 
 set(dependencies
@@ -20,17 +21,21 @@ set(dependencies
   rclcpp
   rclcpp_action
   rclcpp_components
+  yaml-cpp
 )
 
+# Comment out the Plugin components and revert to spinning the node in main.
+#add_library(${PROJECT_NAME}_pick_place_repeat_action_server SHARED src/pick_place_repeat_server.cpp)
+# target_include_directories(${PROJECT_NAME}_pick_place_repeat_action_server PUBLIC
+#   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+#   $<INSTALL_INTERFACE:include>
+# )
 
-add_library(${PROJECT_NAME}_pick_place_repeat_action_server SHARED src/pick_place_repeat_server.cpp)
-target_include_directories(${PROJECT_NAME}_pick_place_repeat_action_server PUBLIC
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-  $<INSTALL_INTERFACE:include>
-)
-target_compile_definitions(${PROJECT_NAME}_pick_place_repeat_action_server PRIVATE "HELLO_MOVEIT_BUILDING_DLL")
+add_executable(${PROJECT_NAME}_pick_place_repeat_action_server src/pick_place_repeat_server.cpp)
+# target_compile_definitions(${PROJECT_NAME}_pick_place_repeat_action_server PRIVATE "PICK_PLACE_REPEAT_SERVER_DLL")
 ament_target_dependencies(${PROJECT_NAME}_pick_place_repeat_action_server ${dependencies})
-rclcpp_components_register_nodes(${PROJECT_NAME}_pick_place_repeat_action_server "hello_moveit::PickPlaceRepeatActionServer" EXECUTABLE pick_place_repeat_action_server)
+target_link_libraries(${PROJECT_NAME}_pick_place_repeat_action_server yaml-cpp)
+#rclcpp_components_register_nodes(${PROJECT_NAME}_pick_place_repeat_action_server PLUGIN "pick_place_repeat_server::PickPlaceRepeatActionServer" EXECUTABLE pick_place_repeat_action_server)
 
 
 add_executable(hello_moveit src/hello_moveit.cpp)

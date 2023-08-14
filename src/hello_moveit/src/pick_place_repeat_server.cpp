@@ -15,6 +15,17 @@
 #include <hello_moveit_interfaces/action/pick_place_repeat.hpp>
 using namespace std::chrono_literals;
 
+/*
+This Action server cannot use the plugin approaches, because it is not a node with standard initialization.
+Instead of following the tutorials here directl we need to spin a node in a main function.
+https://docs.ros.org/en/humble/Tutorials/Intermediate/Writing-an-Action-Server-Client/Cpp.html
+
+I.e. using a namespace and RCLCPP_COMPONENTS_REGISTER_NODE(action_tutorials_cpp::FibonacciActionServer)
+and rclcpp_components_register_nodes will not work. It will create an compilation error:
+/usr/include/c++/11/ext/new_allocator.h:162:11: \
+error: no matching function for call to ‘pick_place_repeat_server::PickPlaceRepeatServer::PickPlaceRepeatServer(const rclcpp::NodeOptions&)’
+{ ::new((void *)__p) _Up(std::forward<_Args>(__args)...); }
+*/
 class PickPlaceRepeatServer
 {
 public:
@@ -59,6 +70,12 @@ public:
 
     RCLCPP_INFO(node_->get_logger(), "PickPlaceRepeatServer has been initialized.");
 
+  }
+
+  rclcpp::node_interfaces::NodeBaseInterface::SharedPtr getNodeBaseInterface()
+  // Expose the node base interface so that the node can be added to a component manager.
+  {
+    return node_->get_node_base_interface();
   }
 
 private:
@@ -405,4 +422,48 @@ private:
     }
 
   }
-};
+}; // class PickPlaceRepeatServer
+
+
+int main(int argc, char * argv[])
+{
+  rclcpp::init(argc, argv);
+
+  // Create a ROS logger for main scope
+  auto const logger = rclcpp::get_logger("hello_moveit");
+
+  // Create a node for synchronously grabbing params
+  auto parameter_client_node = rclcpp::Node::make_shared("param_client");
+  auto parent_parameters_client =
+    std::make_shared<rclcpp::SyncParametersClient>(parameter_client_node, "move_group");
+  // Boiler plate wait block
+  while (!parent_parameters_client->wait_for_service(1s)) {
+    if (!rclcpp::ok()) {
+      RCLCPP_ERROR(
+        logger, "Interrupted while waiting for the service. Exiting.");
+      return 0;
+    }
+    RCLCPP_INFO(logger, "move_group service not available, waiting again...");
+  }
+  // Get robot config parameters from parameter server
+  auto parameters = parent_parameters_client->get_parameters(
+    {"robot_description_semantic",
+      "robot_description"});
+
+  // Set node parameters using NodeOptions
+  rclcpp::NodeOptions node_options;
+  node_options.automatically_declare_parameters_from_overrides(true);
+  node_options.parameter_overrides(
+  {
+    {"robot_description_semantic", parameters[0].value_to_string()},
+    {"robot_description", parameters[1].value_to_string()}
+  });
+
+
+  auto parent_node = std::make_shared<PickPlaceRepeatServer>(
+    "pick_place_repeat_server",
+    node_options);
+  rclcpp::spin(parent_node->getNodeBaseInterface());
+  rclcpp::shutdown();
+  return 0;
+}
