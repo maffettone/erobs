@@ -9,44 +9,36 @@ endif()
 find_package(ament_cmake REQUIRED)
 find_package(moveit_ros_planning_interface REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(rosidl_default_generators REQUIRED)
 
-add_executable(hello_moveit src/hello_moveit.cpp)
-target_include_directories(hello_moveit PUBLIC
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-  $<INSTALL_INTERFACE:include>)
-target_compile_features(hello_moveit PUBLIC c_std_99 cxx_std_17)  # Require C99 and C++17
-ament_target_dependencies(
-  hello_moveit
-  "moveit_ros_planning_interface"
-  "rclcpp"
+set(dependencies
+  moveit_ros_planning_interface
+  rclcpp
 )
+
+# Generate interfaces for actions
+rosidl_generate_interfaces(${PROJECT_NAME}
+  "action/PickPlaceRepeat.action"
+)
+
+
+add_executable(hello_moveit_cpp src/hello_moveit.cpp)
+ament_target_dependencies(hello_moveit_cpp ${dependencies})
 
 add_executable(pose_subscriber src/pose_subscriber.cpp)
-target_include_directories(pose_subscriber PUBLIC
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-  $<INSTALL_INTERFACE:include>)
-target_compile_features(pose_subscriber PUBLIC c_std_99 cxx_std_17)  # Require C99 and C++17
-ament_target_dependencies(
-  pose_subscriber
-  "moveit_ros_planning_interface"
-  "rclcpp"
-)
+ament_target_dependencies( pose_subscriber ${dependencies})
 
 add_executable(parameter_demo src/parameter_demo.cpp)
-target_include_directories(parameter_demo PUBLIC
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-  $<INSTALL_INTERFACE:include>)
-target_compile_features(parameter_demo PUBLIC c_std_99 cxx_std_17)  # Require C99 and C++17
-ament_target_dependencies(
-  parameter_demo
-  "rclcpp"
-)
+ament_target_dependencies(parameter_demo ${dependencies})
 
 install(TARGETS 
-  hello_moveit
+  hello_moveit_cpp
   parameter_demo
   pose_subscriber
-  DESTINATION lib/${PROJECT_NAME})
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION lib/${PROJECT_NAME}
+)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
