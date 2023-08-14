@@ -7,7 +7,6 @@ services:
     ports:
       - 5900:5900
       - 6080:6080
-      #- 50001:50001
     environment:
       - ROBOT_MODEL=UR3e
     networks:
@@ -33,8 +32,11 @@ services:
 
   urmoveit:
     image: ur-moveit:latest
+    ports:
+      - 5901:5901
     environment:
       - ROBOT_IP=192.168.56.101
+      - LAUNCH_RVIZ=true
     networks:
       ursim_net:
         ipv4_address: 192.168.56.103
