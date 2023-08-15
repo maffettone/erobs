@@ -40,13 +40,17 @@ public:
     using namespace std::chrono_literals;
 
     // Create parameters for list of waypoints
-    node_->declare_parameter<std::vector<double>>("pickup_approach");
-    node_->declare_parameter<std::vector<double>>("pickup_grasp");
-    node_->declare_parameter<std::vector<double>>("pickup_retreat");
-    node_->declare_parameter<std::vector<double>>("dropoff_approach");
-    node_->declare_parameter<std::vector<double>>("dropoff_grasp");
-    node_->declare_parameter<std::vector<double>>("dropoff_retreat");
-    node_->declare_parameter<std::vector<double>>("home_pose");
+    RCLCPP_INFO(node_->get_logger(), "Not declaring parameters for waypoints");
+    // Parameters need not be declared because of Moveit Node Options
+    // node_->declare_parameter<std::vector<double>>("pickup_approach");
+    // node_->declare_parameter<std::vector<double>>("pickup_grasp");
+    // node_->declare_parameter<std::vector<double>>("pickup_retreat");
+    // node_->declare_parameter<std::vector<double>>("dropoff_approach");
+    // node_->declare_parameter<std::vector<double>>("dropoff_grasp");
+    // node_->declare_parameter<std::vector<double>>("dropoff_retreat");
+    // node_->declare_parameter<std::vector<double>>("home_pose");
+    // node_->declare_parameter<std::string>("waypoints_file");
+    RCLCPP_INFO(node_->get_logger(), "Reading parameters for waypoints");
     home_pose_ = node_->get_parameter("home_pose").as_double_array();
     pickup_approach_ = node_->get_parameter("pickup_approach").as_double_array();
     pickup_grasp_ = node_->get_parameter("pickup_grasp").as_double_array();
@@ -56,7 +60,6 @@ public:
     dropoff_retreat_ = node_->get_parameter("dropoff_retreat").as_double_array();
 
     // Read in travel waypoints as Poses from config/waypoints.yaml file
-    node_->declare_parameter<std::string>("waypoints_file");
     auto const waypoints_file = node_->get_parameter("waypoints_file").as_string();
     travel_waypoints = read_waypoints(waypoints_file);
 
@@ -104,13 +107,14 @@ private:
     YAML::Node yaml_node = YAML::Load(file);
     for (auto const & pose : yaml_node) {
       geometry_msgs::msg::Pose msg;
-      msg.position.x = pose["position"]["x"].as<double>();
-      msg.position.y = pose["position"]["y"].as<double>();
-      msg.position.z = pose["position"]["z"].as<double>();
-      msg.orientation.x = pose["orientation"]["x"].as<double>();
-      msg.orientation.y = pose["orientation"]["y"].as<double>();
-      msg.orientation.z = pose["orientation"]["z"].as<double>();
-      msg.orientation.w = pose["orientation"]["w"].as<double>();
+      const YAML::Node & poseNode = pose["pose"];
+      msg.position.x = poseNode["position"]["x"].as<double>();
+      msg.position.y = poseNode["position"]["y"].as<double>();
+      msg.position.z = poseNode["position"]["z"].as<double>();
+      msg.orientation.x = poseNode["orientation"]["x"].as<double>();
+      msg.orientation.y = poseNode["orientation"]["y"].as<double>();
+      msg.orientation.z = poseNode["orientation"]["z"].as<double>();
+      msg.orientation.w = poseNode["orientation"]["w"].as<double>();
       waypoints.push_back(msg);
     }
     return waypoints;
@@ -461,7 +465,7 @@ int main(int argc, char * argv[])
 
 
   auto parent_node = std::make_shared<PickPlaceRepeatServer>(
-    "pick_place_repeat_server",
+    "ur_manipulator",
     node_options);
   rclcpp::spin(parent_node->getNodeBaseInterface());
   rclcpp::shutdown();

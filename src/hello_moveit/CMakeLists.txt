@@ -25,17 +25,17 @@ set(dependencies
 )
 
 # Comment out the Plugin components and revert to spinning the node in main.
-#add_library(${PROJECT_NAME}_pick_place_repeat_action_server SHARED src/pick_place_repeat_server.cpp)
-# target_include_directories(${PROJECT_NAME}_pick_place_repeat_action_server PUBLIC
+#add_library(pick_place_repeat_action_server SHARED src/pick_place_repeat_server.cpp)
+# target_include_directories(pick_place_repeat_action_server PUBLIC
 #   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
 #   $<INSTALL_INTERFACE:include>
 # )
 
-add_executable(${PROJECT_NAME}_pick_place_repeat_action_server src/pick_place_repeat_server.cpp)
-# target_compile_definitions(${PROJECT_NAME}_pick_place_repeat_action_server PRIVATE "PICK_PLACE_REPEAT_SERVER_DLL")
-ament_target_dependencies(${PROJECT_NAME}_pick_place_repeat_action_server ${dependencies})
-target_link_libraries(${PROJECT_NAME}_pick_place_repeat_action_server yaml-cpp)
-#rclcpp_components_register_nodes(${PROJECT_NAME}_pick_place_repeat_action_server PLUGIN "pick_place_repeat_server::PickPlaceRepeatActionServer" EXECUTABLE pick_place_repeat_action_server)
+add_executable(pick_place_repeat_action_server src/pick_place_repeat_server.cpp)
+# target_compile_definitions(pick_place_repeat_action_server PRIVATE "PICK_PLACE_REPEAT_SERVER_DLL")
+ament_target_dependencies(pick_place_repeat_action_server ${dependencies})
+target_link_libraries(pick_place_repeat_action_server yaml-cpp)
+#rclcpp_components_register_nodes(pick_place_repeat_action_server PLUGIN "pick_place_repeat_server::PickPlaceRepeatActionServer" EXECUTABLE pick_place_repeat_action_server)
 
 
 add_executable(hello_moveit src/hello_moveit.cpp)
@@ -51,17 +51,13 @@ install(TARGETS
   hello_moveit
   parameter_demo
   pose_subscriber
+  pick_place_repeat_action_server
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION lib/${PROJECT_NAME}
 )
 
-install(TARGETS
-  ${PROJECT_NAME}_pick_place_repeat_action_server 
-  ARCHIVE DESTINATION lib
-  LIBRARY DESTINATION lib
-  RUNTIME DESTINATION bin
-  )
+install(DIRECTORY launch config DESTINATION share/${PROJECT_NAME})
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
