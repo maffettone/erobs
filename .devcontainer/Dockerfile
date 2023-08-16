@@ -16,6 +16,8 @@ RUN apt-get update \
         && apt-get autoremove -y \
         && apt-get clean -y \
         && rm -rf /var/lib/apt/lists/*
+
+RUN pip3 install bluesky ophyd Ipython
 ENV DEBIAN_FRONTEND=dialog
 
 # Set up auto-source of workspace for ros user
