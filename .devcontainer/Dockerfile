@@ -17,7 +17,7 @@ RUN apt-get update \
         && apt-get clean -y \
         && rm -rf /var/lib/apt/lists/*
 
-RUN pip3 install bluesky ophyd Ipython
+RUN pip3 install bluesky ophyd Ipython rosidl_adapter
 ENV DEBIAN_FRONTEND=dialog
 
 # Set up auto-source of workspace for ros user
