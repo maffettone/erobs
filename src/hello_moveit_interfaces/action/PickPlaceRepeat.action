@@ -1,0 +1,7 @@
+int32 repeats
+---
+bool success
+---
+int32 num_completed
+float32 percent_completed
+float32 percentage_current

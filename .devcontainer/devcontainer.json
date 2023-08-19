@@ -31,15 +31,20 @@
 				"betwo.b2-catkin-tools",
 				"DotJoshJohnson.xml",
 				"ms-azuretools.vscode-docker",
-				"ms-iot.vscode-ros",
 				"ms-python.python",
 				"ms-vscode.cpptools",
+				"ms-vscode.cpptools-extension-pack",
+				"ms-iot.vscode-ros",
+				"ms-python.black-formatter",
+				"ms-python.flake8",
+				"ms-python.isort",
 				"redhat.vscode-yaml",
 				"smilerobotics.urdf",
 				"streetsidesoftware.code-spell-checker",
 				"twxs.cmake",
 				"yzhang.markdown-all-in-one",
-				"zachflower.uncrustify"
+				"zachflower.uncrustify",
+				"github.copilot"
 			]
 		}
 	}

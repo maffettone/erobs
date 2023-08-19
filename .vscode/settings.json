@@ -1,12 +1,13 @@
 {
-    "editor.tabSize": 8,
+    "editor.tabSize": 2,
     "editor.rulers": [
-        100
+        120
     ],
     "files.associations": {
         "*.repos": "yaml",
         "*.world": "xml",
-        "*.xacro": "xml"
+        "*.xacro": "xml",
+        "functional": "cpp"
     },
     "python.analysis.extraPaths": [
         "/opt/ros/humble/lib/python3.10/site-packages/"
@@ -18,15 +19,25 @@
     // Environment file lets vscode find python files within workspace
     "python.envFile": "${workspaceFolder}/.env",
     // Use the system installed version of autopep8
-    "python.formatting.autopep8Path": "/usr/bin/autopep8",
-    "python.formatting.autopep8Args": [
-        "--max-line-length=100"
+    "[python]": {
+        "editor.defaultFormatter": "ms-python.black-formatter",
+        "editor.formatOnSave": true,
+        "editor.tabSize": 4,
+        "editor.formatOnType": true
+    },
+    "black-formatter.args": [
+        "--line-length=120"
+    ],
+    "autoDocstring.docstringFormat": "numpy",
+    "flake8.args": [
+        "--max-line-length=120"
     ],
     "C_Cpp.default.intelliSenseMode": "linux-gcc-x86",
     "C_Cpp.formatting": "disabled",
     "uncrustify.configPath.linux": "/opt/ros/humble/lib/python3.10/site-packages/ament_uncrustify/configuration/ament_code_style.cfg",
     "[cpp]": {
-        "editor.defaultFormatter": "zachflower.uncrustify"
+        "editor.defaultFormatter": "zachflower.uncrustify",
+        "editor.formatOnSave": true
     },
     "search.exclude": {
         "**/node_modules": true,
@@ -59,7 +70,8 @@
         "uncrustify",
         "Wextra",
         "Wpedantic",
-        "xmllint"
+        "xmllint",
+        "moveit"
     ],
     "cSpell.allowCompoundWords": true,
     "cSpell.ignorePaths": [
@@ -70,5 +82,7 @@
         ".vscode",
         ".vscode-insiders",
         ".devcontainer/devcontainer.json"
-    ]
+    ],
+    "cmake.configureOnOpen": false,
+    "cmake.sourceDirectory": "/workspaces/erobs/src/hello_moveit"
 }
