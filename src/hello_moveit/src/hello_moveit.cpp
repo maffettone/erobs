@@ -1,13 +1,13 @@
 /*Copyright 2023 Brookhaven National Laboratory
 BSD 3 Clause License. See LICENSE.txt for details.*/
-#include <chrono>
+#include <moveit/move_group_interface/move_group_interface.h>
 
 #include <memory>
+#include <chrono>
 #include <string>
 #include <vector>
 
-#include <moveit/move_group_interface/move_group_interface.h>
-#include "rclcpp/rclcpp.hpp"
+#include <rclcpp/rclcpp.hpp>
 
 using namespace std::chrono_literals;
 /*

@@ -35,7 +35,7 @@ add_executable(pick_place_repeat_action_server src/pick_place_repeat_server.cpp)
 # target_compile_definitions(pick_place_repeat_action_server PRIVATE "PICK_PLACE_REPEAT_SERVER_DLL")
 ament_target_dependencies(pick_place_repeat_action_server ${dependencies})
 target_link_libraries(pick_place_repeat_action_server yaml-cpp)
-#rclcpp_components_register_nodes(pick_place_repeat_action_server PLUGIN 
+#rclcpp_components_register_nodes(pick_place_repeat_action_server PLUGIN
 #    "pick_place_repeat_server::PickPlaceRepeatActionServer" EXECUTABLE pick_place_repeat_action_server)
 
 
