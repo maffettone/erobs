@@ -1,9 +1,11 @@
+/*Copyright 2023 Brookhaven National Laboratory
+BSD 3 Clause License. See LICENSE.txt for details.*/
 #include <memory>
 #include <chrono>
 
+#include <moveit/move_group_interface/move_group_interface.h>
 #include <rclcpp/rclcpp.hpp>
 #include <geometry_msgs/msg/pose.hpp>
-#include <moveit/move_group_interface/move_group_interface.h>
 
 using std::placeholders::_1;
 using namespace std::chrono_literals;
@@ -49,7 +51,6 @@ public:
     } else {
       RCLCPP_ERROR(logger, "Planning failed!");
     }
-
   }
 
   rclcpp::node_interfaces::NodeBaseInterface::SharedPtr getNodeBaseInterface()

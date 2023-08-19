@@ -12,9 +12,7 @@ from rclpy.task import Future
 
 
 class ActionStatus(DeviceStatus):
-    """
-    Track the status of a potentially-lengthy ROS Action using the Bluesky interface.
-    """
+    """Track the status of a potentially-lengthy ROS Action using the Bluesky interface."""
 
     def __init__(self, device, **kwargs):
         super().__init__(device, **kwargs)
@@ -82,9 +80,7 @@ class ActionMovable(Node, Movable):
         return NotImplemented
 
     def _stop_spin_callback(self, future: Future):
-        """Final callback that manages the execution of all other done Callabacks.
-        This ensures a sensible ordering.
-        """
+        """Callback that manages the execution of all other done Callabacks. This ensures a sensible ordering."""
         if not future.done():
             self.get_logger().error("Somehow the stop spin callback was called before the future was done...")
 

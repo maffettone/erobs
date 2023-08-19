@@ -1,16 +1,18 @@
+/*Copyright 2023 Brookhaven National Laboratory
+BSD 3 Clause License. See LICENSE.txt for details.*/
 #include <functional>
 #include <memory>
 #include <thread>
 #include <chrono>
-#include <yaml-cpp/yaml.h>
 #include <fstream>
 #include <iostream>
+#include <yaml-cpp/yaml.h>
 
+#include <moveit/move_group_interface/move_group_interface.h>
 #include <rclcpp/rclcpp.hpp>
 #include <rclcpp_action/rclcpp_action.hpp>
 #include <rclcpp_components/register_node_macro.hpp>
 #include <geometry_msgs/msg/pose.hpp>
-#include <moveit/move_group_interface/move_group_interface.h>
 
 #include <hello_moveit_interfaces/action/pick_place_repeat.hpp>
 using namespace std::chrono_literals;
@@ -70,9 +72,7 @@ public:
       std::bind(&PickPlaceRepeatServer::handle_goal, this, _1, _2),
       std::bind(&PickPlaceRepeatServer::handle_cancel, this, _1),
       std::bind(&PickPlaceRepeatServer::handle_accepted, this, _1));
-
     RCLCPP_INFO(node_->get_logger(), "PickPlaceRepeatServer has been initialized.");
-
   }
 
   rclcpp::node_interfaces::NodeBaseInterface::SharedPtr getNodeBaseInterface()
@@ -152,7 +152,7 @@ private:
 
   // Helper function to plan and execute in joint space
   bool plan_and_execute_joint_target(const std::vector<double> & angles)
-  // TODO: take the goal handle and add cancellation infrastructure
+  // TODO(maffettone): take the goal handle and add cancellation infrastructure
   {
     move_group_interface_.setJointValueTarget(angles);
     // Create a plan to that target pose
@@ -173,7 +173,7 @@ private:
 
   // Helper function to plan and execute based on pose
   bool plan_and_execute_pose(const geometry_msgs::msg::Pose & pose)
-  // TODO: take the goal handle and add cancellation infrastructure
+  // TODO(maffettone): take the goal handle and add cancellation infrastructure
   {
     move_group_interface_.setPoseTarget(pose);
     // Create a plan to that target pose
@@ -414,7 +414,6 @@ private:
 
       // Sleep for a while
       loop_rate.sleep();
-
     }
 
     // Send the result
@@ -422,12 +421,10 @@ private:
       result->success = true;
       goal_handle->succeed(result);
       RCLCPP_INFO(node_->get_logger(), "Goal succeeded");
-
     }
 
   }
 }; // class PickPlaceRepeatServer
-
 
 int main(int argc, char * argv[])
 {

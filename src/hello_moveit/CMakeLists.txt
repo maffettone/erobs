@@ -35,7 +35,8 @@ add_executable(pick_place_repeat_action_server src/pick_place_repeat_server.cpp)
 # target_compile_definitions(pick_place_repeat_action_server PRIVATE "PICK_PLACE_REPEAT_SERVER_DLL")
 ament_target_dependencies(pick_place_repeat_action_server ${dependencies})
 target_link_libraries(pick_place_repeat_action_server yaml-cpp)
-#rclcpp_components_register_nodes(pick_place_repeat_action_server PLUGIN "pick_place_repeat_server::PickPlaceRepeatActionServer" EXECUTABLE pick_place_repeat_action_server)
+#rclcpp_components_register_nodes(pick_place_repeat_action_server PLUGIN 
+#    "pick_place_repeat_server::PickPlaceRepeatActionServer" EXECUTABLE pick_place_repeat_action_server)
 
 
 add_executable(hello_moveit src/hello_moveit.cpp)
@@ -47,7 +48,7 @@ ament_target_dependencies( pose_subscriber ${dependencies})
 add_executable(parameter_demo src/parameter_demo.cpp)
 ament_target_dependencies(parameter_demo ${dependencies})
 
-install(TARGETS 
+install(TARGETS
   hello_moveit
   parameter_demo
   pose_subscriber
