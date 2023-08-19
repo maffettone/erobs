@@ -124,7 +124,6 @@ class ActionMovable(Node, Movable):
 
         self._goal_handle = goal_handle
         self._get_result_future: Future = self._goal_handle.get_result_async()
-        # The callbacks get executed in reverse order
         self._get_result_future.add_done_callback(self._stop_spin_callback)
 
     def _send_goal(self, goal: Any) -> None:
