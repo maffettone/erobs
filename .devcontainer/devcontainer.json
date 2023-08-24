@@ -8,7 +8,9 @@
 	},
 	"remoteUser": "ros",
 	"runArgs": [
-		"--network=docker_ursim_net",
+		// THIS NETWORK NEEDS TO EXIST. CREATE IT WITH: docker network create --subnet=192.168.56.0/24 ursim_net 
+		// This corresponds to the docker compose used in launching other services.
+		"--network=ursim_net",
 		"--cap-add=SYS_PTRACE",
 		"--security-opt=seccomp:unconfined",
 		"--security-opt=apparmor:unconfined",
