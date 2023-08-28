@@ -1,5 +1,13 @@
 #!/bin/bash
-docker run -it --network host\
+# Driver launch for Gripper Tool (Robotiq HandE)
+ROS_DISTRO=humble
+UR_TYPE="ur3e"
+ROBOT_IP=10.66.218.141
+REVERSE_IP=10.66.218.39
+
+docker run -it --network host \
+    --env ROBOT_IP=$ROBOT_IP \
+    --env REVERSE_IP=$REVERSE_IP \
+    -v ./robotiq-driver-entrypoint.sh:/root/entrypoints/robotiq-driver-entrypoint.sh \
     ghcr.io/nsls2/ur-hande-draft:latest \
-    /bin/bash -c ". /root/ws/ERoBS_ur3e/install/setup.sh && \
-ros2 launch robotiq_driver tests.launch.py"
+    /bin/bash /root/entrypoints/robotiq-driver-entrypoint.sh
