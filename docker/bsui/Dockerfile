@@ -11,7 +11,28 @@ RUN apt-get update && apt-get install -y \
   python3-rosdep \
   python3-setuptools \
   python3-vcstool \
-  wget
+  wget \
+  ros-${ROS_DISTRO}-rclpy \
+  python3-colcon-common-extensions \
+  ros-dev-tools
+
+# Emprical best practice is to do all ros dependencies packages first!
+RUN pip3 install numpy rosdep && \
+  rosdep update
+
+ARG GITHUB_TOKEN
+RUN mkdir /root/ws/src -p
+WORKDIR  /root/ws/src
+RUN git clone https://maffettone:${GITHUB_TOKEN}@github.com/maffettone/erobs.git -b humble
+WORKDIR  /root/ws/
+RUN /bin/bash -c "source /opt/ros/${ROS_DISTRO}/setup.bash  && \
+  rosdep install -r --from-paths . --ignore-src --rosdistro $ROS_DISTRO -y"
+WORKDIR  /root/ws/src
+RUN git clone https://maffettone:${GITHUB_TOKEN}@github.com/ChandimaFernando/ERoBS_ur3e.git -b action_client_basic
+WORKDIR  /root/ws/
+RUN /bin/bash -c "source /opt/ros/${ROS_DISTRO}/setup.bash && \
+  colcon build --packages-select hello_moveit_interfaces custom_msgs"
+
 
 # This is an exit hatch for testing when conda envs not avail
 RUN pip3 install\
@@ -46,6 +67,7 @@ RUN apt-get update && apt-get install -y fontconfig
 RUN mkdir /root/.ipython
 
 # Clean up
+# TODO (maffettone): this image is rather large, there may be some source and build files we can clean up here. 
 RUN apt-get autoremove -y \
   && apt-get clean -y \
   && rm -rf /var/lib/apt/lists/*
@@ -55,4 +77,4 @@ ENV BS_ENV="/nsls2/conda/envs/2023-2.1-py310-tiled"
 ENV BS_PROFILE="collection"
 
 # Start a shell session with BSUI when we run the container
-CMD ["/bin/bash", "-c", ".  /opt/ros/${ROS_DISTRO}/setup.sh && bsui"]
+CMD ["/bin/bash", "-c", ".  /opt/ros/${ROS_DISTRO}/setup.bash &&  . /root/ws/install/setup.bash && bsui"]
