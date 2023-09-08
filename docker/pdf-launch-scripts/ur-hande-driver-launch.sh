@@ -13,4 +13,4 @@ docker run -it --network host \
     /bin/bash -c ". /root/ws/install/setup.sh && \
 ros2 launch ur_hande_moveit_config ur_control_hande.launch.py \
 ur_type:=${UR_TYPE} robot_ip:=${ROBOT_IP} launch_rviz:=false description_package:=ur3e_hande_description \
-use_tool_communication:=true tool_voltage:=24"
+use_tool_communication:=false tool_voltage:=24"
