@@ -148,6 +148,7 @@ class ActionMovable(Node, Movable):
     def set(self, value) -> ActionStatus:
         self._send_goal(value)
         self._bluesky_status = ActionStatus(self)
+        self._finalize_future = Future()  # Reset the future
         rclpy.spin_until_future_complete(self, self._finalize_future)
         return self._bluesky_status
 
