@@ -1,6 +1,6 @@
 #!/bin/bash
 
-podman run -it --network host \
+podman run -it --network host --ipc=host --pid=host\
     --env BS_ENV=$(basename "$BS_ENV") \
     --env BS_PROFILE="collection" \
     --env CDC_LOCALHOST=xf28id1-srv2.nsls2.bnl.local \
