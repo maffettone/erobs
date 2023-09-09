@@ -5,7 +5,7 @@ UR_TYPE="ur3e"
 ROBOT_IP=10.66.218.141
 REVERSE_IP=10.66.218.39
 
-docker run -it --network host \
+docker run -it --network host --ipc=host --pid=host\
     --env ROBOT_IP=$ROBOT_IP \
     --env REVERSE_IP=$REVERSE_IP \
     -v ./robotiq-driver-entrypoint.sh:/root/entrypoints/robotiq-driver-entrypoint.sh \
