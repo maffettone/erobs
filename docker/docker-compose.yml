@@ -53,6 +53,15 @@ services:
     depends_on:
       - urdriver
 
+  # helloworld:
+  #   image: hello-world:latest
+  #   environment:
+  #     - ROBOT_IP=192.168.56.101
+  #   networks:
+  #     ursim_net:
+  #       ipv4_address: 192.168.56.104
+
+
 networks:
   ursim_net:
     ipam:
