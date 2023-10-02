@@ -102,6 +102,8 @@ private:
   std::vector<double> dropoff_grasp_;
   std::vector<double> dropoff_retreat_;
 
+  std::vector<double> pre_approach_angles_stage_1;
+  std::vector<double> pre_approach_angles_stage_2;
 
   std::vector<geometry_msgs::msg::Pose> read_waypoints(const std::string & filename)
   {
