@@ -1,0 +1,16 @@
+pick_place_repeat_server:
+  ros__parameters:
+    # home_pose: [0.0, -1.571, 0.0, -1.571, 0.0, 0.0]
+    pickup_approach: [1.466, -2.042, -2.1293, -2.164, -0.105, 0.0]
+    pickup_grasp: [1.099, -2.234, -1.728, -2.339, -0.489, -0.035]
+    pickup_retreat: [1.099, -2.025, -1.571, -2.705, -0.489, -0.035]
+    dropoff_approach: [2.618, -2.356, -1.763, -2.216, -2.215, 0.0]
+    dropoff_grasp: [2.618, -2.566, -1.7453, -2.025, -2.217, 0.0]
+    dropoff_retreat: [2.321, -2.496, -1.955, -1.902, -2.513, 0.0]
+    
+    joint_names: ['shoulder_pan_joint' , 'shoulder_lift_joint', 'elbow_joint', 'wrist_1_joint', 'wrist_2_joint', 'wrist_3_joint']
+    home_pose: [-0.11536, -1.783732, 0.38816, -1.75492, 0.11484, 3.14159] #For real robot
+
+    pickup_pre_approach: [0.0, -2.2230397, -2.4030528 , -1.627018 , -1.541525, 3.141435] 
+    pickup_pre_approach_stg_2: [-4.251453 , -2.2230678 , -2.4030139 , -1.6269628 , -1.0731676, 3.1413669] # This is the base turn 
+

@@ -56,6 +56,10 @@ public:
     // node_->declare_parameter<std::string>("waypoints_file");
     RCLCPP_INFO(node_->get_logger(), "Reading parameters for waypoints");
     home_pose_ = node_->get_parameter("home_pose").as_double_array();
+  
+    pre_approach_angles_stage_1 = node_->get_parameter("ur3e.pre_approach").as_double_array();
+    pre_approach_angles_stage_2 = node_->get_parameter("ur3e.pre_approach_stg_2").as_double_array();
+
     pickup_approach_ = node_->get_parameter("pickup_approach").as_double_array();
     pickup_grasp_ = node_->get_parameter("pickup_grasp").as_double_array();
     pickup_retreat_ = node_->get_parameter("pickup_retreat").as_double_array();
@@ -98,6 +102,9 @@ private:
   std::vector<double> dropoff_grasp_;
   std::vector<double> dropoff_retreat_;
 
+  std::vector<double> pre_approach_angles_stage_1;
+  std::vector<double> pre_approach_angles_stage_2;
+
   std::vector<geometry_msgs::msg::Pose> read_waypoints(const std::string & filename)
   {
     /* Function to read in a series of poses from a yaml file*/
@@ -120,7 +127,6 @@ private:
     }
     return waypoints;
   }
-
 
   // Receiving the goal request. Simply asking for, do the thing several times.
   rclcpp_action::GoalResponse handle_goal(
@@ -229,7 +235,7 @@ private:
 
       // Move to pickup approach pose
       RCLCPP_INFO(node_->get_logger(), "Moving to pre - pickup approach pose 1");
-      success = plan_and_execute_joint_target(pickup_approach_);
+      success = plan_and_execute_joint_target(pre_approach_angles_stage_1);
       if (!success) {
         result->success = false;
         goal_handle->succeed(result);
@@ -238,6 +244,17 @@ private:
       percentage_current += 1.0 / total_steps_;
       goal_handle->publish_feedback(feedback);
 
+      RCLCPP_INFO(node_->get_logger(), "Moving to pre - pickup approach pose 2");
+      success = plan_and_execute_joint_target(pre_approach_angles_stage_2);
+      if (!success) {
+        result->success = false;
+        goal_handle->succeed(result);
+        return;
+      }
+      percentage_current += 1.0 / total_steps_;
+      goal_handle->publish_feedback(feedback);
+
+/*
       // Move to pickup grasp pose
       RCLCPP_INFO(node_->get_logger(), "Moving to pickup grasp pose");
       success = plan_and_execute_joint_target(pickup_grasp_);
@@ -411,6 +428,7 @@ private:
       percentage_current = 1.0;
       goal_handle->publish_feedback(feedback);
 
+*/
       // Sleep for a while
       loop_rate.sleep();
     }
