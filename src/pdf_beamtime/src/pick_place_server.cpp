@@ -1,22 +1,18 @@
 /*Copyright 2023 Brookhaven National Laboratory
 BSD 3 Clause License. See LICENSE.txt for details.*/
-#include <moveit/move_group_interface/move_group_interface.h>
-#include <yaml-cpp/yaml.h>
-
 #include <chrono>
 #include <fstream>
 #include <iostream>
 #include <functional>
 #include <memory>
 #include <thread>
-
 #include <rclcpp/rclcpp.hpp>
 #include <rclcpp_action/rclcpp_action.hpp>
 #include <rclcpp_components/register_node_macro.hpp>
 #include <geometry_msgs/msg/pose.hpp>
-
 #include <moveit/planning_scene_interface/planning_scene_interface.h>
-
+#include <moveit/move_group_interface/move_group_interface.h>
+#include <yaml-cpp/yaml.h>
 #include <hello_moveit_interfaces/action/pick_place_repeat.hpp>
 
 using namespace std::chrono_literals;
@@ -39,7 +35,6 @@ public:
     // Add the obstacles
     planning_scene_interface = new moveit::planning_interface::PlanningSceneInterface();
     planning_scene_interface->applyCollisionObjects(create_env());
-
   }
 
   rclcpp::node_interfaces::NodeBaseInterface::SharedPtr getNodeBaseInterface()
@@ -68,11 +63,10 @@ private:
 
     // Create objects in a recursion
     for (size_t i = 0; i < object_names.size(); i++) {
+      std::string name = object_names[i];  //get each name here as it uses as a parameter field
 
-      std::string name = object_names[i]; //get each name here as it uses as a parameter field
-
-      moveit_msgs::msg::CollisionObject obj; // collision object
-      geometry_msgs::msg::Pose pose; // object pose
+      moveit_msgs::msg::CollisionObject obj;  // collision object
+      geometry_msgs::msg::Pose pose;  // object pose
       obj.id = name;
       obj.header.frame_id = "world";
 
@@ -115,7 +109,6 @@ private:
     }
     return all_objects;
   }
-
 };   // class PickPlaceServer
 
 int main(int argc, char * argv[])
