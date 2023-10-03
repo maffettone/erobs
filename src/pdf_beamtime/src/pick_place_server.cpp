@@ -238,7 +238,7 @@ private:
     std::vector<moveit_msgs::msg::CollisionObject> all_objects;
 
     // Create objects in a recursion
-    for (int i = 0; i < object_names.size(); i++) {
+    for (size_t i = 0; i < object_names.size(); i++) {
 
       std::string name = object_names[i]; //get each name here as it uses as a parameter field
 
@@ -287,7 +287,7 @@ private:
     return all_objects;
   }
 
-}   // class PickPlaceServer
+};   // class PickPlaceServer
 
 int main(int argc, char * argv[])
 {
