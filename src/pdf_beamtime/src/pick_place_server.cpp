@@ -17,7 +17,7 @@ BSD 3 Clause License. See LICENSE.txt for details.*/
 
 using namespace std::chrono_literals;
 
-// This only adds the obstacle environment
+// This only adds the obstacle environment. This should be changed to have a header in the future iterations
 
 class PickPlaceServer
 {
@@ -52,6 +52,7 @@ private:
 
 
   std::vector<moveit_msgs::msg::CollisionObject> create_env()
+  // Builds a vector of obstacle as defined in the .yaml file and returns the vector
   {
     obstacle_type_map.insert(std::pair<std::string, int>("CYLINDER", 1));
     obstacle_type_map.insert(std::pair<std::string, int>("BOX", 2));
@@ -59,7 +60,7 @@ private:
     // int num_objects = node_->get_parameter("num_objects").as_int();
     std::vector<std::string> object_names = node_->get_parameter("object_names").as_string_array();
 
-    std::vector<moveit_msgs::msg::CollisionObject> all_objects;
+    std::vector<moveit_msgs::msg::CollisionObject> all_obstacles;
 
     // Create objects in a recursion
     for (size_t i = 0; i < object_names.size(); i++) {
@@ -89,6 +90,7 @@ private:
           break;
 
         case 2:
+          // These objects are boxes
           obj.primitives.resize(1);
           obj.primitives[0].type = shape_msgs::msg::SolidPrimitive::BOX;
           obj.primitives[0].dimensions =
@@ -105,9 +107,9 @@ private:
           break;
       }
 
-      all_objects.push_back(obj);
+      all_obstacles.push_back(obj);
     }
-    return all_objects;
+    return all_obstacles;
   }
 };   // class PickPlaceServer
 
