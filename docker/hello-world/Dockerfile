@@ -52,7 +52,5 @@ RUN apt-get autoremove -y \
   && apt-get clean -y \
   && rm -rf /var/lib/apt/lists/*
 
-# ENTRYPOINT [ "/entrypoint.sh" ]
 CMD ["/bin/bash"]
-# CMD ["/bin/sh", "-c", ".  /opt/ros/${ROS_DISTRO}/setup.sh"] 
 
