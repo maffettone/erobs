@@ -88,3 +88,5 @@ target/
 #Ipython Notebook
 .ipynb_checkpoints
 .devcontainer/devcontainer.json
+erobs_minimal_fork.code-workspace
+.devcontainer/devcontainer.json
