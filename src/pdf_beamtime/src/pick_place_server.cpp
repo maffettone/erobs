@@ -15,6 +15,8 @@ BSD 3 Clause License. See LICENSE.txt for details.*/
 #include <rclcpp_components/register_node_macro.hpp>
 #include <geometry_msgs/msg/pose.hpp>
 
+#include <moveit/planning_scene_interface/planning_scene_interface.h>
+
 #include <hello_moveit_interfaces/action/pick_place_repeat.hpp>
 
 using namespace std::chrono_literals;
@@ -53,6 +55,11 @@ public:
     auto const waypoints_file = node_->get_parameter("waypoints_file").as_string();
     travel_waypoints = read_waypoints(waypoints_file);
 
+    // Add the obstacles
+    planning_scene_interface = new moveit::planning_interface::PlanningSceneInterface();
+    planning_scene_interface->applyCollisionObjects(create_env());
+
+
     action_server_ = rclcpp_action::create_server<PickPlaceRepeat>(
       node_,
       "pick_place_repeat",
@@ -76,6 +83,9 @@ private:
   int total_steps_ = 2 * 8;
   std::vector<geometry_msgs::msg::Pose> travel_waypoints;
   std::vector<double> home_pose_;
+
+  moveit::planning_interface::PlanningSceneInterface * planning_scene_interface;
+  enum class obstacle_type_enum { CYLINDER, BOX };
 
   std::vector<geometry_msgs::msg::Pose> read_waypoints(const std::string & filename)
   {
@@ -216,6 +226,77 @@ private:
       RCLCPP_INFO(node_->get_logger(), "Goal succeeded");
     }
   }
+
+  std::vector<moveit_msgs::msg::CollisionObject> create_env()
+  {
+    // MTCPlanner::obj_type_map.insert(std::pair<std::string, int>("CYLINDER", 1));
+    // MTCPlanner::obj_type_map.insert(std::pair<std::string, int>("BOX", 2));
+
+    // int num_objects = node_->get_parameter("num_objects").as_int();
+    std::vector<std::string> object_names = node_->get_parameter("object_names").as_string_array();
+
+    std::vector<moveit_msgs::msg::CollisionObject> all_objects;
+
+    // Create objects in a recursion
+    for (int i = 0; i < object_names.size(); i++) {
+
+      std::string name = object_names[i]; //get each name here as it uses as a parameter field
+
+      obstacle_type_enum obstacle_type_value = name.c_str();
+
+      moveit_msgs::msg::CollisionObject obj; // collision object
+      geometry_msgs::msg::Pose pose; // object pose
+      obj.id = name;
+      obj.header.frame_id = "world";
+
+      // Map to the correct int
+      // switch (MTCPlanner::obj_type_map[node_->get_parameter("objects." + name + ".type").as_string()])
+      switch (obstacle_type_value) {
+        // Change these to enums
+        case obstacle_type_enum::CYLINDER:
+          // case 1:
+          // These objects are cylinders
+          obj.primitives.resize(1);
+          obj.primitives[0].type = shape_msgs::msg::SolidPrimitive::CYLINDER;
+          // Populate the fields from the parameters
+          obj.primitives[0].dimensions =
+          {node_->get_parameter("objects." + name + ".h").as_double(),
+            node_->get_parameter("objects." + name + ".r").as_double()};
+
+          pose.position.x = node_->get_parameter("objects." + name + ".x").as_double();
+          pose.position.y = node_->get_parameter("objects." + name + ".y").as_double();
+          pose.position.z = node_->get_parameter("objects." + name + ".z").as_double();
+          obj.pose = pose;
+
+          break;
+
+        case obstacle_type_enum::BOX:
+          // case 2:
+          obj.primitives.resize(1);
+          obj.primitives[0].type = shape_msgs::msg::SolidPrimitive::BOX;
+          obj.primitives[0].dimensions =
+          {node_->get_parameter("objects." + name + ".w").as_double(),
+            node_->get_parameter("objects." + name + ".d").as_double(),
+            node_->get_parameter("objects." + name + ".h").as_double()};
+
+          pose.position.x = node_->get_parameter("objects." + name + ".x").as_double();
+          pose.position.y = node_->get_parameter("objects." + name + ".y").as_double();
+          pose.position.z = node_->get_parameter("objects." + name + ".z").as_double();
+          obj.pose = pose;
+
+        default:
+          break;
+      }
+
+      all_objects.push_back(obj);
+
+    }
+
+    return all_objects;
+
+  }
+
+
 };  // class PickPlaceServer
 
 int main(int argc, char * argv[])
