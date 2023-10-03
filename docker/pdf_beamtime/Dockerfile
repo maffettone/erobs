@@ -34,7 +34,7 @@ RUN /bin/bash -c "source /opt/ros/${ROS_DISTRO}/setup.bash  && \
   rosdep install -r --from-paths . --ignore-src --rosdistro $ROS_DISTRO -y"
 
 RUN /bin/bash -c "source /opt/ros/${ROS_DISTRO}/setup.bash && \
-  colcon build --symlink-install --packages-select  pdf_beamtime"
+  colcon build --symlink-install --packages-select  hello_moveit_interfaces"
 
 RUN /bin/bash -c "source install/setup.bash && \
   colcon build --symlink-install"
