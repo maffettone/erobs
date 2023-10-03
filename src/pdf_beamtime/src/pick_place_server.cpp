@@ -85,7 +85,7 @@ private:
   std::vector<double> home_pose_;
 
   moveit::planning_interface::PlanningSceneInterface * planning_scene_interface;
-  enum class obstacle_type_enum { CYLINDER, BOX };
+  std::map<std::string, int> obstacle_type_map ;
 
   std::vector<geometry_msgs::msg::Pose> read_waypoints(const std::string & filename)
   {
@@ -229,8 +229,8 @@ private:
 
   std::vector<moveit_msgs::msg::CollisionObject> create_env()
   {
-    // MTCPlanner::obj_type_map.insert(std::pair<std::string, int>("CYLINDER", 1));
-    // MTCPlanner::obj_type_map.insert(std::pair<std::string, int>("BOX", 2));
+    obstacle_type_map.insert(std::pair<std::string, int>("CYLINDER", 1));
+    obstacle_type_map.insert(std::pair<std::string, int>("BOX", 2));
 
     // int num_objects = node_->get_parameter("num_objects").as_int();
     std::vector<std::string> object_names = node_->get_parameter("object_names").as_string_array();
@@ -242,19 +242,15 @@ private:
 
       std::string name = object_names[i]; //get each name here as it uses as a parameter field
 
-      obstacle_type_enum obstacle_type_value = name.c_str();
-
       moveit_msgs::msg::CollisionObject obj; // collision object
       geometry_msgs::msg::Pose pose; // object pose
       obj.id = name;
       obj.header.frame_id = "world";
 
       // Map to the correct int
-      // switch (MTCPlanner::obj_type_map[node_->get_parameter("objects." + name + ".type").as_string()])
-      switch (obstacle_type_value) {
+      switch (MTCPlanner::obstacle_type_map[node_->get_parameter("objects." + name + ".type").as_string()])
         // Change these to enums
-        case obstacle_type_enum::CYLINDER:
-          // case 1:
+        case 1:
           // These objects are cylinders
           obj.primitives.resize(1);
           obj.primitives[0].type = shape_msgs::msg::SolidPrimitive::CYLINDER;
@@ -270,8 +266,7 @@ private:
 
           break;
 
-        case obstacle_type_enum::BOX:
-          // case 2:
+        case 2:
           obj.primitives.resize(1);
           obj.primitives[0].type = shape_msgs::msg::SolidPrimitive::BOX;
           obj.primitives[0].dimensions =
