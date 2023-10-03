@@ -85,7 +85,7 @@ private:
   std::vector<double> home_pose_;
 
   moveit::planning_interface::PlanningSceneInterface * planning_scene_interface;
-  std::map<std::string, int> obstacle_type_map ;
+  std::map<std::string, int> obstacle_type_map;
 
   std::vector<geometry_msgs::msg::Pose> read_waypoints(const std::string & filename)
   {
@@ -248,8 +248,7 @@ private:
       obj.header.frame_id = "world";
 
       // Map to the correct int
-      switch (MTCPlanner::obstacle_type_map[node_->get_parameter("objects." + name + ".type").as_string()])
-        // Change these to enums
+      switch (obstacle_type_map[node_->get_parameter("objects." + name + ".type").as_string()]) {
         case 1:
           // These objects are cylinders
           obj.primitives.resize(1);
@@ -284,15 +283,11 @@ private:
       }
 
       all_objects.push_back(obj);
-
     }
-
     return all_objects;
-
   }
 
-
-};  // class PickPlaceServer
+}   // class PickPlaceServer
 
 int main(int argc, char * argv[])
 {
