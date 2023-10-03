@@ -28,12 +28,7 @@ add_executable(pick_place_action_server src/pick_place_server.cpp)
 ament_target_dependencies(pick_place_action_server ${dependencies})
 target_link_libraries(pick_place_action_server yaml-cpp)
 
-add_executable(hello_moveit src/hello_moveit.cpp)
-ament_target_dependencies(hello_moveit ${dependencies})
-
-
 install(TARGETS
-  hello_moveit
   pick_place_action_server
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
