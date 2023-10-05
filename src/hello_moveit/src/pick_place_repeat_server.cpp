@@ -98,6 +98,7 @@ private:
   std::vector<double> dropoff_grasp_;
   std::vector<double> dropoff_retreat_;
 
+
   std::vector<geometry_msgs::msg::Pose> read_waypoints(const std::string & filename)
   {
     /* Function to read in a series of poses from a yaml file*/
@@ -228,7 +229,7 @@ private:
       goal_handle->publish_feedback(feedback);
 
       // Move to pickup approach pose
-      RCLCPP_INFO(node_->get_logger(), "Moving to pre - pickup approach pose 1");
+      RCLCPP_INFO(node_->get_logger(), "Moving to pickup approach pose");
       success = plan_and_execute_joint_target(pickup_approach_);
       if (!success) {
         result->success = false;
@@ -237,6 +238,7 @@ private:
       }
       percentage_current += 1.0 / total_steps_;
       goal_handle->publish_feedback(feedback);
+
 
       // Move to pickup grasp pose
       RCLCPP_INFO(node_->get_logger(), "Moving to pickup grasp pose");
@@ -410,6 +412,7 @@ private:
       }
       percentage_current = 1.0;
       goal_handle->publish_feedback(feedback);
+
 
       // Sleep for a while
       loop_rate.sleep();

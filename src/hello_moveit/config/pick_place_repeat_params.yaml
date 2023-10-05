@@ -7,4 +7,3 @@ pick_place_repeat_server:
     dropoff_approach: [2.618, -2.356, -1.763, -2.216, -2.215, 0.0]
     dropoff_grasp: [2.618, -2.566, -1.7453, -2.025, -2.217, 0.0]
     dropoff_retreat: [2.321, -2.496, -1.955, -1.902, -2.513, 0.0]
-    

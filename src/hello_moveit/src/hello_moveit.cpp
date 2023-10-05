@@ -38,8 +38,7 @@ int main(int argc, char * argv[])
   // Get robot config parameters from parameter server
   auto parameters = parent_parameters_client->get_parameters(
     {"robot_description_semantic",
-      "robot_description",
-      "robot_description_kinematics"});
+      "robot_description"});
 
   // create the Node for moveit with
   auto const node = std::make_shared<rclcpp::Node>(
@@ -51,9 +50,6 @@ int main(int argc, char * argv[])
   node->declare_parameter<std::string>("robot_description_semantic", parameter_value);
   parameter_value = parameters[1].value_to_string();
   node->declare_parameter<std::string>("robot_description", parameter_value);
-  parameter_value = parameters[2].value_to_string();
-  node->declare_parameter<std::string>("robot_description_kinematics", parameter_value);
-
 
   // Next step goes here
   // Create the MoveIt MoveGroup Interface
