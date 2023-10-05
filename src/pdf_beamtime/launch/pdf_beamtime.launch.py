@@ -5,12 +5,13 @@ from launch_ros.substitutions import FindPackageShare
 
 
 def generate_launch_description():
+    """Launch the node obstacle_builder with a parameter file."""
     action_cmd = Node(
         package="pdf_beamtime",
-        executable="pick_place_action_server",
+        executable="simple_server",
         parameters=[
-            PathJoinSubstitution([FindPackageShare("pdf_beamtime"), "config", "pick_place_repeat_params.yaml"]),
-            {"waypoints_file": PathJoinSubstitution([FindPackageShare("pdf_beamtime"), "config", "waypoints.yaml"])},
+            PathJoinSubstitution([FindPackageShare("pdf_beamtime"), "config", "obstacles.yaml"]),
+            PathJoinSubstitution([FindPackageShare("pdf_beamtime"), "config", "joint_poses.yaml"]),
         ],
         output="screen",
     )

@@ -1,6 +1,6 @@
-pick_place_server:
+simple_server:
   ros__parameters:
-    object_names: ['table', 'table_gluider', 'inbeam_platform','holder_base_inbeam','holder_shaft_inbeam','holder_head_inbeam','holder_base_storage','holder_shaft_storage','holder_head_storage']
+    object_names: ['table', 'moving_platform', 'inbeam_platform','holder_base_inbeam','holder_shaft_inbeam','holder_head_inbeam','holder_base_storage','holder_shaft_storage','holder_head_storage']
     objects:
       table:
         type: 'BOX'
@@ -11,7 +11,7 @@ pick_place_server:
         x: 0.0 # pose x
         y: 0.0 # pose y
         z: -0.03 # pose z
-      table_gluider:
+      moving_platform:
         type: 'BOX'
         w: 0.60 # width
         d: 0.15 # depth

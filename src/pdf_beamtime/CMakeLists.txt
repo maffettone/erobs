@@ -23,13 +23,13 @@ set(dependencies
   yaml-cpp
 )
 
-add_executable(pick_place_action_server src/pick_place_server.cpp)
+include_directories(include)  # This makes sure the libraries are visible
 
-ament_target_dependencies(pick_place_action_server ${dependencies})
-target_link_libraries(pick_place_action_server yaml-cpp)
+add_executable(simple_server src/simple_server.cpp)
+ament_target_dependencies(simple_server ${dependencies})
 
 install(TARGETS
-  pick_place_action_server
+  simple_server
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION lib/${PROJECT_NAME}
