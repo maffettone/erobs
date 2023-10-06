@@ -44,23 +44,14 @@ services:
       - urdriver
 
 
-  # urexample:
-  #   image: ur-example:latest
-  #   environment:
-  #     - ROBOT_IP=192.168.56.101
-  #   networks:
-  #     - ursim_net
-  #   depends_on:
-  #     - urdriver
-
-  helloworld:
-    image: hello-world:latest
+  urexample:
+    image: ur-example:latest
     environment:
       - ROBOT_IP=192.168.56.101
     networks:
-      ursim_net:
-        ipv4_address: 192.168.56.104
-
+      - ursim_net
+    depends_on:
+      - urdriver
 
 networks:
   ursim_net:

@@ -1,6 +1,5 @@
 // See https://aka.ms/vscode-remote/devcontainer.json for format details.
 {
-
 	"dockerFile": "Dockerfile",
 	"build": {
 		"args": {
@@ -9,7 +8,6 @@
 	},
 	"remoteUser": "ros",
 	"runArgs": [
-		"--privileged",
 		"--network=docker_ursim_net",
 		"--cap-add=SYS_PTRACE",
 		"--security-opt=seccomp:unconfined",
@@ -36,7 +34,6 @@
 				"ms-python.python",
 				"ms-vscode.cpptools",
 				"ms-vscode.cpptools-extension-pack",
-				"ms-vscode-remote.remote-containers",
 				"ms-iot.vscode-ros",
 				"ms-python.black-formatter",
 				"ms-python.flake8",
@@ -52,5 +49,3 @@
 		}
 	}
 }
-
-
