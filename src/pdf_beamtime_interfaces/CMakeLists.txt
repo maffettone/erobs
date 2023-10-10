@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.8)
-project(hello_moveit_interfaces)
+project(pdf_beamtime_interfaces)
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
@@ -11,7 +11,7 @@ find_package(rosidl_default_generators REQUIRED)
 
 # Generate interfaces for actions
 rosidl_generate_interfaces(${PROJECT_NAME}
-  "action/PickPlaceRepeat.action"
+  "action/PickPlaceControlMsg.action"
 )
 
 
@@ -28,3 +28,4 @@ if(BUILD_TESTING)
 endif()
 
 ament_package()
+

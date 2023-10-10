@@ -9,14 +9,14 @@ endif()
 find_package(ament_cmake REQUIRED)
 find_package(moveit_ros_planning_interface REQUIRED)
 find_package(rclcpp REQUIRED)
-find_package(hello_moveit_interfaces REQUIRED)
+find_package(pdf_beamtime_interfaces REQUIRED)
 find_package(rclcpp_action REQUIRED)
 find_package(rclcpp_components REQUIRED)
 find_package(yaml-cpp REQUIRED)
 
 set(dependencies
   moveit_ros_planning_interface
-  hello_moveit_interfaces
+  pdf_beamtime_interfaces
   rclcpp
   rclcpp_action
   rclcpp_components
@@ -25,11 +25,11 @@ set(dependencies
 
 include_directories(include)  # This makes sure the libraries are visible
 
-add_executable(simple_server src/simple_server.cpp)
-ament_target_dependencies(simple_server ${dependencies})
+add_executable(pdf_beamtime_server src/pdf_beamtime_server.cpp)
+ament_target_dependencies(pdf_beamtime_server ${dependencies})
 
 install(TARGETS
-  simple_server
+  pdf_beamtime_server
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION lib/${PROJECT_NAME}

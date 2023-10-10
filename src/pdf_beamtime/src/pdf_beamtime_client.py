@@ -4,17 +4,17 @@ import rclpy
 from rclpy.action import ActionClient
 from rclpy.node import Node
 
-from hello_moveit_interfaces.action import SimpleActionMsg
+from pdf_beamtime_interfaces.action import PickPlaceControlMsg
 
 
 class SimpleClient(Node):
     # Send a simple goal request to the action server
     def __init__(self):
-        super().__init__("simple_client")
-        self._action_client = ActionClient(self, SimpleActionMsg, "pdf_simple_action")
+        super().__init__("pdf_beamtime_client")
+        self._action_client = ActionClient(self, PickPlaceControlMsg, "pdf_beamtime_action_server")
 
     def send_goal(self):
-        goal_msg = SimpleActionMsg.Goal()
+        goal_msg = PickPlaceControlMsg.Goal()
         goal_msg.run = True
 
         self._action_client.wait_for_server()

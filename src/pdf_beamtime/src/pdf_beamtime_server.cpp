@@ -1,92 +1,92 @@
-#include <pdf_beamtime/simple_server.hpp>
+#include <pdf_beamtime/pdf_beamtime_server.hpp>
 
 using moveit::planning_interface::MoveGroupInterface;
 
-SimpleServer::SimpleServer(
+PdfBeamtimeServer::PdfBeamtimeServer(
   const std::string & move_group_name = "ur_manipulator",
-  const rclcpp::NodeOptions & options = rclcpp::NodeOptions())
-: node_(std::make_shared<rclcpp::Node>("simple_server", options))
+  const rclcpp::NodeOptions & options = rclcpp::NodeOptions(),
+  std::string action_name = "pdf_beamtime_action_server")
+: node_(std::make_shared<rclcpp::Node>("simple_server", options)),
+  move_group_interface_(node_, move_group_name),
+  planning_scene_interface_()
 {
   // Add the obstacles
-  this->planning_scene_interface = new moveit::planning_interface::PlanningSceneInterface();
-  this->planning_scene_interface->applyCollisionObjects(create_env());
-
-  this->move_group_interface_ = new MoveGroupInterface(this->node_, move_group_name);
+  planning_scene_interface_.applyCollisionObjects(create_env());
 
   // Create the action server
-  this->action_server_ = rclcpp_action::create_server<SimpleActionMsg>(
+  action_server_ = rclcpp_action::create_server<PickPlaceControlMsg>(
     this->node_,
-    this->ACTION_NAME,
-    std::bind(&SimpleServer::handle_goal, this, std::placeholders::_1, std::placeholders::_2),
-    std::bind(&SimpleServer::handle_cancel, this, std::placeholders::_1),
-    std::bind(&SimpleServer::handle_accepted, this, std::placeholders::_1));
+    action_name,
+    std::bind(&PdfBeamtimeServer::handle_goal, this, std::placeholders::_1, std::placeholders::_2),
+    std::bind(&PdfBeamtimeServer::handle_cancel, this, std::placeholders::_1),
+    std::bind(&PdfBeamtimeServer::handle_accepted, this, std::placeholders::_1));
 
 }
-rclcpp::node_interfaces::NodeBaseInterface::SharedPtr SimpleServer::getNodeBaseInterface()
+rclcpp::node_interfaces::NodeBaseInterface::SharedPtr PdfBeamtimeServer::getNodeBaseInterface()
 // Expose the node base interface so that the node can be added to a component manager.
 {
   return node_->get_node_base_interface();
 }
 
-rclcpp_action::GoalResponse SimpleServer::handle_goal(
+rclcpp_action::GoalResponse PdfBeamtimeServer::handle_goal(
   const rclcpp_action::GoalUUID & uuid,
-  std::shared_ptr<const SimpleActionMsg::Goal> goal)
+  std::shared_ptr<const PickPlaceControlMsg::Goal> goal)
 {
   (void)uuid;
   return rclcpp_action::GoalResponse::ACCEPT_AND_EXECUTE;
 }
 
-void SimpleServer::handle_accepted(
-  const std::shared_ptr<rclcpp_action::ServerGoalHandle<SimpleActionMsg>> goal_handle)
+void PdfBeamtimeServer::handle_accepted(
+  const std::shared_ptr<rclcpp_action::ServerGoalHandle<PickPlaceControlMsg>> goal_handle)
 {
   using namespace std::placeholders;
   // this needs to return quickly to avoid blocking the executor, so spin up a new thread
-  std::thread{std::bind(&SimpleServer::execute, this, _1), goal_handle}.detach();
+  std::thread{std::bind(&PdfBeamtimeServer::execute, this, _1), goal_handle}.detach();
 }
 
 // Receiving the cancel request.
-rclcpp_action::CancelResponse SimpleServer::handle_cancel(
-  const std::shared_ptr<rclcpp_action::ServerGoalHandle<SimpleActionMsg>> goal_handle)
+rclcpp_action::CancelResponse PdfBeamtimeServer::handle_cancel(
+  const std::shared_ptr<rclcpp_action::ServerGoalHandle<PickPlaceControlMsg>> goal_handle)
 {
   RCLCPP_INFO(node_->get_logger(), "Received request to cancel goal");
   (void)goal_handle;
   return rclcpp_action::CancelResponse::ACCEPT;
 }
 
-void SimpleServer::execute(
-  const std::shared_ptr<rclcpp_action::ServerGoalHandle<SimpleActionMsg>> goal_handle)
+void PdfBeamtimeServer::execute(
+  const std::shared_ptr<rclcpp_action::ServerGoalHandle<PickPlaceControlMsg>> goal_handle)
 {
   // A cool Moveit function
   std::vector<double> home_angles = node_->get_parameter("home_angles").as_double_array();
 
-  this->move_group_interface_->setJointValueTarget(home_angles);
+  move_group_interface_.setJointValueTarget(home_angles);
   // Create a plan to that target pose
   auto const [success, plan] = [this] {
       moveit::planning_interface::MoveGroupInterface::Plan msg;
-      auto const ok = static_cast<bool>(this->move_group_interface_->plan(msg));
+      auto const ok = static_cast<bool>(move_group_interface_.plan(msg));
       return std::make_pair(ok, msg);
     }();
   // Execute the plan
   if (success) {
-    this->move_group_interface_->execute(plan);
+    move_group_interface_.execute(plan);
   } else {
     RCLCPP_ERROR(node_->get_logger(), "Planning failed!");
   }
 
 }
 
-std::vector<moveit_msgs::msg::CollisionObject> SimpleServer::create_env()
+std::vector<moveit_msgs::msg::CollisionObject> PdfBeamtimeServer::create_env()
 // Builds a vector of obstacle as defined in the .yaml file and returns the vector
 {
-  obstacle_type_map.insert(std::pair<std::string, int>("CYLINDER", 1));
-  obstacle_type_map.insert(std::pair<std::string, int>("BOX", 2));
+  obstacle_type_map_.insert(std::pair<std::string, int>("CYLINDER", 1));
+  obstacle_type_map_.insert(std::pair<std::string, int>("BOX", 2));
 
   // int num_objects = node_->get_parameter("num_objects").as_int();
   std::vector<std::string> object_names = node_->get_parameter("object_names").as_string_array();
 
   std::vector<moveit_msgs::msg::CollisionObject> all_obstacles;
 
-  // Create objects in a recursion
+  // Create objects in a loop
   for (size_t i = 0; i < object_names.size(); i++) {
     std::string name = object_names[i];    //get each name here as it uses as a parameter field
 
@@ -96,8 +96,9 @@ std::vector<moveit_msgs::msg::CollisionObject> SimpleServer::create_env()
     obj.header.frame_id = "world";
 
     // Map to the correct int
-    switch (obstacle_type_map[node_->get_parameter("objects." + name + ".type").as_string()]) {
+    switch (obstacle_type_map_[node_->get_parameter("objects." + name + ".type").as_string()]) {
       case 1:
+        // TODO: Break these following statements to functions
         // These objects are cylinders
         obj.primitives.resize(1);
         obj.primitives[0].type = shape_msgs::msg::SolidPrimitive::CYLINDER;
@@ -172,7 +173,7 @@ int main(int argc, char * argv[])
     {"robot_description", parameters[1].value_to_string()}
   });
 
-  auto parent_node = std::make_shared<SimpleServer>(
+  auto parent_node = std::make_shared<PdfBeamtimeServer>(
     "ur_manipulator",
     node_options);
   rclcpp::spin(parent_node->getNodeBaseInterface());
