@@ -1,7 +1,7 @@
 /*Copyright 2023 Brookhaven National Laboratory
 BSD 3 Clause License. See LICENSE.txt for details.*/
-#ifndef PDF_BEAMTIME_PDF_BEAMTIME_SERVER_HPP
-#define PDF_BEAMTIME_PDF_BEAMTIME_SERVER_HPP
+#ifndef PDF_BEAMTIME__PDF_BEAMTIME_SERVER_HPP
+#define PDF_BEAMTIME__PDF_BEAMTIME_SERVER_HPP
 
 #include <moveit/move_group_interface/move_group_interface.h>
 #include <moveit/planning_scene_interface/planning_scene_interface.h>
@@ -60,4 +60,4 @@ private:
   std::vector<moveit_msgs::msg::CollisionObject> create_env();
 };
 
-#endif  // PDF_BEAMTIME_PDF_BEAMTIME_SERVER_HPP
+#endif  // PDF_BEAMTIME__PDF_BEAMTIME_SERVER_HPP
