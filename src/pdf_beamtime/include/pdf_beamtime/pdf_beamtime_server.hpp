@@ -1,5 +1,10 @@
-#ifndef PDF_BEAMTIME_SERVER_HPP
-#define PDF_BEAMTIME_SERVER_HPP
+/*Copyright 2023 Brookhaven National Laboratory
+BSD 3 Clause License. See LICENSE.txt for details.*/
+#ifndef PDF_BEAMTIME_PDF_BEAMTIME_SERVER_HPP
+#define PDF_BEAMTIME_PDF_BEAMTIME_SERVER_HPP
+
+#include <moveit/move_group_interface/move_group_interface.h>
+#include <moveit/planning_scene_interface/planning_scene_interface.h>
 
 #include <chrono>
 #include <fstream>
@@ -7,12 +12,11 @@
 #include <functional>
 #include <memory>
 #include <thread>
-
+#include <string>
+#include <map>
+#include <vector>
 #include <rclcpp/rclcpp.hpp>
 #include <rclcpp_action/rclcpp_action.hpp>
-
-#include <moveit/move_group_interface/move_group_interface.h>
-#include <moveit/planning_scene_interface/planning_scene_interface.h>
 #include <pdf_beamtime_interfaces/action/pick_place_control_msg.hpp>
 
 /// @brief Create the obstacle environment and an simple action server for the robot to move
@@ -54,7 +58,6 @@ private:
   /// @brief generates a vector of obstacles from a yaml file.
   /// @return a vector of CollisionObjects
   std::vector<moveit_msgs::msg::CollisionObject> create_env();
-
 };
 
-#endif
+#endif  // PDF_BEAMTIME_PDF_BEAMTIME_SERVER_HPP

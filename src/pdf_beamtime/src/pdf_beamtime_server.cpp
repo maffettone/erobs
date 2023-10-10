@@ -1,3 +1,5 @@
+/*Copyright 2023 Brookhaven National Laboratory
+BSD 3 Clause License. See LICENSE.txt for details.*/
 #include <pdf_beamtime/pdf_beamtime_server.hpp>
 
 using moveit::planning_interface::MoveGroupInterface;
@@ -20,7 +22,6 @@ PdfBeamtimeServer::PdfBeamtimeServer(
     std::bind(&PdfBeamtimeServer::handle_goal, this, std::placeholders::_1, std::placeholders::_2),
     std::bind(&PdfBeamtimeServer::handle_cancel, this, std::placeholders::_1),
     std::bind(&PdfBeamtimeServer::handle_accepted, this, std::placeholders::_1));
-
 }
 rclcpp::node_interfaces::NodeBaseInterface::SharedPtr PdfBeamtimeServer::getNodeBaseInterface()
 // Expose the node base interface so that the node can be added to a component manager.
@@ -72,7 +73,6 @@ void PdfBeamtimeServer::execute(
   } else {
     RCLCPP_ERROR(node_->get_logger(), "Planning failed!");
   }
-
 }
 
 std::vector<moveit_msgs::msg::CollisionObject> PdfBeamtimeServer::create_env()
@@ -88,7 +88,7 @@ std::vector<moveit_msgs::msg::CollisionObject> PdfBeamtimeServer::create_env()
 
   // Create objects in a loop
   for (size_t i = 0; i < object_names.size(); i++) {
-    std::string name = object_names[i];    //get each name here as it uses as a parameter field
+    std::string name = object_names[i];  // get each name here as it uses as a parameter field
 
     moveit_msgs::msg::CollisionObject obj;    // collision object
     geometry_msgs::msg::Pose pose;    // object pose
@@ -98,7 +98,7 @@ std::vector<moveit_msgs::msg::CollisionObject> PdfBeamtimeServer::create_env()
     // Map to the correct int
     switch (obstacle_type_map_[node_->get_parameter("objects." + name + ".type").as_string()]) {
       case 1:
-        // TODO: Break these following statements to functions
+        // TODO(ChandimaFernando): Break these following statements to functions
         // These objects are cylinders
         obj.primitives.resize(1);
         obj.primitives[0].type = shape_msgs::msg::SolidPrimitive::CYLINDER;
@@ -179,5 +179,4 @@ int main(int argc, char * argv[])
   rclcpp::spin(parent_node->getNodeBaseInterface());
   rclcpp::shutdown();
   return 0;
-
 }
