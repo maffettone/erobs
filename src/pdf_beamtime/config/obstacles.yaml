@@ -1,5 +1,6 @@
 simple_server:
   ros__parameters:
+    update_toggle_value: 0.0
     object_names: ['table', 'moving_platform', 'inbeam_platform','holder_base_inbeam','holder_shaft_inbeam','holder_head_inbeam','holder_base_storage','holder_shaft_storage','holder_head_storage']
     objects:
       table:
