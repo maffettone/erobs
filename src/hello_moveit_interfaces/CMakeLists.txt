@@ -12,7 +12,6 @@ find_package(rosidl_default_generators REQUIRED)
 # Generate interfaces for actions
 rosidl_generate_interfaces(${PROJECT_NAME}
   "action/PickPlaceRepeat.action"
-  "action/SimpleActionMsg.action"
 )
 
 
