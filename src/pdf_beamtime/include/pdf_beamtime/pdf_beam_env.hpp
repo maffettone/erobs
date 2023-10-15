@@ -9,6 +9,7 @@ BSD 3 Clause License. See LICENSE.txt for details.*/
 #include <functional>
 #include <memory>
 #include <thread>
+#include <string>
 
 #include <rclcpp/rclcpp.hpp>
 #include <rclcpp/parameter_client.hpp>
