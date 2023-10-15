@@ -8,7 +8,6 @@ PdfBeamEnvironment::PdfBeamEnvironment(
   const rclcpp::NodeOptions & options = rclcpp::NodeOptions())
 : node_(std::make_shared<rclcpp::Node>("pdf_beam_env", options))
 {
-
   new_obstacle_client_ = node_->create_client<NewObstacleMsg>("pdf_new_obstacle");
   update_obstacle_client_ = node_->create_client<UpdateObstacleMsg>("pdf_update_obstacles");
 

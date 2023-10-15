@@ -154,7 +154,6 @@ void PdfBeamtimeServer::new_obstacle_service_cb(
   const std::shared_ptr<NewObstacleMsg::Request> request,
   std::shared_ptr<NewObstacleMsg::Response> response)
 {
-
   try {
     // Adds the new obstacle name to the existing list
     auto obj_param = node_->get_parameters({"object_names"})[0].as_string_array();
@@ -204,7 +203,6 @@ void PdfBeamtimeServer::update_obstacles_service_cb(
   }
 
   planning_scene_interface_.applyCollisionObjects(create_env());
-
 }
 
 int main(int argc, char * argv[])

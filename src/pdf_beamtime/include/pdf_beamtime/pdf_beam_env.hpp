@@ -1,7 +1,7 @@
 /*Copyright 2023 Brookhaven National Laboratory
 BSD 3 Clause License. See LICENSE.txt for details.*/
-#ifndef PDF_BEAMTIME_ENVIRONMENT__PDF_BEAM_ENV_HPP_
-#define PDF_BEAMTIME_ENVIRONMENT__PDF_BEAM_ENV_HPP_
+#ifndef PDF_BEAMTIME__PDF_BEAM_ENV_HPP_
+#define PDF_BEAMTIME__PDF_BEAM_ENV_HPP_
 
 #include <chrono>
 #include <fstream>
@@ -38,11 +38,11 @@ private:
   rclcpp::Client<UpdateObstacleMsg>::SharedPtr update_obstacle_client_;
 
   Obstacle new_obstacle_;
-  /// @brief Changes a property of an obstacle. This invokes a service call to update_obstacle_client_.
+  /// @brief Changes a property of an obstacle.
   void change_obstacle(std::string obstacle_name, std::string property, double value);
 
   /// @brief Adds a new obstacle. This invokes a service call to new_obstacle_client_.
   void add_new_obstacle(const Obstacle & new_obstacle_);
 };
 
-#endif  // PDF_BEAMTIME_ENVIRONMENT__PDF_BEAM_ENV_HPP_
+#endif  // PDF_BEAMTIME__PDF_BEAM_ENV_HPP_
