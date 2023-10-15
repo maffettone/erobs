@@ -9,9 +9,11 @@ endif()
 find_package(ament_cmake REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
 
-# Generate interfaces for actions
+# Generate interfaces for actions and services
 rosidl_generate_interfaces(${PROJECT_NAME}
   "action/PickPlaceControlMsg.action"
+  "srv/NewObstacleMsg.srv"
+  "srv/UpdateObstacleMsg.srv"
 )
 
 

@@ -28,8 +28,12 @@ include_directories(include)  # This makes sure the libraries are visible
 add_executable(pdf_beamtime_server src/pdf_beamtime_server.cpp)
 ament_target_dependencies(pdf_beamtime_server ${dependencies})
 
+add_executable(pdf_beam_env src/pdf_beam_env.cpp)
+ament_target_dependencies(pdf_beam_env ${dependencies})
+
 install(TARGETS
   pdf_beamtime_server
+  pdf_beam_env
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION lib/${PROJECT_NAME}
