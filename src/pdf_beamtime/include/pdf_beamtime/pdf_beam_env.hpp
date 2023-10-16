@@ -25,7 +25,7 @@ public:
   {
     std::string name;
     std::string type;
-    double w, d, h, r, x, y, z;
+    double x, y, z, w, h, d, r;
   };
   using NewObstacleMsg = pdf_beamtime_interfaces::srv::NewObstacleMsg;
   using UpdateObstacleMsg = pdf_beamtime_interfaces::srv::UpdateObstacleMsg;
