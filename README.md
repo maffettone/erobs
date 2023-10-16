@@ -52,3 +52,6 @@ ROS2-approved formatters are included in the IDE.
 
 * **c++** uncrustify; config from `ament_uncrustify`
 * **python** autopep8; vscode settings consistent with the [style guide](https://index.ros.org/doc/ros2/Contributing/Code-Style-Language-Versions/)
+
+## Notes on testing pdf_beamtime_server
+[Link to pdf_beamtime README](./src/pdf_beamtime/README.md)
