@@ -83,7 +83,10 @@ void PdfBeamtimeServer::execute(
   // Create a plan to that target pose
   auto const [success, plan] = [this] {
       moveit::planning_interface::MoveGroupInterface::Plan msg;
+      mutex_.unlock();
       auto const ok = static_cast<bool>(move_group_interface_.plan(msg));
+      mutex_.unlock();
+
       return std::make_pair(ok, msg);
     }();
   // Execute the plan
@@ -187,6 +190,7 @@ void PdfBeamtimeServer::new_obstacle_service_cb(
   }
   // Update the whole environment
   planning_scene_interface_.applyCollisionObjects(create_env());
+  mutex_.unlock();
 }
 
 void PdfBeamtimeServer::update_obstacles_service_cb(
@@ -209,6 +213,8 @@ void PdfBeamtimeServer::update_obstacles_service_cb(
     }
   }
   planning_scene_interface_.applyCollisionObjects(create_env());
+  mutex_.unlock();
+
 }
 
 void PdfBeamtimeServer::remove_obstacles_service_cb(
