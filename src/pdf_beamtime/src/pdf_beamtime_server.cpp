@@ -77,7 +77,10 @@ void PdfBeamtimeServer::execute(
   // Create a plan to that target pose
   auto const [success, plan] = [this] {
       moveit::planning_interface::MoveGroupInterface::Plan msg;
+      mutex_.unlock();
       auto const ok = static_cast<bool>(move_group_interface_.plan(msg));
+      mutex_.unlock();
+
       return std::make_pair(ok, msg);
     }();
   // Execute the plan
@@ -180,14 +183,17 @@ void PdfBeamtimeServer::new_obstacle_service_cb(
     response->results = "Failure";
   }
 
+  mutex_.lock();
   // Update the whole environment
   planning_scene_interface_.applyCollisionObjects(create_env());
+  mutex_.unlock();
 }
 
 void PdfBeamtimeServer::update_obstacles_service_cb(
   const std::shared_ptr<UpdateObstaclesMsg::Request> request,
   std::shared_ptr<UpdateObstaclesMsg::Response> response)
 {
+  std::lock_guard<std::mutex> lock(mutex_);
   // Update the existing parameter
   auto results = node_->set_parameter(
     rclcpp::Parameter(
@@ -202,7 +208,10 @@ void PdfBeamtimeServer::update_obstacles_service_cb(
     RCLCPP_ERROR(node_->get_logger(), "Failed to set parameter");
   }
 
+  mutex_.lock();
   planning_scene_interface_.applyCollisionObjects(create_env());
+  mutex_.unlock();
+
 }
 
 int main(int argc, char * argv[])

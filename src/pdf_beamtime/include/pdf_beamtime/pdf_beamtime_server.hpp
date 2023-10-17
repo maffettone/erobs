@@ -15,6 +15,7 @@ BSD 3 Clause License. See LICENSE.txt for details.*/
 #include <string>
 #include <map>
 #include <vector>
+#include <mutex>
 #include <rclcpp/rclcpp.hpp>
 #include <rclcpp_action/rclcpp_action.hpp>
 #include <pdf_beamtime_interfaces/action/pick_place_control_msg.hpp>
@@ -36,6 +37,7 @@ public:
 
 private:
   rclcpp::Node::SharedPtr node_;
+  std::mutex mutex_;
   moveit::planning_interface::MoveGroupInterface move_group_interface_;
 
   moveit::planning_interface::PlanningSceneInterface planning_scene_interface_;
