@@ -23,7 +23,7 @@ type: BOX or CYLINDER
 x, y, z: location for the obstacle
 w, h, d, r: width, height, depth, and radius 
 ```bash
-ros2 service call /pdf_new_obstacle pdf_beamtime_interfaces/srv/NewObstacleMsg '{request: '', name: "obstacle", type: "BOX", x: 1.5, y: 0.2, z: 0.9, w: 0.3, h: 0.3, d: 0.3, r: 0.0}'
+ros2 service call /pdf_new_obstacle pdf_beamtime_interfaces/srv/NewObstacleMsg '{name: "obstacle", type: "BOX", x: 1.5, y: 0.2, z: 0.9, w: 0.3, h: 0.3, d: 0.3, r: 0.0}'
 ```
 
 ## Service to remove an obstacle 
