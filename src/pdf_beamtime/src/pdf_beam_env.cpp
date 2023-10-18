@@ -10,6 +10,7 @@ PdfBeamEnvironment::PdfBeamEnvironment(
 {
   new_obstacle_client_ = node_->create_client<NewObstacleMsg>("pdf_new_obstacle");
   update_obstacle_client_ = node_->create_client<UpdateObstacleMsg>("pdf_update_obstacles");
+  remove_obstacle_client_ = node_->create_client<UpdateObstacleMsg>("pdf_remove_obstacle");
 
   this->change_obstacle("inbeam_platform", "z", 1.5);
 
@@ -20,6 +21,23 @@ rclcpp::node_interfaces::NodeBaseInterface::SharedPtr PdfBeamEnvironment::getNod
 // Expose the node base interface so that the node can be added to a component manager.
 {
   return node_->get_node_base_interface();
+}
+
+void PdfBeamEnvironment::remove_obstacle(
+  std::string obstacle_name)
+{
+  auto request = std::make_shared<UpdateObstacleMsg::Request>();
+  request->name = obstacle_name;
+
+  while (!this->remove_obstacle_client_->wait_for_service(1s)) {
+    if (!rclcpp::ok()) {
+      RCLCPP_ERROR(node_->get_logger(), "Interrupted while waiting for the service. Exiting.");
+      break;
+    }
+    RCLCPP_INFO(node_->get_logger(), "service not available, waiting again...");
+  }
+  // Send the request
+  auto result = this->remove_obstacle_client_->async_send_request(request);
 }
 
 void PdfBeamEnvironment::change_obstacle(
@@ -38,7 +56,6 @@ void PdfBeamEnvironment::change_obstacle(
     }
     RCLCPP_INFO(node_->get_logger(), "service not available, waiting again...");
   }
-
   // Send the request
   auto result = this->update_obstacle_client_->async_send_request(request);
 }
@@ -46,7 +63,6 @@ void PdfBeamEnvironment::change_obstacle(
 void PdfBeamEnvironment::add_new_obstacle(const Obstacle & new_obstacle_)
 {
   auto request = std::make_shared<NewObstacleMsg::Request>();
-
   // Add the desired obstacle properties to the request
   request->request = "new_obstacle";
   request->name = new_obstacle_.name;
@@ -66,7 +82,6 @@ void PdfBeamEnvironment::add_new_obstacle(const Obstacle & new_obstacle_)
     }
     RCLCPP_INFO(node_->get_logger(), "service not available, waiting again...");
   }
-
   auto result = this->new_obstacle_client_->async_send_request(request);
 }
 

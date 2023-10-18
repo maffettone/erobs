@@ -37,6 +37,7 @@ private:
   rclcpp::Node::SharedPtr node_;
   rclcpp::Client<NewObstacleMsg>::SharedPtr new_obstacle_client_;
   rclcpp::Client<UpdateObstacleMsg>::SharedPtr update_obstacle_client_;
+  rclcpp::Client<UpdateObstacleMsg>::SharedPtr remove_obstacle_client_;
 
   Obstacle new_obstacle_;
   /// @brief Changes a property of an obstacle.
@@ -44,6 +45,9 @@ private:
 
   /// @brief Adds a new obstacle. This invokes a service call to new_obstacle_client_.
   void add_new_obstacle(const Obstacle & new_obstacle_);
+
+  /// @brief Removes an obstacle. This invokes a service call to remove_obstacle_client_.
+  void remove_obstacle(std::string obstacle_name);
 };
 
 #endif  // PDF_BEAMTIME__PDF_BEAM_ENV_HPP_

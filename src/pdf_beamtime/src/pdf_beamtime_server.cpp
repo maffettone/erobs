@@ -83,10 +83,7 @@ void PdfBeamtimeServer::execute(
   // Create a plan to that target pose
   auto const [success, plan] = [this] {
       moveit::planning_interface::MoveGroupInterface::Plan msg;
-      mutex_.unlock();
       auto const ok = static_cast<bool>(move_group_interface_.plan(msg));
-      mutex_.unlock();
-
       return std::make_pair(ok, msg);
     }();
   // Execute the plan
@@ -190,7 +187,6 @@ void PdfBeamtimeServer::new_obstacle_service_cb(
   }
   // Update the whole environment
   planning_scene_interface_.applyCollisionObjects(create_env());
-  mutex_.unlock();
 }
 
 void PdfBeamtimeServer::update_obstacles_service_cb(
@@ -213,8 +209,29 @@ void PdfBeamtimeServer::update_obstacles_service_cb(
     }
   }
   planning_scene_interface_.applyCollisionObjects(create_env());
-  mutex_.unlock();
+}
 
+void PdfBeamtimeServer::remove_obstacles_service_cb(
+  const std::shared_ptr<UpdateObstaclesMsg::Request> request,
+  std::shared_ptr<UpdateObstaclesMsg::Response> response)
+{
+  std::vector<std::string> removable_object;
+  try {
+    // Remove the new obstacle name from the existing list
+    auto obj_param = node_->get_parameters({"object_names"})[0].as_string_array();
+
+    obj_param.erase(
+      std::remove_if(
+        obj_param.begin(), obj_param.end(), [&request](const std::string & param) {
+          return param == request->name;
+        }), obj_param.end());
+    removable_object.push_back(request->name);
+    response->results = "Success";
+  } catch (const std::exception & e) {
+    std::cerr << e.what() << '\n';
+    response->results = "Failure";
+  }
+  planning_scene_interface_.removeCollisionObjects(removable_object);
 }
 
 void PdfBeamtimeServer::remove_obstacles_service_cb(
