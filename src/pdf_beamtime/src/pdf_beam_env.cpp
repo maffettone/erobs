@@ -64,7 +64,6 @@ void PdfBeamEnvironment::add_new_obstacle(const Obstacle & new_obstacle_)
 {
   auto request = std::make_shared<NewObstacleMsg::Request>();
   // Add the desired obstacle properties to the request
-  request->request = "new_obstacle";
   request->name = new_obstacle_.name;
   request->type = new_obstacle_.type;
   request->x = new_obstacle_.x;

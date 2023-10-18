@@ -223,6 +223,7 @@ void PdfBeamtimeServer::remove_obstacles_service_cb(
         obj_param.begin(), obj_param.end(), [&request](const std::string & param) {
           return param == request->name;
         }), obj_param.end());
+    // Add the obstacle id (which is the obstacle name to a list)
     removable_object.push_back(request->name);
     response->results = "Success";
   } catch (const std::exception & e) {
