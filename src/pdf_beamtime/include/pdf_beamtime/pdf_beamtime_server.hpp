@@ -15,7 +15,6 @@ BSD 3 Clause License. See LICENSE.txt for details.*/
 #include <string>
 #include <map>
 #include <vector>
-#include <mutex>
 #include <rclcpp/rclcpp.hpp>
 #include <rclcpp_action/rclcpp_action.hpp>
 #include <pdf_beamtime_interfaces/action/pick_place_control_msg.hpp>
@@ -37,7 +36,6 @@ public:
 
 private:
   rclcpp::Node::SharedPtr node_;
-  std::mutex mutex_;
   moveit::planning_interface::MoveGroupInterface move_group_interface_;
 
   moveit::planning_interface::PlanningSceneInterface planning_scene_interface_;
@@ -46,6 +44,7 @@ private:
 
   rclcpp::Service<NewObstacleMsg>::SharedPtr env_refresh_service_;
   rclcpp::Service<UpdateObstaclesMsg>::SharedPtr update_obstacles_service_;
+  rclcpp::Service<UpdateObstaclesMsg>::SharedPtr remove_obstacles_service_;
 
   /// @brief Pointer to the action server
   rclcpp_action::Server<PickPlaceControlMsg>::SharedPtr action_server_;
@@ -82,6 +81,13 @@ private:
   /// @param request UpdateObstaclesMsg
   /// @param response Success / Failure
   void update_obstacles_service_cb(
+    const std::shared_ptr<UpdateObstaclesMsg::Request> request,
+    std::shared_ptr<UpdateObstaclesMsg::Response> response);
+
+  /// @brief Callback to remove an existing obstacle
+  /// @param request UpdateObstaclesMsg
+  /// @param response Success / Failure
+  void remove_obstacles_service_cb(
     const std::shared_ptr<UpdateObstaclesMsg::Request> request,
     std::shared_ptr<UpdateObstaclesMsg::Response> response);
 };
