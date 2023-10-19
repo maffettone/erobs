@@ -212,8 +212,8 @@ void PdfBeamtimeServer::update_obstacles_service_cb(
 }
 
 void PdfBeamtimeServer::remove_obstacles_service_cb(
-  const std::shared_ptr<UpdateObstaclesMsg::Request> request,
-  std::shared_ptr<UpdateObstaclesMsg::Response> response)
+  const std::shared_ptr<DeleteObstacleMsg::Request> request,
+  std::shared_ptr<DeleteObstacleMsg::Response> response)
 {
   std::vector<std::string> removable_object;
   try {
