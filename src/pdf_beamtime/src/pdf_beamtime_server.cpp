@@ -28,7 +28,7 @@ PdfBeamtimeServer::PdfBeamtimeServer(
       &PdfBeamtimeServer::update_obstacles_service_cb, this, std::placeholders::_1,
       std::placeholders::_2));
 
-  remove_obstacles_service_ = node_->create_service<UpdateObstaclesMsg>(
+  remove_obstacles_service_ = node_->create_service<DeleteObstacleMsg>(
     "pdf_remove_obstacle",
     std::bind(
       &PdfBeamtimeServer::remove_obstacles_service_cb, this, std::placeholders::_1,
@@ -193,25 +193,27 @@ void PdfBeamtimeServer::update_obstacles_service_cb(
   const std::shared_ptr<UpdateObstaclesMsg::Request> request,
   std::shared_ptr<UpdateObstaclesMsg::Response> response)
 {
-  // Update the existing parameter
-  auto results = node_->set_parameter(
-    rclcpp::Parameter(
-      "objects." + request->name + "." + request->property,
-      request->value));
+  for (size_t idx = 0; idx < request->property.size(); ++idx) {
+    // Update the existing parameter
+    auto results = node_->set_parameter(
+      rclcpp::Parameter(
+        "objects." + request->name + "." + request->property[idx],
+        request->value[idx]));
 
-  if (results.successful) {
-    response->results = "Success";
-    RCLCPP_INFO(node_->get_logger(), "Parameter set is successfully.");
-  } else {
-    response->results = "Failure";
-    RCLCPP_ERROR(node_->get_logger(), "Failed to set parameter");
+    if (results.successful) {
+      response->results = "Success";
+      RCLCPP_INFO(node_->get_logger(), "Parameter set is successfully.");
+    } else {
+      response->results = "Failure";
+      RCLCPP_ERROR(node_->get_logger(), "Failed to set parameter");
+    }
   }
   planning_scene_interface_.applyCollisionObjects(create_env());
 }
 
 void PdfBeamtimeServer::remove_obstacles_service_cb(
-  const std::shared_ptr<UpdateObstaclesMsg::Request> request,
-  std::shared_ptr<UpdateObstaclesMsg::Response> response)
+  const std::shared_ptr<DeleteObstacleMsg::Request> request,
+  std::shared_ptr<DeleteObstacleMsg::Response> response)
 {
   std::vector<std::string> removable_object;
   try {

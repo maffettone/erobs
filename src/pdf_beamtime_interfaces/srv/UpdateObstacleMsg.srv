@@ -1,5 +1,5 @@
 string name
-string property
-float64 value
+string[<=8] property
+float64[<=8] value
 ---
 string results

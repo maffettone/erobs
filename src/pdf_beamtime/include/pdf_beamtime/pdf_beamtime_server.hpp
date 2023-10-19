@@ -20,6 +20,7 @@ BSD 3 Clause License. See LICENSE.txt for details.*/
 #include <pdf_beamtime_interfaces/action/pick_place_control_msg.hpp>
 #include <pdf_beamtime_interfaces/srv/new_obstacle_msg.hpp>
 #include <pdf_beamtime_interfaces/srv/update_obstacle_msg.hpp>
+#include <pdf_beamtime_interfaces/srv/delete_obstacle_msg.hpp>
 
 /// @brief Create the obstacle environment and an simple action server for the robot to move
 class PdfBeamtimeServer
@@ -28,6 +29,7 @@ public:
   using PickPlaceControlMsg = pdf_beamtime_interfaces::action::PickPlaceControlMsg;
   using NewObstacleMsg = pdf_beamtime_interfaces::srv::NewObstacleMsg;
   using UpdateObstaclesMsg = pdf_beamtime_interfaces::srv::UpdateObstacleMsg;
+  using DeleteObstacleMsg = pdf_beamtime_interfaces::srv::DeleteObstacleMsg;
 
   explicit PdfBeamtimeServer(
     const std::string & move_group_name, const rclcpp::NodeOptions & options,
@@ -44,7 +46,7 @@ private:
 
   rclcpp::Service<NewObstacleMsg>::SharedPtr env_refresh_service_;
   rclcpp::Service<UpdateObstaclesMsg>::SharedPtr update_obstacles_service_;
-  rclcpp::Service<UpdateObstaclesMsg>::SharedPtr remove_obstacles_service_;
+  rclcpp::Service<DeleteObstacleMsg>::SharedPtr remove_obstacles_service_;
 
   /// @brief Pointer to the action server
   rclcpp_action::Server<PickPlaceControlMsg>::SharedPtr action_server_;
@@ -85,11 +87,11 @@ private:
     std::shared_ptr<UpdateObstaclesMsg::Response> response);
 
   /// @brief Callback to remove an existing obstacle
-  /// @param request UpdateObstaclesMsg
+  /// @param request DeleteObstacleMsg
   /// @param response Success / Failure
   void remove_obstacles_service_cb(
-    const std::shared_ptr<UpdateObstaclesMsg::Request> request,
-    std::shared_ptr<UpdateObstaclesMsg::Response> response);
+    const std::shared_ptr<DeleteObstacleMsg::Request> request,
+    std::shared_ptr<DeleteObstacleMsg::Response> response);
 };
 
 #endif  // PDF_BEAMTIME__PDF_BEAMTIME_SERVER_HPP_

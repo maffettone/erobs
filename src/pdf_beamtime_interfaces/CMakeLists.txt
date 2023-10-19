@@ -14,6 +14,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "action/PickPlaceControlMsg.action"
   "srv/NewObstacleMsg.srv"
   "srv/UpdateObstacleMsg.srv"
+  "srv/DeleteObstacleMsg.srv"
 )
 
 

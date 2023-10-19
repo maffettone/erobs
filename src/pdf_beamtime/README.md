@@ -1,20 +1,18 @@
 ## Functionality
 
-This package has two nodes. 
-
-The first node is pdf_beam_env inside pdf_beam_env.cpp. This nodes invokes two service calls to create a new obstacle and change the parameters of an existing obstacle. 
-
-The second node is pdf_beamtime_server inside pdf_beamtime_server.cpp. This nodes,
+Node pdf_beamtime_server is implemented in pdf_beamtime_server.cpp. This nodes,
  - Performs motion planning for the robot,
  - Reads the parameter server and creates the obstacles,
- - Implements servers for creating new obstacles and updating existing. 
+ - Implements servers for creating new obstacles, deleting and updating existing ones. 
+
+Servers can be called by following the examples below:
 
 ## Service to update an obstacle
 name: obstacle name
-property : intended property of the obstacle
-value: new value for the property
+array property : intended properties of the obstacle
+array value: new values for the properties
 ```bash
-ros2 service call /pdf_update_obstacles pdf_beamtime_interfaces/srv/UpdateObstacleMsg '{name: "inbeam_platform", property: "z", value: 1.5}'
+ros2 service call /pdf_update_obstacles pdf_beamtime_interfaces/srv/UpdateObstacleMsg '{name: "inbeam_platform", property: ["z", "x"], value: [1.35, 1.0]}'
 ```
 
 ## Service to add a new obstacle 
@@ -29,5 +27,5 @@ ros2 service call /pdf_new_obstacle pdf_beamtime_interfaces/srv/NewObstacleMsg '
 ## Service to remove an obstacle 
 name: obstacle name
 ```bash
-ros2 service call /pdf_remove_obstacle pdf_beamtime_interfaces/srv/UpdateObstacleMsg "{name: 'inbeam_platform'}"
+ros2 service call /pdf_remove_obstacle pdf_beamtime_interfaces/srv/DeleteObstacleMsg "{name: 'inbeam_platform'}"
 ```
