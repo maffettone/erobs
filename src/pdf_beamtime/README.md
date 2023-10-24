@@ -17,11 +17,18 @@ ros2 service call /pdf_update_obstacles pdf_beamtime_interfaces/srv/UpdateObstac
 
 ## Service to add a new obstacle 
 name: new obstacle name
-type: BOX or CYLINDER
+type: BOX
 x, y, z: location for the obstacle
 w, h, d, r: width, height, depth, and radius 
 ```bash
-ros2 service call /pdf_new_obstacle pdf_beamtime_interfaces/srv/NewObstacleMsg '{name: "obstacle", type: "BOX", x: 1.5, y: 0.2, z: 0.9, w: 0.3, h: 0.3, d: 0.3, r: 0.0}'
+ros2 service call /pdf_new_box_obstacle pdf_beamtime_interfaces/srv/BoxObstacleMsg '{name: "obstacle", type: "BOX", x: 1.5, y: 0.2, z: 0.9, w: 0.3, h: 0.3, d: 0.3}'
+```
+
+type: CYLINDER
+x, y, z: location for the obstacle
+w, h, d, r: width, height, depth, and radius 
+```bash
+ros2 service call /pdf_new_cylinder_obstacle pdf_beamtime_interfaces/srv/CylinderObstacleMsg '{name: "obstacle2", type: "CYLINDER", x: 1.5, y: 0.2, z: 1.9, h: 0.3, r: 0.10}'
 ```
 
 ## Service to remove an obstacle 
