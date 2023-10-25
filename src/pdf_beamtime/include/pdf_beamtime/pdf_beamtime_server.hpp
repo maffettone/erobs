@@ -58,6 +58,28 @@ private:
   /// @brief generates a vector of obstacles from a yaml file.
   /// @return a vector of CollisionObjects
   std::vector<moveit_msgs::msg::CollisionObject> create_env();
+
+  /// @brief Callback for changing the value of an existing obstacle
+  /// @param request UpdateObstaclesMsg
+  /// @param response Success / Failure
+  void update_obstacles_service_cb(
+    const std::shared_ptr<UpdateObstaclesMsg::Request> request,
+    std::shared_ptr<UpdateObstaclesMsg::Response> response);
+
+  /// @brief Callback to remove an existing obstacle
+  /// @param request DeleteObstacleMsg
+  /// @param response Success / Failure
+  void remove_obstacles_service_cb(
+    const std::shared_ptr<DeleteObstacleMsg::Request> request,
+    std::shared_ptr<DeleteObstacleMsg::Response> response);
+
+  /// @brief Callback for adding a new obstacle
+  /// @param request a CylinderObstacleMsg or BoxObstacleMsg
+  /// @param response Success / Failure
+  template<typename RequestT, typename ResponseT>
+  void new_obstacle_service_cb(
+    const typename RequestT::SharedPtr request,
+    typename ResponseT::SharedPtr response);
 };
 
 #endif  // PDF_BEAMTIME__PDF_BEAMTIME_SERVER_HPP_

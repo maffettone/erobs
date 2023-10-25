@@ -15,6 +15,29 @@ PdfBeamtimeServer::PdfBeamtimeServer(
   // Add the obstacles
   planning_scene_interface_.applyCollisionObjects(create_env());
 
+  // // Create the services
+  new_box_obstacle_service_ = node_->create_service<BoxObstacleMsg>(
+    "pdf_new_box_obstacle",
+    std::bind(
+      &PdfBeamtimeServer::new_obstacle_service_cb<BoxObstacleMsg::Request,
+      BoxObstacleMsg::Response>, this, _1, _2));
+
+  new_cylinder_obstacle_service_ = node_->create_service<CylinderObstacleMsg>(
+    "pdf_new_cylinder_obstacle",
+    std::bind(
+      &PdfBeamtimeServer::new_obstacle_service_cb<CylinderObstacleMsg::Request,
+      CylinderObstacleMsg::Response>, this, _1, _2));
+
+  update_obstacles_service_ = node_->create_service<UpdateObstaclesMsg>(
+    "pdf_update_obstacles",
+    std::bind(
+      &PdfBeamtimeServer::update_obstacles_service_cb, this, _1, _2));
+
+  remove_obstacles_service_ = node_->create_service<DeleteObstacleMsg>(
+    "pdf_remove_obstacle",
+    std::bind(
+      &PdfBeamtimeServer::remove_obstacles_service_cb, this, _1, _2));
+
   // Create the action server
   action_server_ = rclcpp_action::create_server<PickPlaceControlMsg>(
     this->node_,
@@ -135,6 +158,93 @@ std::vector<moveit_msgs::msg::CollisionObject> PdfBeamtimeServer::create_env()
     all_obstacles.push_back(obj);
   }
   return all_obstacles;
+}
+
+void PdfBeamtimeServer::update_obstacles_service_cb(
+  const std::shared_ptr<UpdateObstaclesMsg::Request> request,
+  std::shared_ptr<UpdateObstaclesMsg::Response> response)
+{
+  for (size_t idx = 0; idx < request->property.size(); ++idx) {
+    // Update the existing parameter
+    auto results = node_->set_parameter(
+      rclcpp::Parameter(
+        "objects." + request->name + "." + request->property[idx],
+        request->value[idx]));
+
+    if (results.successful) {
+      response->results = "Success";
+      RCLCPP_INFO(node_->get_logger(), "Parameter set is successfully.");
+    } else {
+      response->results = "Failure";
+      RCLCPP_ERROR(node_->get_logger(), "Failed to set parameter");
+    }
+  }
+  planning_scene_interface_.applyCollisionObjects(create_env());
+}
+
+void PdfBeamtimeServer::remove_obstacles_service_cb(
+  const std::shared_ptr<DeleteObstacleMsg::Request> request,
+  std::shared_ptr<DeleteObstacleMsg::Response> response)
+{
+  std::vector<std::string> removable_object;
+  try {
+    // Remove the new obstacle name from the existing list
+    auto obj_param = node_->get_parameters({"object_names"})[0].as_string_array();
+
+    obj_param.erase(
+      std::remove_if(
+        obj_param.begin(), obj_param.end(), [&request](const std::string & param) {
+          return param == request->name;
+        }), obj_param.end());
+    // Add the obstacle id (which is the obstacle name to a list)
+    removable_object.push_back(request->name);
+    response->results = "Success";
+  } catch (const std::exception & e) {
+    std::cerr << e.what() << '\n';
+    response->results = "Failure";
+  }
+  planning_scene_interface_.removeCollisionObjects(removable_object);
+}
+
+
+template<typename RequestT, typename ResponseT>
+void PdfBeamtimeServer::new_obstacle_service_cb(
+  const typename RequestT::SharedPtr request,
+  typename ResponseT::SharedPtr response)
+{
+  try {
+    // Adds the new obstacle name to the existing list
+    auto obj_param = node_->get_parameters({"object_names"})[0].as_string_array();
+    obj_param.push_back(request->name);
+    node_->set_parameters(
+      {rclcpp::Parameter("object_names", obj_param)});
+
+    // Add the common parameters
+    node_->declare_parameter("objects." + request->name + ".type", request->type);
+    const std::vector<std::pair<std::string, double>> parameters = {
+      {"x", request->x}, {"y", request->y}, {"z", request->z}, {"h", request->h}};
+
+    for (const auto & param : parameters) {
+      node_->declare_parameter("objects." + request->name + "." + param.first, param.second);
+    }
+
+    // Checks the message type to differentiate Box type from Cylinder
+    if constexpr (std::is_same_v<RequestT, BoxObstacleMsg::Request>) {
+      node_->declare_parameter("objects." + request->name + ".w", request->w);
+      node_->declare_parameter("objects." + request->name + ".d", request->d);
+    } else if constexpr (std::is_same_v<RequestT, CylinderObstacleMsg::Request>) {
+      node_->declare_parameter("objects." + request->name + ".r", request->r);
+    } else {
+      RCLCPP_INFO(node_->get_logger(), "Message type not registered");
+    }
+    // Return response results
+    response->results = "Success";
+  } catch (const std::exception & e) {
+    std::cerr << e.what() << '\n';
+    response->results = "Failure";
+  }
+  // Update the whole environment
+  planning_scene_interface_.applyCollisionObjects(create_env());
 }
 
 
