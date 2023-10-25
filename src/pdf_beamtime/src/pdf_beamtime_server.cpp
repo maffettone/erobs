@@ -3,6 +3,7 @@ BSD 3 Clause License. See LICENSE.txt for details.*/
 #include <pdf_beamtime/pdf_beamtime_server.hpp>
 
 using moveit::planning_interface::MoveGroupInterface;
+using namespace std::placeholders;
 
 PdfBeamtimeServer::PdfBeamtimeServer(
   const std::string & move_group_name = "ur_manipulator",
@@ -16,31 +17,33 @@ PdfBeamtimeServer::PdfBeamtimeServer(
   planning_scene_interface_.applyCollisionObjects(create_env());
 
   // Create the services
-  env_refresh_service_ = node_->create_service<NewObstacleMsg>(
-    "pdf_new_obstacle",
+  new_box_obstacle_service_ = node_->create_service<BoxObstacleMsg>(
+    "pdf_new_box_obstacle",
     std::bind(
-      &PdfBeamtimeServer::new_obstacle_service_cb, this, std::placeholders::_1,
-      std::placeholders::_2));
+      &PdfBeamtimeServer::new_box_obstacle_service_cb, this, _1, _2));
+
+  new_cylinder_obstacle_service_ = node_->create_service<CylinderObstacleMsg>(
+    "pdf_new_cylinder_obstacle",
+    std::bind(
+      &PdfBeamtimeServer::new_cylinder_obstacle_service_cb, this, _1, _2));
 
   update_obstacles_service_ = node_->create_service<UpdateObstaclesMsg>(
     "pdf_update_obstacles",
     std::bind(
-      &PdfBeamtimeServer::update_obstacles_service_cb, this, std::placeholders::_1,
-      std::placeholders::_2));
+      &PdfBeamtimeServer::update_obstacles_service_cb, this, _1, _2));
 
   remove_obstacles_service_ = node_->create_service<DeleteObstacleMsg>(
     "pdf_remove_obstacle",
     std::bind(
-      &PdfBeamtimeServer::remove_obstacles_service_cb, this, std::placeholders::_1,
-      std::placeholders::_2));
+      &PdfBeamtimeServer::remove_obstacles_service_cb, this, _1, _2));
 
   // Create the action server
   action_server_ = rclcpp_action::create_server<PickPlaceControlMsg>(
     this->node_,
     action_name,
-    std::bind(&PdfBeamtimeServer::handle_goal, this, std::placeholders::_1, std::placeholders::_2),
-    std::bind(&PdfBeamtimeServer::handle_cancel, this, std::placeholders::_1),
-    std::bind(&PdfBeamtimeServer::handle_accepted, this, std::placeholders::_1));
+    std::bind(&PdfBeamtimeServer::handle_goal, this, _1, _2),
+    std::bind(&PdfBeamtimeServer::handle_cancel, this, _1),
+    std::bind(&PdfBeamtimeServer::handle_accepted, this, _1));
 }
 rclcpp::node_interfaces::NodeBaseInterface::SharedPtr PdfBeamtimeServer::getNodeBaseInterface()
 // Expose the node base interface so that the node can be added to a component manager.
@@ -156,29 +159,57 @@ std::vector<moveit_msgs::msg::CollisionObject> PdfBeamtimeServer::create_env()
   return all_obstacles;
 }
 
-void PdfBeamtimeServer::new_obstacle_service_cb(
-  const std::shared_ptr<NewObstacleMsg::Request> request,
-  std::shared_ptr<NewObstacleMsg::Response> response)
+void PdfBeamtimeServer::new_box_obstacle_service_cb(
+  const std::shared_ptr<BoxObstacleMsg::Request> request,
+  std::shared_ptr<BoxObstacleMsg::Response> response)
 {
   try {
     // Adds the new obstacle name to the existing list
     auto obj_param = node_->get_parameters({"object_names"})[0].as_string_array();
     obj_param.push_back(request->name);
     node_->set_parameters(
-      {rclcpp::Parameter(
-          "object_names",
-          obj_param)});
-
-    // Add new parameters one by one
+    {
+      rclcpp::Parameter("object_names", obj_param)
+    });
     node_->declare_parameter("objects." + request->name + ".type", request->type);
-    node_->declare_parameter("objects." + request->name + ".x", request->x);
-    node_->declare_parameter("objects." + request->name + ".y", request->y);
-    node_->declare_parameter("objects." + request->name + ".z", request->z);
-    node_->declare_parameter("objects." + request->name + ".w", request->w);
-    node_->declare_parameter("objects." + request->name + ".h", request->h);
-    node_->declare_parameter("objects." + request->name + ".d", request->d);
-    node_->declare_parameter("objects." + request->name + ".r", request->r);
 
+    const std::vector<std::pair<std::string, double>> parameters = {
+      {"x", request->x}, {"y", request->y}, {"z", request->z},
+      {"w", request->w}, {"h", request->h}, {"d", request->d}};
+
+    for (const auto & param : parameters) {
+      node_->declare_parameter("objects." + request->name + "." + param.first, param.second);
+    }
+    // Return response results
+    response->results = "Success";
+  } catch (const std::exception & e) {
+    std::cerr << e.what() << '\n';
+    response->results = "Failure";
+  }
+  // Update the whole environment
+  planning_scene_interface_.applyCollisionObjects(create_env());
+}
+
+void PdfBeamtimeServer::new_cylinder_obstacle_service_cb(
+  const std::shared_ptr<CylinderObstacleMsg::Request> request,
+  std::shared_ptr<CylinderObstacleMsg::Response> response)
+{
+  try {
+    // Adds the new obstacle name to the existing list
+    auto obj_param = node_->get_parameters({"object_names"})[0].as_string_array();
+    obj_param.push_back(request->name);
+    node_->set_parameters(
+    {
+      rclcpp::Parameter("object_names", obj_param)
+    });
+    node_->declare_parameter("objects." + request->name + ".type", request->type);
+    const std::vector<std::pair<std::string, double>> parameters = {
+      {"x", request->x}, {"y", request->y}, {"z", request->z}, {"h", request->h},
+      {"r", request->r}};
+
+    for (const auto & param : parameters) {
+      node_->declare_parameter("objects." + request->name + "." + param.first, param.second);
+    }
     // Return response results
     response->results = "Success";
   } catch (const std::exception & e) {

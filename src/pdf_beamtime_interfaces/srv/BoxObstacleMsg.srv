@@ -6,6 +6,5 @@ float64 z
 float64 w 
 float64 h 
 float64 d 
-float64 r 
 ---
 string results

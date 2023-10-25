@@ -18,16 +18,18 @@ BSD 3 Clause License. See LICENSE.txt for details.*/
 #include <rclcpp/rclcpp.hpp>
 #include <rclcpp_action/rclcpp_action.hpp>
 #include <pdf_beamtime_interfaces/action/pick_place_control_msg.hpp>
-#include <pdf_beamtime_interfaces/srv/new_obstacle_msg.hpp>
 #include <pdf_beamtime_interfaces/srv/update_obstacle_msg.hpp>
 #include <pdf_beamtime_interfaces/srv/delete_obstacle_msg.hpp>
+#include <pdf_beamtime_interfaces/srv/box_obstacle_msg.hpp>
+#include <pdf_beamtime_interfaces/srv/cylinder_obstacle_msg.hpp>
 
 /// @brief Create the obstacle environment and an simple action server for the robot to move
 class PdfBeamtimeServer
 {
 public:
   using PickPlaceControlMsg = pdf_beamtime_interfaces::action::PickPlaceControlMsg;
-  using NewObstacleMsg = pdf_beamtime_interfaces::srv::NewObstacleMsg;
+  using BoxObstacleMsg = pdf_beamtime_interfaces::srv::BoxObstacleMsg;
+  using CylinderObstacleMsg = pdf_beamtime_interfaces::srv::CylinderObstacleMsg;
   using UpdateObstaclesMsg = pdf_beamtime_interfaces::srv::UpdateObstacleMsg;
   using DeleteObstacleMsg = pdf_beamtime_interfaces::srv::DeleteObstacleMsg;
 
@@ -44,7 +46,8 @@ private:
   /// @brief records the two types of obstacles CYLINDER and BOX.
   std::map<std::string, int> obstacle_type_map_;
 
-  rclcpp::Service<NewObstacleMsg>::SharedPtr env_refresh_service_;
+  rclcpp::Service<BoxObstacleMsg>::SharedPtr new_box_obstacle_service_;
+  rclcpp::Service<CylinderObstacleMsg>::SharedPtr new_cylinder_obstacle_service_;
   rclcpp::Service<UpdateObstaclesMsg>::SharedPtr update_obstacles_service_;
   rclcpp::Service<DeleteObstacleMsg>::SharedPtr remove_obstacles_service_;
 
@@ -72,12 +75,19 @@ private:
   /// @return a vector of CollisionObjects
   std::vector<moveit_msgs::msg::CollisionObject> create_env();
 
-  /// @brief Callback for adding a new obstacle
-  /// @param request a NewObstacleMsg
+  /// @brief Callback for adding a new box obstacle
+  /// @param request a BoxObstacleMsg
   /// @param response Success / Failure
-  void new_obstacle_service_cb(
-    const std::shared_ptr<NewObstacleMsg::Request> request,
-    std::shared_ptr<NewObstacleMsg::Response> response);
+  void new_box_obstacle_service_cb(
+    const std::shared_ptr<BoxObstacleMsg::Request> request,
+    std::shared_ptr<BoxObstacleMsg::Response> response);
+
+  /// @brief Callback for adding a new Cylinder obstacle
+  /// @param request a CylinderObstacleMsg
+  /// @param response Success / Failure
+  void new_cylinder_obstacle_service_cb(
+    const std::shared_ptr<CylinderObstacleMsg::Request> request,
+    std::shared_ptr<CylinderObstacleMsg::Response> response);
 
   /// @brief Callback for changing the value of an existing obstacle
   /// @param request UpdateObstaclesMsg
