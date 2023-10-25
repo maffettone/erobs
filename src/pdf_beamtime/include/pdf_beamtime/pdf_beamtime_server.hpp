@@ -18,12 +18,20 @@ BSD 3 Clause License. See LICENSE.txt for details.*/
 #include <rclcpp/rclcpp.hpp>
 #include <rclcpp_action/rclcpp_action.hpp>
 #include <pdf_beamtime_interfaces/action/pick_place_control_msg.hpp>
+#include <pdf_beamtime_interfaces/srv/update_obstacle_msg.hpp>
+#include <pdf_beamtime_interfaces/srv/delete_obstacle_msg.hpp>
+#include <pdf_beamtime_interfaces/srv/box_obstacle_msg.hpp>
+#include <pdf_beamtime_interfaces/srv/cylinder_obstacle_msg.hpp>
 
 /// @brief Create the obstacle environment and an simple action server for the robot to move
 class PdfBeamtimeServer
 {
 public:
   using PickPlaceControlMsg = pdf_beamtime_interfaces::action::PickPlaceControlMsg;
+  using BoxObstacleMsg = pdf_beamtime_interfaces::srv::BoxObstacleMsg;
+  using CylinderObstacleMsg = pdf_beamtime_interfaces::srv::CylinderObstacleMsg;
+  using UpdateObstaclesMsg = pdf_beamtime_interfaces::srv::UpdateObstacleMsg;
+  using DeleteObstacleMsg = pdf_beamtime_interfaces::srv::DeleteObstacleMsg;
 
   explicit PdfBeamtimeServer(
     const std::string & move_group_name, const rclcpp::NodeOptions & options,
@@ -32,15 +40,22 @@ public:
 
 private:
   rclcpp::Node::SharedPtr node_;
-
-  /// @brief Pointer to the action server
-  rclcpp_action::Server<PickPlaceControlMsg>::SharedPtr action_server_;
+  moveit::planning_interface::MoveGroupInterface move_group_interface_;
 
   moveit::planning_interface::PlanningSceneInterface planning_scene_interface_;
   /// @brief records the two types of obstacles CYLINDER and BOX.
   std::map<std::string, int> obstacle_type_map_;
 
-  moveit::planning_interface::MoveGroupInterface move_group_interface_;
+  rclcpp::Service<BoxObstacleMsg>::SharedPtr new_box_obstacle_service_;
+  rclcpp::Service<CylinderObstacleMsg>::SharedPtr new_cylinder_obstacle_service_;
+  rclcpp::Service<UpdateObstaclesMsg>::SharedPtr update_obstacles_service_;
+  rclcpp::Service<DeleteObstacleMsg>::SharedPtr remove_obstacles_service_;
+
+  /// @brief Pointer to the action server
+  rclcpp_action::Server<PickPlaceControlMsg>::SharedPtr action_server_;
+
+  std::shared_ptr<rclcpp::ParameterEventHandler> param_subscriber_;
+  std::shared_ptr<rclcpp::ParameterCallbackHandle> cb_handle_;
 
   // Action server related callbacks
   rclcpp_action::GoalResponse handle_goal(
@@ -52,6 +67,7 @@ private:
 
   void handle_accepted(
     const std::shared_ptr<rclcpp_action::ServerGoalHandle<PickPlaceControlMsg>> goal_handle);
+
   void execute(
     const std::shared_ptr<rclcpp_action::ServerGoalHandle<PickPlaceControlMsg>> goal_handle);
 

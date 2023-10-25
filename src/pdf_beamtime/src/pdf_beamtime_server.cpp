@@ -3,24 +3,26 @@ BSD 3 Clause License. See LICENSE.txt for details.*/
 #include <pdf_beamtime/pdf_beamtime_server.hpp>
 
 using moveit::planning_interface::MoveGroupInterface;
+using namespace std::placeholders;
 
 PdfBeamtimeServer::PdfBeamtimeServer(
   const std::string & move_group_name = "ur_manipulator",
   const rclcpp::NodeOptions & options = rclcpp::NodeOptions(),
   std::string action_name = "pdf_beamtime_action_server")
-: node_(std::make_shared<rclcpp::Node>("simple_server", options)),
+: node_(std::make_shared<rclcpp::Node>("pdf_beamtime_server", options)),
   move_group_interface_(node_, move_group_name),
   planning_scene_interface_()
 {
   // Add the obstacles
   planning_scene_interface_.applyCollisionObjects(create_env());
 
+
   // // Create the services
   new_box_obstacle_service_ = node_->create_service<BoxObstacleMsg>(
     "pdf_new_box_obstacle",
     std::bind(
       &PdfBeamtimeServer::new_obstacle_service_cb<BoxObstacleMsg::Request,
-      BoxObstacleMsg::Response>, this, _1, _2));
+      BoxObstacleMsg::Response>, this, _1, _2))
 
   new_cylinder_obstacle_service_ = node_->create_service<CylinderObstacleMsg>(
     "pdf_new_cylinder_obstacle",
@@ -42,9 +44,9 @@ PdfBeamtimeServer::PdfBeamtimeServer(
   action_server_ = rclcpp_action::create_server<PickPlaceControlMsg>(
     this->node_,
     action_name,
-    std::bind(&PdfBeamtimeServer::handle_goal, this, std::placeholders::_1, std::placeholders::_2),
-    std::bind(&PdfBeamtimeServer::handle_cancel, this, std::placeholders::_1),
-    std::bind(&PdfBeamtimeServer::handle_accepted, this, std::placeholders::_1));
+    std::bind(&PdfBeamtimeServer::handle_goal, this, _1, _2),
+    std::bind(&PdfBeamtimeServer::handle_cancel, this, _1),
+    std::bind(&PdfBeamtimeServer::handle_accepted, this, _1));
 }
 rclcpp::node_interfaces::NodeBaseInterface::SharedPtr PdfBeamtimeServer::getNodeBaseInterface()
 // Expose the node base interface so that the node can be added to a component manager.
@@ -206,7 +208,6 @@ void PdfBeamtimeServer::remove_obstacles_service_cb(
   planning_scene_interface_.removeCollisionObjects(removable_object);
 }
 
-
 template<typename RequestT, typename ResponseT>
 void PdfBeamtimeServer::new_obstacle_service_cb(
   const typename RequestT::SharedPtr request,
@@ -246,7 +247,6 @@ void PdfBeamtimeServer::new_obstacle_service_cb(
   // Update the whole environment
   planning_scene_interface_.applyCollisionObjects(create_env());
 }
-
 
 int main(int argc, char * argv[])
 {
