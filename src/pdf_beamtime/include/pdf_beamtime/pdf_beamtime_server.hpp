@@ -75,20 +75,6 @@ private:
   /// @return a vector of CollisionObjects
   std::vector<moveit_msgs::msg::CollisionObject> create_env();
 
-  /// @brief Callback for adding a new box obstacle
-  /// @param request a BoxObstacleMsg
-  /// @param response Success / Failure
-  void new_box_obstacle_service_cb(
-    const std::shared_ptr<BoxObstacleMsg::Request> request,
-    std::shared_ptr<BoxObstacleMsg::Response> response);
-
-  /// @brief Callback for adding a new Cylinder obstacle
-  /// @param request a CylinderObstacleMsg
-  /// @param response Success / Failure
-  void new_cylinder_obstacle_service_cb(
-    const std::shared_ptr<CylinderObstacleMsg::Request> request,
-    std::shared_ptr<CylinderObstacleMsg::Response> response);
-
   /// @brief Callback for changing the value of an existing obstacle
   /// @param request UpdateObstaclesMsg
   /// @param response Success / Failure
@@ -102,6 +88,14 @@ private:
   void remove_obstacles_service_cb(
     const std::shared_ptr<DeleteObstacleMsg::Request> request,
     std::shared_ptr<DeleteObstacleMsg::Response> response);
+
+  /// @brief Callback for adding a new obstacle
+  /// @param request a CylinderObstacleMsg or BoxObstacleMsg
+  /// @param response Success / Failure
+  template<typename RequestT, typename ResponseT>
+  void new_obstacle_service_cb(
+    const typename RequestT::SharedPtr request,
+    typename ResponseT::SharedPtr response);
 };
 
 #endif  // PDF_BEAMTIME__PDF_BEAMTIME_SERVER_HPP_
