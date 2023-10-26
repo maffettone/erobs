@@ -12,8 +12,8 @@ podman push ghcr.io/nsls2/erobs-ur-driver:latest # Push up
 ```
 
 ## Testing:
-- `hello-talker.sh`: publisher node for testing
-- `simple_listener.py`: Subscriber node for testing
+- `hello-talker.sh`: publisher node for testing container communication at beamline
+- `simple_listener.py`: Subscriber node for testing container communication at beamline
 - `ur-driver-launch.sh`: Pure UR driver for testing without gripper
 
 ## Deployment:

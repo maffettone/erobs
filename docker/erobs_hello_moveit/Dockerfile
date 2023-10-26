@@ -1,4 +1,4 @@
-# Minimal source install to run basic tests and communication debugging.
+# Minimal source install to run basic tests of repository and communication debugging.
 FROM osrf/ros:humble-desktop-full
 RUN apt-get update && apt-get install -y \
   build-essential \
@@ -33,7 +33,7 @@ RUN /bin/bash -c "source /opt/ros/${ROS_DISTRO}/setup.bash && \
   colcon build --symlink-install --packages-select  hello_moveit_interfaces"
 
 RUN /bin/bash -c "source install/setup.bash && \
-  colcon build --symlink-install"
+  colcon build --symlink-install --packages-select  hello_moveit_interfaces"
 
 
 # This is an exit hatch for testing when conda envs not avail
