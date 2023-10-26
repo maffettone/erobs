@@ -16,13 +16,12 @@ PdfBeamtimeServer::PdfBeamtimeServer(
   // Add the obstacles
   planning_scene_interface_.applyCollisionObjects(create_env());
 
-
   // // Create the services
   new_box_obstacle_service_ = node_->create_service<BoxObstacleMsg>(
     "pdf_new_box_obstacle",
     std::bind(
       &PdfBeamtimeServer::new_obstacle_service_cb<BoxObstacleMsg::Request,
-      BoxObstacleMsg::Response>, this, _1, _2))
+      BoxObstacleMsg::Response>, this, _1, _2));
 
   new_cylinder_obstacle_service_ = node_->create_service<CylinderObstacleMsg>(
     "pdf_new_cylinder_obstacle",
@@ -236,7 +235,7 @@ void PdfBeamtimeServer::new_obstacle_service_cb(
     } else if constexpr (std::is_same_v<RequestT, CylinderObstacleMsg::Request>) {
       node_->declare_parameter("objects." + request->name + ".r", request->r);
     } else {
-      RCLCPP_INFO(node_->get_logger(), "Message type not registered");
+      RCLCPP_WARN(node_->get_logger(), "Message type not registered");
     }
     // Return response results
     response->results = "Success";
