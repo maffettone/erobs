@@ -1,3 +1,4 @@
+# Draft container for action server for first beamtime, to be deprecated for future beamtimes. 
 FROM osrf/ros:humble-desktop-full
 
 RUN apt-get update && apt-get install -y \
