@@ -33,7 +33,7 @@ RUN /bin/bash -c "source /opt/ros/${ROS_DISTRO}/setup.bash && \
   colcon build --symlink-install --packages-select  hello_moveit_interfaces"
 
 RUN /bin/bash -c "source install/setup.bash && \
-  colcon build --symlink-install --packages-select  hello_moveit_interfaces"
+  colcon build --symlink-install --packages-select  hello_moveit"
 
 
 # This is an exit hatch for testing when conda envs not avail
