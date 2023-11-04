@@ -15,7 +15,10 @@ class SimpleClient(Node):
 
     def send_goal(self):
         goal_msg = PickPlaceControlMsg.Goal()
-        goal_msg.run = True
+        goal_msg.pickup_approach = [1.466, -2.042, -2.1293, -2.164, -0.105, 0.0]
+        goal_msg.pickup = [1.099, -2.234, -1.728, -2.339, -0.489, -0.035]
+        goal_msg.place_approach = [2.618, -2.356, -1.763, -2.216, -2.215, 0.0]
+        goal_msg.place = [2.618, -2.356, -1.763, -2.216, -2.215, 0.0]
 
         self._action_client.wait_for_server()
 
