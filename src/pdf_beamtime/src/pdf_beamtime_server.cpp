@@ -101,7 +101,7 @@ void PdfBeamtimeServer::execute(
   {goal->pickup_approach, goal->pickup, goal->pickup, goal->pickup_approach, goal->place_approach,
     goal->place, goal->place_approach, goal_home};
 
-  for (const auto & goal_joint: rearranged_goal_list) {
+  for (const auto & goal_joint : rearranged_goal_list) {
     fsm_results = run_fsm(current_state_, goal_joint);
     if (!fsm_results) {
       // Abort the execution if move_group_ fails
@@ -117,7 +117,6 @@ void PdfBeamtimeServer::execute(
     results->success = fsm_results;
     goal_handle->succeed(results);
   }
-
 }
 
 bool PdfBeamtimeServer::set_joint_goal(std::vector<double> joint_goal)
@@ -336,7 +335,6 @@ bool PdfBeamtimeServer::reset_fsm(State STATE, std::vector<double> joint_goal)
   current_state_ = STATE;
   // gripper_open();
   return set_joint_goal(joint_goal);
-
 }
 
 int main(int argc, char * argv[])

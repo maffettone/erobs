@@ -118,7 +118,6 @@ private:
 
   /// @brief use move_group_interface to set joint targets
   bool set_joint_goal(std::vector<double> joint_goal);
-
 };
 
 #endif  // PDF_BEAMTIME__PDF_BEAMTIME_SERVER_HPP_
