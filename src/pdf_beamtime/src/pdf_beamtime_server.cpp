@@ -94,7 +94,7 @@ void PdfBeamtimeServer::execute(
   feedback->status = get_state_completions();
 
   RCLCPP_INFO(
-    node_->get_logger(), "Current state is state %d . If the robot is not at HOME state for a nee task execution, we move the robot to the HOME state first. ",
+    node_->get_logger(), "Current state is state %d . If the robot is not in the HOME state for a new task execution, we move the robot to the HOME state first. ",
     static_cast<int>(current_state_));
   if (current_state_ != State::HOME) {
     fsm_results = reset_fsm(State::HOME, goal_home);
