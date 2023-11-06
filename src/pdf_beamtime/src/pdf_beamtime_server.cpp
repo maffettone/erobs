@@ -89,20 +89,19 @@ void PdfBeamtimeServer::execute(
   auto feedback = std::make_shared<PickPlaceControlMsg::Feedback>();
   auto results = std::make_shared<PickPlaceControlMsg::Result>();
   bool fsm_results = true;
+  bool state_transition_complete = false;
   auto goal_home = node_->get_parameter("home_angles").as_double_array();
   feedback->status = get_state_completions();
 
-  RCLCPP_INFO(node_->get_logger(), "Current state is state %d", static_cast<int>(current_state_));
+  RCLCPP_INFO(
+    node_->get_logger(), "Current state is state %d . If the robot is not at HOME state for a nee task execution, we move the robot to the HOME state first. ",
+    static_cast<int>(current_state_));
   if (current_state_ != State::HOME) {
     fsm_results = reset_fsm(State::HOME, goal_home);
   }
-  // Another array to sequencial-list the joint angles to be passed
-  std::vector<std::vector<double>> rearranged_goal_list =
-  {goal->pickup_approach, goal->pickup, goal->pickup, goal->pickup_approach, goal->place_approach,
-    goal->place, goal->place_approach, goal_home};
 
-  for (const auto & goal_joint : rearranged_goal_list) {
-    fsm_results = run_fsm(current_state_, goal_joint);
+  while (!state_transition_complete) {
+    fsm_results = run_fsm(goal);
     if (!fsm_results) {
       // Abort the execution if move_group_ fails
       results->success = fsm_results;
@@ -111,8 +110,13 @@ void PdfBeamtimeServer::execute(
     }
     feedback->status = get_state_completions();
     goal_handle->publish_feedback(feedback);
+
+    // This marks the completion of a state transition cycle
+    if (current_state_ == State::HOME) {
+      state_transition_complete = true;
+    }
   }
-  // return results upon completion
+
   if (current_state_ == State::HOME) {
     results->success = fsm_results;
     goal_handle->succeed(results);
@@ -297,14 +301,35 @@ int PdfBeamtimeServer::get_state_completions()
 }
 
 // PdfBeamtimeServer::State
-bool PdfBeamtimeServer::run_fsm(State STATE, std::vector<double> joint_goal)
+bool PdfBeamtimeServer::run_fsm(
+  std::shared_ptr<const pdf_beamtime_interfaces::action::PickPlaceControlMsg_Goal> goal)
 {
-  RCLCPP_INFO(node_->get_logger(), "Executing state %d", static_cast<int>(STATE));
+  RCLCPP_INFO(node_->get_logger(), "Executing state %d", static_cast<int>(current_state_));
   bool state_transition = false;
-  switch (STATE) {
+  switch (current_state_) {
+    case State::HOME:
+      state_transition = set_joint_goal(goal->pickup_approach);
+      break;
+
+    case State::PICKUP_APPROACH:
+      state_transition = set_joint_goal(goal->pickup);
+      break;
+
     case State::PICKUP:
       // gripper_close();
       state_transition = true;
+      break;
+
+    case State::GRASP_SUCCESS:
+      state_transition = set_joint_goal(goal->pickup_approach);
+      break;
+
+    case State::PICKUP_RETREAT:
+      state_transition = set_joint_goal(goal->place_approach);
+      break;
+
+    case State::PLACE_APPROACH:
+      state_transition = set_joint_goal(goal->place);
       break;
 
     case State::PLACE:
@@ -312,11 +337,18 @@ bool PdfBeamtimeServer::run_fsm(State STATE, std::vector<double> joint_goal)
       state_transition = true;
       break;
 
+    case State::RELEASE_SUCCESS:
+      state_transition = set_joint_goal(goal->place_approach);
+      break;
+
+    case State::PLACE_RETREAT:
+      state_transition = set_joint_goal(node_->get_parameter("home_angles").as_double_array());
+      break;
+
     default:
-      state_transition = set_joint_goal(joint_goal);
       break;
   }
-  std::this_thread::sleep_for(std::chrono::seconds(3));
+  std::this_thread::sleep_for(std::chrono::seconds(3)); // 3 second wait for robot movement to complete
   progress_++;
   // Propegate the current state here
   if (current_state_ == State::PLACE_RETREAT && state_transition) {
@@ -324,7 +356,7 @@ bool PdfBeamtimeServer::run_fsm(State STATE, std::vector<double> joint_goal)
     RCLCPP_INFO(node_->get_logger(), "Set current state to HOME");
     current_state_ = State::HOME;
   } else {
-    current_state_ = static_cast<State>(static_cast<int>(STATE) + 1);
+    current_state_ = static_cast<State>(static_cast<int>(current_state_) + 1);
   }
   return state_transition;
 }

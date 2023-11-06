@@ -111,7 +111,8 @@ private:
   int get_state_completions();
 
   /// @brief Performs the transitions for each State
-  bool run_fsm(State next_state, std::vector<double> joint_goal);
+  bool run_fsm(
+    std::shared_ptr<const pdf_beamtime_interfaces::action::PickPlaceControlMsg_Goal> goal);
 
   /// @brief Set the current state to HOME and move robot to home position
   bool reset_fsm(State next_state, std::vector<double> joint_goal);
