@@ -93,9 +93,8 @@ void PdfBeamtimeServer::execute(
   auto goal_home = node_->get_parameter("home_angles").as_double_array();
   feedback->status = get_state_completions();
 
-  RCLCPP_INFO(
-    node_->get_logger(), "Current state is state %d. We move the robot to the HOME state first for a new execution.",
-    static_cast<int>(current_state_));
+  RCLCPP_INFO(node_->get_logger(), "Current state is state %d.", static_cast<int>(current_state_));
+  RCLCPP_INFO(node_->get_logger(), "Robot  is moved the HOME state first for a new execution.");
   if (current_state_ != State::HOME) {
     fsm_results = reset_fsm(goal_home);
   }
