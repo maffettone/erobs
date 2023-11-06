@@ -300,7 +300,6 @@ int PdfBeamtimeServer::get_state_completions()
   return progress_ / total_states_;
 }
 
-// PdfBeamtimeServer::State
 bool PdfBeamtimeServer::run_fsm(
   std::shared_ptr<const pdf_beamtime_interfaces::action::PickPlaceControlMsg_Goal> goal)
 {
