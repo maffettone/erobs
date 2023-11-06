@@ -115,7 +115,7 @@ private:
     std::shared_ptr<const pdf_beamtime_interfaces::action::PickPlaceControlMsg_Goal> goal);
 
   /// @brief Set the current state to HOME and move robot to home position
-  bool reset_fsm(State next_state, std::vector<double> joint_goal);
+  bool reset_fsm(std::vector<double> joint_goal);
 
   /// @brief use move_group_interface to set joint targets
   bool set_joint_goal(std::vector<double> joint_goal);

@@ -97,7 +97,7 @@ void PdfBeamtimeServer::execute(
     node_->get_logger(), "Current state is state %d . If the robot is not in the HOME state for a new task execution, we move the robot to the HOME state first. ",
     static_cast<int>(current_state_));
   if (current_state_ != State::HOME) {
-    fsm_results = reset_fsm(State::HOME, goal_home);
+    fsm_results = reset_fsm(goal_home);
   }
 
   while (!state_transition_complete) {
@@ -361,10 +361,10 @@ bool PdfBeamtimeServer::run_fsm(
   return state_transition;
 }
 
-bool PdfBeamtimeServer::reset_fsm(State STATE, std::vector<double> joint_goal)
+bool PdfBeamtimeServer::reset_fsm(std::vector<double> joint_goal)
 {
-  RCLCPP_INFO(node_->get_logger(), "State machine RESET");
-  current_state_ = STATE;
+  RCLCPP_INFO(node_->get_logger(), "State machine was RESET");
+  current_state_ = State::HOME;
   // gripper_open();
   return set_joint_goal(joint_goal);
 }
