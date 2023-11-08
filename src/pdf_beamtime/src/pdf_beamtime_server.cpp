@@ -320,7 +320,7 @@ bool PdfBeamtimeServer::run_fsm(
       break;
 
     case State::PICKUP:
-      // TODO (chandimafernando): Add a check for gipper availability before open/close
+      // TODO(chandimafernando): Add a check for gipper availability before open/close
       // gripper_close();
       state_transition = true;
       break;
@@ -353,7 +353,7 @@ bool PdfBeamtimeServer::run_fsm(
     default:
       break;
   }
-  // TODO (chandimafernando): Remove the 3 second wait in robot testing
+  // TODO(chandimafernando): Remove the 3 second wait in robot testing
   RCLCPP_WARN(node_->get_logger(), "***** The thread will sleep for 3 seconds *****");
   //  3 second wait for robot movement to complete
   std::this_thread::sleep_for(std::chrono::seconds(3));

@@ -1,10 +1,9 @@
 """Copyright 2023 Brookhaven National Laboratory
 BSD 3 Clause License. See LICENSE.txt for details."""
 import rclpy
+import math
 from rclpy.action import ActionClient
 from rclpy.node import Node
-import math
-
 from pdf_beamtime_interfaces.action import PickPlaceControlMsg
 
 
