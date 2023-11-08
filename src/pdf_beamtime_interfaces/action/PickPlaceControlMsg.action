@@ -5,4 +5,4 @@ float64[] place
 ---
 bool success
 ---
-int32 status
+float64 status

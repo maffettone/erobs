@@ -61,11 +61,15 @@ private:
   enum class State {HOME, PICKUP_APPROACH, PICKUP, GRASP_SUCCESS, PICKUP_RETREAT,
     PLACE_APPROACH, PLACE, RELEASE_SUCCESS, PLACE_RETREAT};
 
+  std::vector<std::string> state_names_ =
+  {"HOME", "PICKUP_APPROACH", "PICKUP", "GRASP_SUCCESS", "PICKUP_RETREAT",
+    "PLACE_APPROACH", "PLACE", "RELEASE_SUCCESS", "PLACE_RETREAT"};
+
   /// @brief current state of the robot
   State current_state_;
   /// @brief used to calculate the completion precentage
-  const int total_states_ = 9;
-  int progress_ = 0;
+  const float total_states_ = 9.0;
+  float progress_ = 0.0;
 
   // Action server related callbacks
   rclcpp_action::GoalResponse handle_goal(
@@ -108,7 +112,7 @@ private:
     typename ResponseT::SharedPtr response);
 
   /// @brief Set the current state to the next state
-  int get_state_completions();
+  float get_action_completion_percentage();
 
   /// @brief Performs the transitions for each State
   bool run_fsm(

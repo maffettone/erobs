@@ -90,11 +90,14 @@ void PdfBeamtimeServer::execute(
   auto results = std::make_shared<PickPlaceControlMsg::Result>();
   bool fsm_results = true;
   bool state_transition_complete = false;
+  progress_ = 0.0;
   auto goal_home = node_->get_parameter("home_angles").as_double_array();
-  feedback->status = get_state_completions();
+  feedback->status = get_action_completion_percentage();
 
-  RCLCPP_INFO(node_->get_logger(), "Current state is state %d.", static_cast<int>(current_state_));
-  RCLCPP_INFO(node_->get_logger(), "Robot  is moved the HOME state first for a new execution.");
+  RCLCPP_INFO(
+    node_->get_logger(), "Current state is state %s.",
+    state_names_[static_cast<int>(current_state_)].c_str());
+  RCLCPP_INFO(node_->get_logger(), "Robot is moved the HOME state first for a new execution.");
   if (current_state_ != State::HOME) {
     fsm_results = reset_fsm(goal_home);
   }
@@ -105,9 +108,10 @@ void PdfBeamtimeServer::execute(
       // Abort the execution if move_group_ fails
       results->success = fsm_results;
       goal_handle->abort(results);
+      RCLCPP_ERROR(node_->get_logger(), "Goal aborted !");
       break;
     }
-    feedback->status = get_state_completions();
+    feedback->status = get_action_completion_percentage();
     goal_handle->publish_feedback(feedback);
 
     // This marks the completion of a state transition cycle
@@ -294,7 +298,7 @@ void PdfBeamtimeServer::new_obstacle_service_cb(
   planning_scene_interface_.applyCollisionObjects(create_env());
 }
 
-int PdfBeamtimeServer::get_state_completions()
+float PdfBeamtimeServer::get_action_completion_percentage()
 {
   return progress_ / total_states_;
 }
@@ -302,7 +306,9 @@ int PdfBeamtimeServer::get_state_completions()
 bool PdfBeamtimeServer::run_fsm(
   std::shared_ptr<const pdf_beamtime_interfaces::action::PickPlaceControlMsg_Goal> goal)
 {
-  RCLCPP_INFO(node_->get_logger(), "Executing state %d", static_cast<int>(current_state_));
+  RCLCPP_INFO(
+    node_->get_logger(), "Executing state %s",
+    state_names_[static_cast<int>(current_state_)].c_str());
   bool state_transition = false;
   switch (current_state_) {
     case State::HOME:
@@ -314,6 +320,7 @@ bool PdfBeamtimeServer::run_fsm(
       break;
 
     case State::PICKUP:
+      // TODO (chandimafernando): Add a check for gipper availability before open/close
       // gripper_close();
       state_transition = true;
       break;
@@ -346,9 +353,11 @@ bool PdfBeamtimeServer::run_fsm(
     default:
       break;
   }
+  // TODO (chandimafernando): Remove the 3 second wait in robot testing
+  RCLCPP_WARN(node_->get_logger(), "***** The thread will sleep for 3 seconds *****");
   //  3 second wait for robot movement to complete
   std::this_thread::sleep_for(std::chrono::seconds(3));
-  progress_++;
+  progress_ = progress_ + 1.0;
   // Propegate the current state here
   if (current_state_ == State::PLACE_RETREAT && state_transition) {
     // Complete the state transition cycle and go to HOME state
