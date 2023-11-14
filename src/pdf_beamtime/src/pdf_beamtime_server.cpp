@@ -109,7 +109,16 @@ void PdfBeamtimeServer::execute(
       results->success = fsm_results;
       goal_handle->abort(results);
       RCLCPP_ERROR(node_->get_logger(), "Goal aborted !");
-      break;
+      return;
+    }
+
+    if (goal_handle->is_canceling()) {
+      // Reset the fsm if goal is cancelled by the action client
+      results->success = false;
+      reset_fsm(goal_home);
+      goal_handle->canceled(results);
+      RCLCPP_WARN(node_->get_logger(), "Goal Cancelled !");
+      return;
     }
     feedback->status = get_action_completion_percentage();
     goal_handle->publish_feedback(feedback);
