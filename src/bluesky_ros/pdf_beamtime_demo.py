@@ -6,11 +6,9 @@ from ophyd.sim import det1, motor1
 from rclpy.task import Future
 
 from bluesky_ros.ophyd_ros import ActionMovable
-
-# from hello_moveit_interfaces.action import PickPlaceRepeat
 from pdf_beamtime_interfaces.action import PickPlaceControlMsg
 
-import pdb
+
 class PickPlaceRepeatDevice(ActionMovable):
     action_type = PickPlaceControlMsg
     parent = None
@@ -25,7 +23,6 @@ class PickPlaceRepeatDevice(ActionMovable):
 
     def feedback_callback(self, feedback_msg):
         feedback = feedback_msg.feedback
-        pdb.set_trace()
         self.get_logger().info("Completion percentage: {0} %".format(math.ceil(feedback.status * 100)))
 
     def get_result_callback(self, future: Future):
