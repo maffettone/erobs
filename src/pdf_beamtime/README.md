@@ -8,31 +8,31 @@ Node pdf_beamtime_server is implemented in pdf_beamtime_server.cpp. This nodes,
 Services can be called by following the examples below:
 
 **Service to update an obstacle**
-name: obstacle name
-array property : intended properties of the obstacle
-array value: new values for the properties
+ - name: obstacle name
+ - array property : intended properties of the obstacle
+ - array value: new values for the properties
 ```bash
 ros2 service call /pdf_update_obstacles pdf_beamtime_interfaces/srv/UpdateObstacleMsg '{name: "inbeam_platform", property: ["z", "x"], value: [1.35, 1.0]}'
 ```
 
 **Service to add a new obstacle**
-name: new obstacle name
-type: BOX
-x, y, z: location for the obstacle
-w, h, d, r: width, height, depth, and radius 
+ - name: new obstacle name
+ - type: BOX
+ - x, y, z: location for the obstacle
+ - w, h, d, r: width, height, depth, and radius 
 ```bash
 ros2 service call /pdf_new_box_obstacle pdf_beamtime_interfaces/srv/BoxObstacleMsg '{name: "obstacle", type: "BOX", x: 1.5, y: 0.2, z: 0.9, w: 0.3, h: 0.3, d: 0.3}'
 ```
 
-type: CYLINDER
-x, y, z: location for the obstacle
-w, h, d, r: width, height, depth, and radius 
+ - type: CYLINDER
+ - x, y, z: location for the obstacle
+ - w, h, d, r: width, height, depth, and radius 
 ```bash
 ros2 service call /pdf_new_cylinder_obstacle pdf_beamtime_interfaces/srv/CylinderObstacleMsg '{name: "obstacle2", type: "CYLINDER", x: 1.5, y: 0.2, z: 1.9, h: 0.3, r: 0.10}'
 ```
 
 **Service to remove an obstacle**
-name: obstacle name
+ - name: obstacle name
 ```bash
 ros2 service call /pdf_remove_obstacle pdf_beamtime_interfaces/srv/DeleteObstacleMsg "{name: 'inbeam_platform'}"
 ```
