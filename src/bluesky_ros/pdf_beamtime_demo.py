@@ -3,14 +3,12 @@
 import math
 
 import bluesky.plan_stubs as bps
+import rclpy
 from bluesky import RunEngine
+from rclpy.task import Future
 
 from bluesky_ros.ophyd_ros import ActionMovable
-
 from pdf_beamtime_interfaces.action import PickPlaceControlMsg
-
-import rclpy
-from rclpy.task import Future
 
 
 class PickPlaceRepeatDevice(ActionMovable):

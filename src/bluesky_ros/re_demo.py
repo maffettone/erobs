@@ -1,16 +1,13 @@
 """Copyright 2023 Brookhaven National Laboratory BSD 3 Clause License. See LICENSE.txt for details."""
 
 import bluesky.plan_stubs as bps
+import rclpy
 from bluesky import RunEngine
+from ophyd.sim import det1, motor1
+from rclpy.task import Future
 
 from bluesky_ros.ophyd_ros import ActionMovable
-
 from hello_moveit_interfaces.action import PickPlaceRepeat
-
-from ophyd.sim import det1, motor1
-
-import rclpy
-from rclpy.task import Future
 
 
 class PickPlaceRepeatDevice(ActionMovable):

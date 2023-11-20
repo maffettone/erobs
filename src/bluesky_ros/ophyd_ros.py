@@ -3,11 +3,9 @@
 from abc import abstractmethod
 from typing import Any, Iterable, List
 
-from bluesky.protocols import Movable
-
-from ophyd.status import DeviceStatus
-
 import rclpy
+from bluesky.protocols import Movable
+from ophyd.status import DeviceStatus
 from rclpy.action import ActionClient, client
 from rclpy.context import Context
 from rclpy.node import Node

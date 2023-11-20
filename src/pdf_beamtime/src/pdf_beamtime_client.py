@@ -2,11 +2,11 @@
 import math
 import time
 
-from pdf_beamtime_interfaces.action import PickPlaceControlMsg
-
 import rclpy
 from rclpy.action import ActionClient
 from rclpy.node import Node
+
+from pdf_beamtime_interfaces.action import PickPlaceControlMsg
 
 
 class SimpleClient(Node):
