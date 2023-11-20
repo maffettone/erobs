@@ -7,37 +7,37 @@ Node pdf_beamtime_server is implemented in pdf_beamtime_server.cpp. This nodes,
 
 Services can be called by following the examples below:
 
-## Service to update an obstacle
-name: obstacle name
-array property : intended properties of the obstacle
-array value: new values for the properties
+**Service to update an obstacle**
+ - name: obstacle name
+ - array property : intended properties of the obstacle
+ - array value: new values for the properties
 ```bash
 ros2 service call /pdf_update_obstacles pdf_beamtime_interfaces/srv/UpdateObstacleMsg '{name: "inbeam_platform", property: ["z", "x"], value: [1.35, 1.0]}'
 ```
 
-## Service to add a new obstacle 
-name: new obstacle name
-type: BOX
-x, y, z: location for the obstacle
-w, h, d, r: width, height, depth, and radius 
+**Service to add a new obstacle**
+ - name: new obstacle name
+ - type: BOX
+ - x, y, z: location for the obstacle
+ - w, h, d, r: width, height, depth, and radius 
 ```bash
 ros2 service call /pdf_new_box_obstacle pdf_beamtime_interfaces/srv/BoxObstacleMsg '{name: "obstacle", type: "BOX", x: 1.5, y: 0.2, z: 0.9, w: 0.3, h: 0.3, d: 0.3}'
 ```
 
-type: CYLINDER
-x, y, z: location for the obstacle
-w, h, d, r: width, height, depth, and radius 
+ - type: CYLINDER
+ - x, y, z: location for the obstacle
+ - w, h, d, r: width, height, depth, and radius 
 ```bash
 ros2 service call /pdf_new_cylinder_obstacle pdf_beamtime_interfaces/srv/CylinderObstacleMsg '{name: "obstacle2", type: "CYLINDER", x: 1.5, y: 0.2, z: 1.9, h: 0.3, r: 0.10}'
 ```
 
-## Service to remove an obstacle 
-name: obstacle name
+**Service to remove an obstacle**
+ - name: obstacle name
 ```bash
 ros2 service call /pdf_remove_obstacle pdf_beamtime_interfaces/srv/DeleteObstacleMsg "{name: 'inbeam_platform'}"
 ```
 
-**Testing of the FSM**
+## Testing of the FSM
 
 FSM is tested for its four main functionality:
 1. Execute a full cycle of state transitions beginning from State:Home to State:Place_Retreat.
@@ -67,7 +67,7 @@ FSM is tested for its four main functionality:
 4. Print the completion percentage:
 - Upon running any of the functionalities in 1,2 or 3, node 'pdf_beamtime_client' should print the completion percentage after each state transition on the terminal. For 1, it should print up to 100%, and for 2, it should print only up to 55%
 
-## Testing via Bluesky Run Engine
+**Testing via Bluesky Run Engine**
 
  - Make sure you have the containers ursim, urdriver, and urmoveit running
  - Launch pdf_beamtime node by running:
