@@ -52,3 +52,9 @@ ROS2-approved formatters are included in the IDE.
 
 * **c++** uncrustify; config from `ament_uncrustify`
 * **python** autopep8; vscode settings consistent with the [style guide](https://index.ros.org/doc/ros2/Contributing/Code-Style-Language-Versions/)
+
+## Notes on pdf_beamtime and its tests
+pdf_beamtime is a work-in-progress package aiming to deploy the UR3e robot arm + HandE gripper at the PDF beamline. 
+This package depends on pdf_beamtime_interfaces. Follow the link below for information on the package and for the commands to call the servers implemented in the package.
+
+[Link to pdf_beamtime README](./src/pdf_beamtime/README.md)

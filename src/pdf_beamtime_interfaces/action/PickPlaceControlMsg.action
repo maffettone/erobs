@@ -1,0 +1,8 @@
+float64[] pickup_approach
+float64[] pickup
+float64[] place_approach
+float64[] place
+---
+bool success
+---
+float64 status
