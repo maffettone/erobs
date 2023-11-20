@@ -46,6 +46,9 @@ PdfBeamtimeServer::PdfBeamtimeServer(
     std::bind(&PdfBeamtimeServer::handle_goal, this, _1, _2),
     std::bind(&PdfBeamtimeServer::handle_cancel, this, _1),
     std::bind(&PdfBeamtimeServer::handle_accepted, this, _1));
+
+  // // Initialize to home
+  current_state_ = State::HOME;
 }
 rclcpp::node_interfaces::NodeBaseInterface::SharedPtr PdfBeamtimeServer::getNodeBaseInterface()
 // Expose the node base interface so that the node can be added to a component manager.
@@ -81,10 +84,60 @@ rclcpp_action::CancelResponse PdfBeamtimeServer::handle_cancel(
 void PdfBeamtimeServer::execute(
   const std::shared_ptr<rclcpp_action::ServerGoalHandle<PickPlaceControlMsg>> goal_handle)
 {
-  // A cool Moveit function
-  std::vector<double> home_angles = node_->get_parameter("home_angles").as_double_array();
+  const auto goal = goal_handle->get_goal();
+  //  Variables for feedback and results
+  auto feedback = std::make_shared<PickPlaceControlMsg::Feedback>();
+  auto results = std::make_shared<PickPlaceControlMsg::Result>();
+  bool fsm_results = true;
+  bool state_transition_complete = false;
+  progress_ = 0.0;
+  auto goal_home = node_->get_parameter("home_angles").as_double_array();
+  feedback->status = get_action_completion_percentage();
 
-  move_group_interface_.setJointValueTarget(home_angles);
+  RCLCPP_INFO(
+    node_->get_logger(), "Current state is state %s.",
+    state_names_[static_cast<int>(current_state_)].c_str());
+  RCLCPP_INFO(node_->get_logger(), "Robot is moved the HOME state first for a new execution.");
+  if (current_state_ != State::HOME) {
+    fsm_results = reset_fsm(goal_home);
+  }
+
+  while (!state_transition_complete) {
+    fsm_results = run_fsm(goal);
+    if (!fsm_results) {
+      // Abort the execution if move_group_ fails
+      results->success = fsm_results;
+      goal_handle->abort(results);
+      RCLCPP_ERROR(node_->get_logger(), "Goal aborted !");
+      return;
+    }
+
+    if (goal_handle->is_canceling()) {
+      // Reset the fsm if goal is cancelled by the action client
+      results->success = false;
+      reset_fsm(goal_home);
+      goal_handle->canceled(results);
+      RCLCPP_WARN(node_->get_logger(), "Goal Cancelled !");
+      return;
+    }
+    feedback->status = get_action_completion_percentage();
+    goal_handle->publish_feedback(feedback);
+
+    // This marks the completion of a state transition cycle
+    if (current_state_ == State::HOME) {
+      state_transition_complete = true;
+    }
+  }
+
+  if (current_state_ == State::HOME) {
+    results->success = fsm_results;
+    goal_handle->succeed(results);
+  }
+}
+
+bool PdfBeamtimeServer::set_joint_goal(std::vector<double> joint_goal)
+{
+  move_group_interface_.setJointValueTarget(joint_goal);
   // Create a plan to that target pose
   auto const [success, plan] = [this] {
       moveit::planning_interface::MoveGroupInterface::Plan msg;
@@ -92,11 +145,18 @@ void PdfBeamtimeServer::execute(
       return std::make_pair(ok, msg);
     }();
   // Execute the plan
+  bool exec_results = false;
   if (success) {
-    move_group_interface_.execute(plan);
+    exec_results = static_cast<bool>(move_group_interface_.execute(plan));
+    if (exec_results) {
+      RCLCPP_INFO(node_->get_logger(), "Execution Succeeded");
+    } else {
+      RCLCPP_ERROR(node_->get_logger(), "Execution failed!");
+    }
   } else {
     RCLCPP_ERROR(node_->get_logger(), "Planning failed!");
   }
+  return exec_results;
 }
 
 std::vector<moveit_msgs::msg::CollisionObject> PdfBeamtimeServer::create_env()
@@ -245,6 +305,85 @@ void PdfBeamtimeServer::new_obstacle_service_cb(
   }
   // Update the whole environment
   planning_scene_interface_.applyCollisionObjects(create_env());
+}
+
+float PdfBeamtimeServer::get_action_completion_percentage()
+{
+  return progress_ / total_states_;
+}
+
+bool PdfBeamtimeServer::run_fsm(
+  std::shared_ptr<const pdf_beamtime_interfaces::action::PickPlaceControlMsg_Goal> goal)
+{
+  RCLCPP_INFO(
+    node_->get_logger(), "Executing state %s",
+    state_names_[static_cast<int>(current_state_)].c_str());
+  bool state_transition = false;
+  switch (current_state_) {
+    case State::HOME:
+      state_transition = set_joint_goal(goal->pickup_approach);
+      break;
+
+    case State::PICKUP_APPROACH:
+      state_transition = set_joint_goal(goal->pickup);
+      break;
+
+    case State::PICKUP:
+      // TODO(chandimafernando): Add a check for gipper availability before open/close
+      // gripper_close();
+      state_transition = true;
+      break;
+
+    case State::GRASP_SUCCESS:
+      state_transition = set_joint_goal(goal->pickup_approach);
+      break;
+
+    case State::PICKUP_RETREAT:
+      state_transition = set_joint_goal(goal->place_approach);
+      break;
+
+    case State::PLACE_APPROACH:
+      state_transition = set_joint_goal(goal->place);
+      break;
+
+    case State::PLACE:
+      // gripper_open();
+      state_transition = true;
+      break;
+
+    case State::RELEASE_SUCCESS:
+      state_transition = set_joint_goal(goal->place_approach);
+      break;
+
+    case State::PLACE_RETREAT:
+      state_transition = set_joint_goal(node_->get_parameter("home_angles").as_double_array());
+      break;
+
+    default:
+      break;
+  }
+  // TODO(chandimafernando): Remove the 3 second wait in robot testing
+  RCLCPP_WARN(node_->get_logger(), "***** The thread will sleep for 3 seconds *****");
+  //  3 second wait for robot movement to complete
+  std::this_thread::sleep_for(std::chrono::seconds(3));
+  progress_ = progress_ + 1.0;
+  // Propegate the current state here
+  if (current_state_ == State::PLACE_RETREAT && state_transition) {
+    // Complete the state transition cycle and go to HOME state
+    RCLCPP_INFO(node_->get_logger(), "Set current state to HOME");
+    current_state_ = State::HOME;
+  } else {
+    current_state_ = static_cast<State>(static_cast<int>(current_state_) + 1);
+  }
+  return state_transition;
+}
+
+bool PdfBeamtimeServer::reset_fsm(std::vector<double> joint_goal)
+{
+  RCLCPP_INFO(node_->get_logger(), "State machine was RESET");
+  current_state_ = State::HOME;
+  // gripper_open();
+  return set_joint_goal(joint_goal);
 }
 
 int main(int argc, char * argv[])

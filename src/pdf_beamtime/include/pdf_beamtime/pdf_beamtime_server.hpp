@@ -57,6 +57,20 @@ private:
   std::shared_ptr<rclcpp::ParameterEventHandler> param_subscriber_;
   std::shared_ptr<rclcpp::ParameterCallbackHandle> cb_handle_;
 
+  /// @brief States of the robot transitions
+  enum class State {HOME, PICKUP_APPROACH, PICKUP, GRASP_SUCCESS, PICKUP_RETREAT,
+    PLACE_APPROACH, PLACE, RELEASE_SUCCESS, PLACE_RETREAT};
+
+  std::vector<std::string> state_names_ =
+  {"HOME", "PICKUP_APPROACH", "PICKUP", "GRASP_SUCCESS", "PICKUP_RETREAT",
+    "PLACE_APPROACH", "PLACE", "RELEASE_SUCCESS", "PLACE_RETREAT"};
+
+  /// @brief current state of the robot
+  State current_state_;
+  /// @brief used to calculate the completion precentage
+  const float total_states_ = 9.0;
+  float progress_ = 0.0;
+
   // Action server related callbacks
   rclcpp_action::GoalResponse handle_goal(
     const rclcpp_action::GoalUUID & uuid,
@@ -96,6 +110,19 @@ private:
   void new_obstacle_service_cb(
     const typename RequestT::SharedPtr request,
     typename ResponseT::SharedPtr response);
+
+  /// @brief Set the current state to the next state
+  float get_action_completion_percentage();
+
+  /// @brief Performs the transitions for each State
+  bool run_fsm(
+    std::shared_ptr<const pdf_beamtime_interfaces::action::PickPlaceControlMsg_Goal> goal);
+
+  /// @brief Set the current state to HOME and move robot to home position
+  bool reset_fsm(std::vector<double> joint_goal);
+
+  /// @brief use move_group_interface to set joint targets
+  bool set_joint_goal(std::vector<double> joint_goal);
 };
 
 #endif  // PDF_BEAMTIME__PDF_BEAMTIME_SERVER_HPP_

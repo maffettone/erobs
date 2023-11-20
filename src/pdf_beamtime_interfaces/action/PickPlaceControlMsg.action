@@ -1,5 +1,8 @@
-bool run
+float64[] pickup_approach
+float64[] pickup
+float64[] place_approach
+float64[] place
 ---
 bool success
 ---
-int32 status
+float64 status

@@ -6,6 +6,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update \
         && apt-get -y install --no-install-recommends \
         python3-pip \
+        python3.10-venv \
         ros-${ROS_DISTRO}-rclpy \
         ros-${ROS_DISTRO}-ur \
         ros-${ROS_DISTRO}-moveit\
@@ -17,7 +18,9 @@ RUN apt-get update \
         && apt-get clean -y \
         && rm -rf /var/lib/apt/lists/*
 
-RUN pip3 install bluesky ophyd Ipython
+# Use venv for bluesky and ipython. Will need to call `source /venv/bin/activate`
+RUN python3 -m venv venv
+RUN . venv/bin/activate && pip install bluesky ophyd Ipython
 ENV DEBIAN_FRONTEND=dialog
 
 # Set up auto-source of workspace for ros user
