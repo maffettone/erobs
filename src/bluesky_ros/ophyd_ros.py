@@ -1,9 +1,13 @@
+"""Copyright 2023 Brookhaven National Laboratory BSD 3 Clause License. See LICENSE.txt for details."""
+
 from abc import abstractmethod
 from typing import Any, Iterable, List
 
-import rclpy
 from bluesky.protocols import Movable
+
 from ophyd.status import DeviceStatus
+
+import rclpy
 from rclpy.action import ActionClient, client
 from rclpy.context import Context
 from rclpy.node import Node
@@ -15,6 +19,7 @@ class ActionStatus(DeviceStatus):
     """Track the status of a potentially-lengthy ROS Action using the Bluesky interface."""
 
     def __init__(self, device, **kwargs):
+        """Class init."""
         super().__init__(device, **kwargs)
 
     def _handle_failure(self):
@@ -23,6 +28,8 @@ class ActionStatus(DeviceStatus):
 
 
 class ActionMovable(Node, Movable):
+    """Base class to create a bluesky client for ROS."""
+
     def __init__(
         self,
         node_name: str,
@@ -38,6 +45,7 @@ class ActionMovable(Node, Movable):
         allow_undeclared_parameters: bool = False,
         automatically_declare_parameters_from_overrides: bool = False
     ) -> None:
+        """Class init."""
         super().__init__(
             node_name,
             context=context,
@@ -67,6 +75,7 @@ class ActionMovable(Node, Movable):
     @property
     @abstractmethod
     def action_type(self):
+        """Define the type of action."""
         pass
 
     @abstractmethod
@@ -80,7 +89,7 @@ class ActionMovable(Node, Movable):
         return NotImplemented
 
     def _stop_spin_callback(self, future: Future):
-        """Callback that manages the execution of all other done Callabacks. This ensures a sensible ordering."""
+        """Manage the execution of all other done Callabacks. This ensures a sensible ordering."""
         if not future.done():
             self.get_logger().error("Somehow the stop spin callback was called before the future was done...")
 
@@ -92,15 +101,17 @@ class ActionMovable(Node, Movable):
 
     @abstractmethod
     def feedback_callback(self, feedback_msg: Any):
-        """Callback to work with feedback messages."""
+        """Work with feedback messages."""
         return NotImplemented
 
     def cancel_goal(self) -> None:
+        """Cancel goal."""
         if self._goal_handle is not None:
             future = self._goal_handle.cancel_goal_async()
             future.add_done_callback(self.cancel_done)
 
     def cancel_done(self, future: Future):
+        """Handle when goal cancellation is successful."""
         cancel_response = future.result()
         if len(cancel_response.goals_canceling) > 0:
             self.get_logger().info("Goal successfully canceled")
@@ -146,6 +157,7 @@ class ActionMovable(Node, Movable):
     """
 
     def set(self, value) -> ActionStatus:
+        """Construct the action."""
         self._send_goal(value)
         self._bluesky_status = ActionStatus(self)
         rclpy.spin_until_future_complete(self, self._finalize_future)
