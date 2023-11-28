@@ -50,8 +50,8 @@
      - Muhammad Asif Rana
   -->
 
-  <xacro:include filename="$(find ur3e_hande_duplicate_description)/urdf/inc/ur_transmissions.xacro" />
-  <xacro:include filename="$(find ur3e_hande_duplicate_description)/urdf/inc/ur_common.xacro" />
+  <xacro:include filename="$(find ur3e_hande_robot_description)/urdf/inc/ur_transmissions.xacro" />
+  <xacro:include filename="$(find ur3e_hande_robot_description)/urdf/inc/ur_common.xacro" />
 
   <xacro:macro name="ur_robot" params="
     name
@@ -100,7 +100,7 @@
 
 
     <!-- ros2 control include -->
-    <xacro:include filename="$(find ur3e_hande_duplicate_description)/urdf/ur.ros2_control.xacro" />
+    <xacro:include filename="$(find ur3e_hande_robot_description)/urdf/ur.ros2_control.xacro" />
     <!-- ros2 control instance -->
     <xacro:ur_ros2_control
       name="${name}" prefix="${prefix}"
@@ -270,7 +270,7 @@
       <visual>
         <origin xyz="0 0 0" rpy="0 0 0" />
         <geometry>
-          <mesh filename="package://ur3e_hande_duplicate_description/meshes/hande/visual/hand-e.dae" scale="0.001 0.001 0.001" />
+          <mesh filename="package://ur3e_hande_robot_description/meshes/hande/visual/hand-e.dae" scale="0.001 0.001 0.001" />
         </geometry>
         <material name="Gazebo/Black">
           <color rgba="0.1 0.1 0.1 1" />
@@ -279,7 +279,7 @@
       <collision>
         <origin xyz="0 0 0" rpy="0 0 0" />
         <geometry>
-          <mesh filename="package://ur3e_hande_duplicate_description/meshes/hande/collision/hand-e.stl" scale="0.001 0.001 0.001"/>
+          <mesh filename="package://ur3e_hande_robot_description/meshes/hande/collision/hand-e.stl" scale="0.001 0.001 0.001"/>
         </geometry>
       </collision>
       <xacro:cylinder_inertial radius="${hande_base_inertia_radius}" length="${hande_base_inertia_length}"  mass="${hande_base_mass}">
@@ -296,7 +296,7 @@
       <visual>
         <origin rpy="0 0 0" xyz="0 0 0"/>
         <geometry>
-          <mesh filename="package://ur3e_hande_duplicate_description/meshes/hande/visual/finger_1.dae" scale="0.001 0.001 0.001"/>
+          <mesh filename="package://ur3e_hande_robot_description/meshes/hande/visual/finger_1.dae" scale="0.001 0.001 0.001"/>
         </geometry>
         <material name="Gazebo/Grey">
           <color rgba="0.1 0.1 0.1 1"/>
@@ -305,7 +305,7 @@
       <collision>
         <origin rpy="0 0 0" xyz="0 0 0"/>
         <geometry>
-          <mesh filename="package://ur3e_hande_duplicate_description/meshes/hande/collision/finger_1.stl" scale="0.001 0.001 0.001"/>
+          <mesh filename="package://ur3e_hande_robot_description/meshes/hande/collision/finger_1.stl" scale="0.001 0.001 0.001"/>
         </geometry>
       </collision>
       <xacro:cylinder_inertial radius="${left_finger_inertia_radius}" length="${left_finger_inertia_length}"  mass="${left_finger_mass}">
@@ -322,7 +322,7 @@
       <visual>
         <origin rpy="0 0 0" xyz="0 0 0"/>
         <geometry>
-          <mesh filename="package://ur3e_hande_duplicate_description/meshes/hande/visual/finger_2.dae" scale="0.001 0.001 0.001"/>
+          <mesh filename="package://ur3e_hande_robot_description/meshes/hande/visual/finger_2.dae" scale="0.001 0.001 0.001"/>
         </geometry>
         <material name="Gazebo/Grey">
           <color rgba="0.1 0.1 0.1 1"/>
@@ -331,7 +331,7 @@
       <collision>
         <origin rpy="0 0 0" xyz="0 0 0"/>
         <geometry>
-          <mesh filename="package://ur3e_hande_duplicate_description/meshes/hande/collision/finger_2.stl" scale="0.001 0.001 0.001"/>
+          <mesh filename="package://ur3e_hande_robot_description/meshes/hande/collision/finger_2.stl" scale="0.001 0.001 0.001"/>
         </geometry>
       </collision>
       <xacro:cylinder_inertial radius="${right_finger_inertia_radius}" length="${right_finger_inertia_length}"  mass="${right_finger_mass}">

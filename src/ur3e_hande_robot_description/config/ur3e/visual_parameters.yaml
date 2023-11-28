@@ -111,39 +111,39 @@ mesh_files:
   hande_base:
     visual:
       mesh:
-        package: ure3_hande_duplicate_description
+        package: ur3e_hande_robot_description
         path: meshes/hande/visual/hand-e.dae
       material:
         name: "LightGrey"
         color: "0.7 0.7 0.7 1.0"
     collision:
       mesh:
-        package: ure3_hande_duplicate_description
+        package: ur3e_hande_robot_description
         path: meshes/hande/collision/hand-e.stl
 
   left_finger:
     visual:
       mesh:
-        package: ure3_hande_duplicate_description
+        package: ur3e_hande_robot_description
         path: meshes/hande/visual/finger_1.dae
       material:
         name: "LightGrey"
         color: "0.7 0.7 0.7 1.0"
     collision:
       mesh:
-        package: ure3_hande_duplicate_description
+        package: ur3e_hande_robot_description
         path: meshes/hande/collision/finger_1.stl
 
   right_finger:
     visual:
       mesh:
-        package: ure3_hande_duplicate_description
+        package: ur3e_hande_robot_description
         path: meshes/hande/visual/finger_2.dae
       material:
         name: "LightGrey"
         color: "0.7 0.7 0.7 1.0"
     collision:
       mesh:
-        package: ure3_hande_duplicate_description
+        package: ur3e_hande_robot_description
         path: meshes/hande/collision/finger_2.stl
           

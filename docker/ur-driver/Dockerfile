@@ -19,19 +19,16 @@ RUN pip3 install rosdep && \
 RUN mkdir /root/ws/src -p
 WORKDIR /root/ws/src
 
-RUN ls
-COPY ../CMakeLists.txt /root/ws/src
+RUN git clone https://github.com/ChandimaFernando/erobs.git -b humble_hande_integration
 
 WORKDIR /root/ws/
 
-# RUN /bin/bash -c "source /opt/ros/${ROS_DISTRO}/setup.bash && \
-#         colcon build --symlink-install"
-
-# RUN "source /root/ws/install/setup.bash"
+RUN /bin/bash -c "source /opt/ros/${ROS_DISTRO}/setup.bash && \
+        colcon build --symlink-install --packages-select ur3e_hande_robot_description"
 
 ENV ROBOT_IP=192.168.56.101
 ENV REVERSE_IP=192.168.56.102
 ENV UR_TYPE="ur3e"
 ENV DESCRIPTION_PKG="ur3e_hande_robot_description"
 
-# CMD ["/bin/sh", "-c", ".  /opt/ros/${ROS_DISTRO}/setup.sh && ros2 launch ur_robot_driver ur_control.launch.py ur_type:=${UR_TYPE} robot_ip:=${ROBOT_IP} launch_rviz:=false description_package:=${DESCRIPTION_PKG}"]
+CMD ["/bin/sh", "-c", ".  /opt/ros/${ROS_DISTRO}/setup.sh && . /root/ws/install/setup.bash && ros2 launch ur_robot_driver ur_control.launch.py ur_type:=${UR_TYPE} robot_ip:=${ROBOT_IP} launch_rviz:=false description_package:=${DESCRIPTION_PKG}"]

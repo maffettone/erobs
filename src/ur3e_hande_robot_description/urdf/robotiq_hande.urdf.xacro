@@ -11,7 +11,7 @@
       <visual>
         <origin xyz="0 0 0" rpy="0 0 0" />
         <geometry>
-          <mesh filename="package://ur3e_hande_description/meshes/hande/visual/hand-e.dae" scale="0.001 0.001 0.001"/>
+          <mesh filename="package://ur3e_hande_robot_description/meshes/hande/visual/hand-e.dae" scale="0.001 0.001 0.001"/>
         </geometry>
         <material name="Gazebo/Black">
           <color rgba="0.1 0.1 0.1 1" />
@@ -20,7 +20,7 @@
       <collision>
         <origin xyz="0 0 0" rpy="0 0 0" />
         <geometry>
-          <mesh filename="package://ur3e_hande_description/meshes/hande/collision/hand-e.stl" scale="0.001 0.001 0.001"/>
+          <mesh filename="package://ur3e_hande_robot_description/meshes/hande/collision/hand-e.stl" scale="0.001 0.001 0.001"/>
         </geometry>
       </collision>
     </link>
@@ -38,7 +38,7 @@
       <visual>
         <origin rpy="0 0 0" xyz="0 0 0"/>
         <geometry>
-          <mesh filename="package://ur3e_hande_description/meshes/hande/visual/finger_1.dae" scale="0.001 0.001 0.001"/>
+          <mesh filename="package://ur3e_hande_robot_description/meshes/hande/visual/finger_1.dae" scale="0.001 0.001 0.001"/>
         </geometry>
         <material name="Gazebo/Grey">
           <color rgba="0.1 0.1 0.1 1"/>
@@ -47,7 +47,7 @@
       <collision>
         <origin rpy="0 0 0" xyz="0 0 0"/>
         <geometry>
-          <mesh filename="package://ur3e_hande_description/meshes/hande/collision/finger_1.stl" scale="0.001 0.001 0.001"/>
+          <mesh filename="package://ur3e_hande_robot_description/meshes/hande/collision/finger_1.stl" scale="0.001 0.001 0.001"/>
         </geometry>
       </collision>
     </link>
@@ -65,7 +65,7 @@
       <visual>
         <origin rpy="0 0 0" xyz="0 0 0"/>
         <geometry>
-          <mesh filename="package://ur3e_hande_description/meshes/hande/vision/finger_2.dae" scale="0.001 0.001 0.001"/>
+          <mesh filename="package://ur3e_hande_robot_description/meshes/hande/vision/finger_2.dae" scale="0.001 0.001 0.001"/>
         </geometry>
         <material name="Gazebo/Grey">
           <color rgba="0.1 0.1 0.1 1"/>
@@ -74,7 +74,7 @@
       <collision>
         <origin rpy="0 0 0" xyz="0 0 0"/>
         <geometry>
-          <mesh filename="package://ur3e_hande_description/meshes/hande/collision/finger_2.stl" scale="0.001 0.001 0.001"/>
+          <mesh filename="package://ur3e_hande_robot_description/meshes/hande/collision/finger_2.stl" scale="0.001 0.001 0.001"/>
         </geometry>
       </collision>
     </link>
