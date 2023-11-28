@@ -18,20 +18,20 @@ RUN pip3 install rosdep && \
 
 RUN mkdir /root/ws/src -p
 WORKDIR /root/ws/src
-# RUN git clone https://github.com/ChandimaFernando/ur3e_hande_moveit_config.git
-RUN git clone https://github.com/ChandimaFernando/ur3e_hande_robot_description.git
+
+RUN ls
+COPY ../CMakeLists.txt /root/ws/src
 
 WORKDIR /root/ws/
 
-RUN /bin/bash -c "source /opt/ros/${ROS_DISTRO}/setup.bash && \
-        colcon build --symlink-install"
+# RUN /bin/bash -c "source /opt/ros/${ROS_DISTRO}/setup.bash && \
+#         colcon build --symlink-install"
 
-RUN "source /root/ws/install/setup.bash"
+# RUN "source /root/ws/install/setup.bash"
 
 ENV ROBOT_IP=192.168.56.101
 ENV REVERSE_IP=192.168.56.102
 ENV UR_TYPE="ur3e"
 ENV DESCRIPTION_PKG="ur3e_hande_robot_description"
 
-# CMD ["/bin/sh", "-c", ".  /opt/ros/${ROS_DISTRO}/setup.sh &&  ros2 launch ur_robot_driver ur_control.launch.py ur_type:=${UR_TYPE} robot_ip:=${ROBOT_IP} launch_rviz:=false"]
-CMD ["/bin/sh", "-c", ".  /opt/ros/${ROS_DISTRO}/setup.sh && ros2 launch ur_robot_driver ur_control.launch.py ur_type:=${UR_TYPE} robot_ip:=${ROBOT_IP} launch_rviz:=false description_package:=${DESCRIPTION_PKG}"]
+# CMD ["/bin/sh", "-c", ".  /opt/ros/${ROS_DISTRO}/setup.sh && ros2 launch ur_robot_driver ur_control.launch.py ur_type:=${UR_TYPE} robot_ip:=${ROBOT_IP} launch_rviz:=false description_package:=${DESCRIPTION_PKG}"]

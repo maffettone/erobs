@@ -50,7 +50,7 @@ RUN /bin/bash -c "source /opt/ros/${ROS_DISTRO}/setup.bash  && rosdep install -r
 
 WORKDIR  /root/ws/
 RUN /bin/bash -c "source /opt/ros/${ROS_DISTRO}/setup.bash && colcon build --packages-select custom_msgs"
-RUN /bin/bash -c "source moveit_config_file/opt/ros/${ROS_DISTRO}/setup.bash && \
+RUN /bin/bash -c "source /opt/ros/${ROS_DISTRO}/setup.bash && \
   source /root/ws/install/setup.bash && \
   colcon build --symlink-install --packages-ignore custom_msgs"
 
