@@ -18,10 +18,20 @@ RUN apt-get autoremove -y \
 RUN pip3 install rosdep && \
         rosdep update
 
+RUN mkdir /root/ws/src -p
+WORKDIR /root/ws/src
+RUN git clone https://github.com/ChandimaFernando/ur3e_hande_moveit_config.git
+RUN git clone https://github.com/ChandimaFernando/ur3e_hande_robot_description.git
+
+WORKDIR /root/ws/
+
 ENV ROBOT_IP=192.168.56.101
 ENV REVERSE_IP=192.168.56.102
 ENV UR_TYPE="ur3e"
 ENV LAUNCH_RVIZ="false"
+ENV DESCRIPTION_PKG="ur3e_hande_robot_description"
+ENV CONFIG_PKG="ur3e_hande_moveit_config"
+ENV CONFIG_FILE="ur.srdf"
 
 # Copy entrypoint script
 COPY entrypoint.sh /entrypoint.sh
