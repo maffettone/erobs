@@ -19,9 +19,16 @@ RUN pip3 install rosdep && \
         rosdep update
 
 RUN mkdir /root/ws/src -p
+
 WORKDIR /root/ws/src
-RUN git clone https://github.com/ChandimaFernando/ur3e_hande_moveit_config.git
-RUN git clone https://github.com/ChandimaFernando/ur3e_hande_robot_description.git
+
+RUN git clone https://github.com/ChandimaFernando/erobs.git -b humble_hande_integration
+
+WORKDIR /root/ws/
+
+RUN /bin/bash -c "source /opt/ros/${ROS_DISTRO}/setup.bash && \
+        colcon build --symlink-install --packages-select ur3e_hande_robot_description && \
+        colcon build --symlink-install --packages-select ur3e_hande_moveit_config"
 
 WORKDIR /root/ws/
 
@@ -30,6 +37,7 @@ ENV REVERSE_IP=192.168.56.102
 ENV UR_TYPE="ur3e"
 ENV LAUNCH_RVIZ="false"
 ENV DESCRIPTION_PKG="ur3e_hande_robot_description"
+ENV DESCRIPTION_FILE="hande_extension.urdf.xacro"
 ENV CONFIG_PKG="ur3e_hande_moveit_config"
 ENV CONFIG_FILE="ur.srdf"
 
