@@ -17,7 +17,10 @@ RUN pip3 install rosdep && \
         rosdep update
 
 RUN mkdir /root/ws/src -p
+
 WORKDIR /root/ws/src
+
+ARG RANDOM_VAR=unknown
 
 RUN git clone https://github.com/ChandimaFernando/erobs.git -b humble_hande_integration
 
@@ -31,4 +34,4 @@ ENV REVERSE_IP=192.168.56.102
 ENV UR_TYPE="ur3e"
 ENV DESCRIPTION_PKG="ur3e_hande_robot_description"
 
-CMD ["/bin/sh", "-c", ".  /opt/ros/${ROS_DISTRO}/setup.sh && . /root/ws/install/setup.bash && ros2 launch ur_robot_driver ur_control.launch.py ur_type:=${UR_TYPE} robot_ip:=${ROBOT_IP} launch_rviz:=false description_package:=${DESCRIPTION_PKG}"]
+CMD ["/bin/sh", "-c", ".  /opt/ros/${ROS_DISTRO}/setup.sh && . /root/ws/install/setup.sh && ros2 launch ur_robot_driver ur_control.launch.py ur_type:=${UR_TYPE} robot_ip:=${ROBOT_IP} launch_rviz:=false description_package:=${DESCRIPTION_PKG}"]
