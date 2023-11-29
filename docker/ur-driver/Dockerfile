@@ -34,4 +34,8 @@ ENV REVERSE_IP=192.168.56.102
 ENV UR_TYPE="ur3e"
 ENV DESCRIPTION_PKG="ur3e_hande_robot_description"
 
+# Copy entrypoint script
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
 ENTRYPOINT [ "/entrypoint.sh" ]
