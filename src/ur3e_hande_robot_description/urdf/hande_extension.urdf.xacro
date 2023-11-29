@@ -206,13 +206,12 @@
     </joint>
 
     <!-- ROS-Industrial 'flange' frame - attachment point for EEF models -->
-    <link name="${prefix}flange" />
+    <!-- <link name="${prefix}flange" />
     <joint name="${prefix}wrist_3-flange" type="fixed">
       <parent link="${prefix}wrist_3_link" />
       <child link="${prefix}flange" />
       <origin xyz="0 0 0" rpy="0 ${-pi/2.0} ${-pi/2.0}" />
-    </joint>
-
+    </joint> -->
 
     <joint name="${prefix}hande_to_wrist_flange" type="fixed">
       <parent link="${prefix}tool0" />
