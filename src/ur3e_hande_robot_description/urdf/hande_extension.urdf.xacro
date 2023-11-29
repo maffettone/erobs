@@ -1,6 +1,205 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://wiki.ros.org/xacro" name="$(arg name)">
+ 
+  <xacro:include filename="$(find ur_description)/urdf/ur.urdf.xacro"/>
 
-   <xacro:include filename="$(find ur_description)/urdf/ur.urdf.xacro"/>
+  <xacro:macro name="read_model_data" params="joint_limits_parameters_file kinematics_parameters_file physical_parameters_file visual_parameters_file force_abs_paths">
+
+    <xacro:property name="hande_base_mass" value="${sec_inertia_parameters['hande_base_mass']}" scope="parent"/>
+    <xacro:property name="left_finger_mass" value="${sec_inertia_parameters['left_finger_mass']}" scope="parent"/>
+    <xacro:property name="right_finger_mass" value="${sec_inertia_parameters['right_finger_mass']}" scope="parent"/>
+
+    <xacro:property name="hande_base_inertia_radius" value="${intertia_links['hande_base']['radius']}" scope="parent"/>
+    <xacro:property name="hande_base_inertia_length" value="${intertia_links['hande_base']['length']}" scope="parent"/>
+    <xacro:property name="left_finger_inertia_radius" value="${intertia_links['left_finger']['radius']}" scope="parent"/>
+    <xacro:property name="left_finger_inertia_length" value="${intertia_links['left_finger']['length']}" scope="parent"/>
+    <xacro:property name="right_finger_inertia_radius" value="${intertia_links['right_finger']['radius']}" scope="parent"/>
+    <xacro:property name="right_finger_inertia_length" value="${intertia_links['right_finger']['length']}" scope="parent"/>
+
+    <xacro:property name="prop_hande_cog" value="${sec_inertia_parameters['center_of_mass']['hande_cog']}" scope="parent"/>
+    <xacro:property name="prop_finger_cog" value="${sec_inertia_parameters['center_of_mass']['finger_cog']}" scope="parent"/>
+
+    <xacro:property name="hande_base_cog" value="${prop_hande_cog['x']} ${prop_hande_cog['y']} ${prop_hande_cog['z']}" scope="parent"/>
+    <xacro:property name="finger_cog" value="${prop_finger_cog['x']} ${prop_finger_cog['y']} ${prop_finger_cog['z']}" scope="parent"/>
+
+    <xacro:property name="hande_base_radius" value="${sec_inertia_parameters['hande_base_radius']}" scope="parent"/>
+    <xacro:property name="finger_radius" value="${sec_inertia_parameters['finger_radius']}" scope="parent"/>
+
+</xacro:macro>
+
+    <ros2_control name="${name}" type="system">
+
+      <!-- custom changes for hande -->
+      <joint name="${prefix}joint_finger">
+        <command_interface name="position">
+          <param name="min">-0.1</param>
+          <param name="max">0.1</param>
+        </command_interface>
+        <command_interface name="velocity">
+          <param name="min">-0.025</param>
+          <param name="max">0.025</param>
+        </command_interface>
+        <state_interface name="position">
+          <!-- initial position for the FakeSystem and simulation -->
+          <param name="initial_value">${initial_positions['joint_finger']}</param>
+        </state_interface>
+        <state_interface name="velocity"/>
+        <state_interface name="effort"/>
+      </joint>
+
+      <joint name="robotiq_hande_base_to_${prefix}right_finger">
+        <command_interface name="position">
+          <param name="min">-0.1</param>
+          <param name="max">0.1</param>
+        </command_interface>
+        <command_interface name="velocity">
+          <param name="min">-0.025</param>
+          <param name="max">0.025</param>
+        </command_interface>
+        <state_interface name="position">
+          <!-- initial position for the FakeSystem and simulation -->
+          <param name="initial_value">${initial_positions['joint_finger']}</param>
+        </state_interface>
+        <state_interface name="velocity"/>
+        <state_interface name="effort"/>
+      </joint>
+
+  </ros2_control>
+
+
+
+<xacro:macro name="ur_robot">
+
+    <!-- customization to include hande -->
+    <link name="${prefix}robotiq_hande_base_link">
+<!--       <inertial>
+        <origin xyz="0 0 0.04607" rpy="0 0 0" />
+        <mass value="0.86387" />
+        <inertia ixx="1017560E-9" ixy="0" ixz="2235E-9" iyy="1028041E-9" iyz="0" izz="489810E-9" />
+      </inertial> -->
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <mesh filename="package://ur3e_hande_robot_description/meshes/hande/visual/hand-e.dae" scale="0.001 0.001 0.001" />
+        </geometry>
+        <material name="Gazebo/Black">
+          <color rgba="0.1 0.1 0.1 1" />
+        </material>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+          <mesh filename="package://ur3e_hande_robot_description/meshes/hande/collision/hand-e.stl" scale="0.001 0.001 0.001"/>
+        </geometry>
+      </collision>
+      <xacro:cylinder_inertial radius="${hande_base_inertia_radius}" length="${hande_base_inertia_length}"  mass="${hande_base_mass}">
+        <origin xyz="0.0 0.0 ${-0.5 * hande_base_inertia_length}" rpy="0 0 0" />
+      </xacro:cylinder_inertial>
+    </link>
+
+    <link name="${prefix}left_finger">
+<!--       <inertial>
+        <origin rpy="0 0 0" xyz="0.02262 -0.00759 0.00738"/>
+        <mass value="0.03804"/>
+        <inertia ixx="13567E-9" ixy="1849E-9" ixz="3622E-9" iyy="15784E-9" iyz="3616E-9" izz="7478E-9"/>
+      </inertial> -->
+      <visual>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <geometry>
+          <mesh filename="package://ur3e_hande_robot_description/meshes/hande/visual/finger_1.dae" scale="0.001 0.001 0.001"/>
+        </geometry>
+        <material name="Gazebo/Grey">
+          <color rgba="0.1 0.1 0.1 1"/>
+        </material>
+      </visual>
+      <collision>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <geometry>
+          <mesh filename="package://ur3e_hande_robot_description/meshes/hande/collision/finger_1.stl" scale="0.001 0.001 0.001"/>
+        </geometry>
+      </collision>
+      <xacro:cylinder_inertial radius="${left_finger_inertia_radius}" length="${left_finger_inertia_length}"  mass="${left_finger_mass}">
+        <origin xyz="0.0 0.0 ${-0.5 * left_finger_inertia_length}" rpy="0 0 0" />
+      </xacro:cylinder_inertial>
+    </link>
+
+    <link name="${prefix}right_finger">
+<!--       <inertial>
+        <origin rpy="0 0 0" xyz="-0.02262 0.00759 0.00738"/>
+        <mass value="0.03804"/>
+        <inertia ixx="13567E-9" ixy="1849E-9" ixz="-3622E-9" iyy="15784E-9" iyz="-3616E-9" izz="7478E-9"/>
+      </inertial> -->
+      <visual>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <geometry>
+          <mesh filename="package://ur3e_hande_robot_description/meshes/hande/visual/finger_2.dae" scale="0.001 0.001 0.001"/>
+        </geometry>
+        <material name="Gazebo/Grey">
+          <color rgba="0.1 0.1 0.1 1"/>
+        </material>
+      </visual>
+      <collision>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <geometry>
+          <mesh filename="package://ur3e_hande_robot_description/meshes/hande/collision/finger_2.stl" scale="0.001 0.001 0.001"/>
+        </geometry>
+      </collision>
+      <xacro:cylinder_inertial radius="${right_finger_inertia_radius}" length="${right_finger_inertia_length}"  mass="${right_finger_mass}">
+        <origin xyz="0.0 0.0 ${-0.5 * right_finger_inertia_length}" rpy="0 0 0" />
+      </xacro:cylinder_inertial>
+    </link>
+
+    <!-- hande installation -->
+    <joint name="${prefix}joint_finger" type="prismatic">
+      <origin rpy="0 0 0" xyz="0 0 0.099"/>
+      <parent link="${prefix}robotiq_hande_base_link"/>
+      <child link="${prefix}left_finger"/>
+      <axis xyz="-1 0 0"/>
+      <limit effort="130" lower="0" upper="0.025" velocity="0.15"/>
+    </joint>
+
+    <joint name="robotiq_hande_base_to_${prefix}right_finger" type="prismatic">
+      <origin rpy="0 0 0" xyz="0 0 0.099"/>
+      <parent link="${prefix}robotiq_hande_base_link"/>
+      <child link="${prefix}right_finger"/>
+      <axis xyz="1 0 0"/>
+      <limit effort="130" lower="0" upper="0.025" velocity="0.15"/>
+      <mimic joint="${prefix}joint_finger" multiplier="1" offset="0"/>
+    </joint>
+<!--     <link name="${prefix}ft_frame"/>
+    <joint name="${prefix}wrist_3_link-ft_frame" type="fixed">
+      <parent link="${prefix}wrist_3_link"/>
+      <child link="${prefix}ft_frame"/>
+      <origin xyz="0 0 0" rpy="${pi} 0 0"/>
+    </joint> -->
+
+    <!-- ROS-Industrial 'base' frame - base_link to UR 'Base' Coordinates transform -->
+    <link name="${prefix}base"/>
+    <joint name="${prefix}base_link-base_fixed_joint" type="fixed">
+      <!-- Note the rotation over Z of pi radians - as base_link is REP-103
+           aligned (i.e., has X+ forward, Y+ left and Z+ up), this is needed
+           to correctly align 'base' with the 'Base' coordinate system of
+           the UR controller.
+      -->
+      <origin xyz="0 0 0" rpy="0 0 ${pi}"/>
+      <parent link="${prefix}base_link"/>
+      <child link="${prefix}base"/>
+    </joint>
+
+    <!-- ROS-Industrial 'flange' frame - attachment point for EEF models -->
+    <link name="${prefix}flange" />
+    <joint name="${prefix}wrist_3-flange" type="fixed">
+      <parent link="${prefix}wrist_3_link" />
+      <child link="${prefix}flange" />
+      <origin xyz="0 0 0" rpy="0 ${-pi/2.0} ${-pi/2.0}" />
+    </joint>
+
+
+    <joint name="${prefix}hande_to_wrist_flange" type="fixed">
+      <parent link="${prefix}flange" />
+      <child link="${prefix}robotiq_hande_base_link" />
+      <origin xyz="0 0 0" rpy="${pi/2.0} 0 ${pi/2.0}" />
+    </joint>
+</xacro:macro>
 
 </robot>
