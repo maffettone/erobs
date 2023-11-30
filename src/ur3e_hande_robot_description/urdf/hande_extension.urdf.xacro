@@ -49,7 +49,7 @@
    <xacro:arg name="sim_ignition" default="false" />
    <xacro:arg name="simulation_controllers" default="" />
 
-    <xacro::robotiq_hande 
+    <xacro:robotiq_hande 
      name="$(arg name)"
      prefix="$(arg prefix)"
      parent="world"
