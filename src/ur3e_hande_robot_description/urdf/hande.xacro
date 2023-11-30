@@ -3,6 +3,11 @@
 
   <xacro:arg name="name" default="hande"/>
 
+<xacro:macro name="robotiq_hande" params="
+    name
+    prefix
+    ur_type" >
+
   <xacro:property name="hande_joint_limit_params" value="$(find ur3e_hande_robot_description)/config/$(arg ur_type)/joint_limits.yaml"/>
   <xacro:property name="hande_kinematics_params" value="$(find ur3e_hande_robot_description)/config/$(arg ur_type)/default_kinematics.yaml"/>
   <xacro:property name="hande_physical_params" value="$(find ur3e_hande_robot_description)/config/$(arg ur_type)/physical_parameters.yaml"/>
@@ -50,10 +55,6 @@
   <xacro:property name="hande_base_radius" value="${sec_inertia_parameters['hande_base_radius']}" scope="parent"/>
   <xacro:property name="finger_radius" value="${sec_inertia_parameters['finger_radius']}" scope="parent"/>
 
-
-<xacro:macro name="robotiq_hande" params="
-    name
-    prefix" >
 
     <!-- customization to include hande -->
     <link name="${prefix}robotiq_hande_base_link">
