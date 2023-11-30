@@ -107,7 +107,7 @@
    />
 
     <joint name="$(arg tf_prefix)hande_to_wrist_flange" type="fixed">
-      <parent link="world" />
+      <parent link="$(arg tf_prefix)flange" />
       <child link="$(arg tf_prefix)robotiq_hande_base_link" />
       <origin xyz="1 1 0" rpy="0 0 0" />
     </joint>
