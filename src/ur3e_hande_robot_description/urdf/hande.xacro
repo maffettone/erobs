@@ -138,6 +138,13 @@
       <mimic joint="${tf_prefix}joint_finger" multiplier="1" offset="0"/>
     </joint>
 
+    <joint name="$(arg tf_prefix)hande_to_wrist_flange" type="fixed">
+      <parent link="world" />
+      <child link="$(arg tf_prefix)robotiq_hande_base_link" />
+      <origin xyz="0 0 0" rpy="0 0 0" />
+    </joint>
+
+
 </xacro:macro>
 
 

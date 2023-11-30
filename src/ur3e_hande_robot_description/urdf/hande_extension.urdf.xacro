@@ -103,11 +103,6 @@
      ur_type="$(arg ur_type)"
    />
 
-    <joint name="$(arg tf_prefix)hande_to_wrist_flange" type="fixed">
-      <parent link="$(arg tf_prefix)tool0" />
-      <child link="$(arg tf_prefix)robotiq_hande_base_link" />
-      <origin xyz="0 0 0" rpy="0 0 0" />
-    </joint>
 
      <origin xyz="0 0 0" rpy="0 0 0" />          <!-- position robot in the world -->
    </xacro:ur_robot>
