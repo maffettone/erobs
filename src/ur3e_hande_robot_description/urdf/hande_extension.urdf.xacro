@@ -36,10 +36,10 @@
    <xacro:arg name="tool_tcp_port" default="54321" />
 
 
-  <xacro:arg name="hande_joint_limit_params" value="$(find ur3e_hande_robot_description)/config/hande/joint_limits.yaml"/>
-  <xacro:arg name="hande_kinematics_params" value="$(find ur3e_hande_robot_description)/config/hande/default_kinematics.yaml"/>
-  <xacro:arg name="hande_physical_params" value="$(find ur3e_hande_robot_description)/config/hande/physical_parameters.yaml"/>
-  <xacro:arg name="hande_visual_params" value="$(find ur3e_hande_robot_description)/config/hande/visual_parameters.yaml"/>
+  <xacro:arg name="hande_joint_limit_params" default="$(find ur3e_hande_robot_description)/config/hande/joint_limits.yaml"/>
+  <xacro:arg name="hande_kinematics_params" default="$(find ur3e_hande_robot_description)/config/hande/default_kinematics.yaml"/>
+  <xacro:arg name="hande_physical_params" default="$(find ur3e_hande_robot_description)/config/hande/physical_parameters.yaml"/>
+  <xacro:arg name="hande_visual_params" default="$(find ur3e_hande_robot_description)/config/hande/visual_parameters.yaml"/>
 
 
      <!-- Simulation parameters -->
