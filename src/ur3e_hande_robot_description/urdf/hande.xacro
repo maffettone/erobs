@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://wiki.ros.org/xacro" name="$(arg name)">
 
-  <xacro:arg name="name" value="hande"/>
+  <xacro:arg name="name" default="hande"/>
 
   <xacro:arg name="hande_joint_limit_params" default="$(find ur3e_hande_robot_description)/config/hande/joint_limits.yaml"/>
   <xacro:arg name="hande_kinematics_params" default="$(find ur3e_hande_robot_description)/config/hande/default_kinematics.yaml"/>
