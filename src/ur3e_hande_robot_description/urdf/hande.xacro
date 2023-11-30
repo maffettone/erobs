@@ -51,7 +51,7 @@
   <xacro:property name="hande_base_radius" value="${sec_inertia_parameters['hande_base_radius']}" scope="parent"/>
   <xacro:property name="finger_radius" value="${sec_inertia_parameters['finger_radius']}" scope="parent"/>
 
-
+<!-- 
 <xacro:macro name="robotiq_hande" params="
     name
     prefix
@@ -167,7 +167,7 @@
       <origin xyz="0 0 0" rpy="0 ${-pi/2.0} ${-pi/2.0}" />
     </joint> -->
 
-</xacro:macro>
+</xacro:macro> -->
 
 
 
