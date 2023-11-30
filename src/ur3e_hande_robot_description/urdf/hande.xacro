@@ -1,93 +1,67 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://wiki.ros.org/xacro" name="$(arg name)">
- 
-  <xacro:include filename="$(find ur_description)/urdf/ur.urdf.xacro"/>
 
-  <xacro:macro name="read_model_data" params="joint_limits_parameters_file kinematics_parameters_file physical_parameters_file visual_parameters_file force_abs_paths">
+  <xacro:arg name="name" value="hande"/>
 
-    <xacro:property name="hande_base_mass" value="${sec_inertia_parameters['hande_base_mass']}" scope="parent"/>
-    <xacro:property name="left_finger_mass" value="${sec_inertia_parameters['left_finger_mass']}" scope="parent"/>
-    <xacro:property name="right_finger_mass" value="${sec_inertia_parameters['right_finger_mass']}" scope="parent"/>
+  <xacro:arg name="hande_joint_limit_params" value="$(find ur3e_hande_robot_description)/config/hande/joint_limits.yaml"/>
+  <xacro:arg name="hande_kinematics_params" value="$(find ur3e_hande_robot_description)/config/hande/default_kinematics.yaml"/>
+  <xacro:arg name="hande_physical_params" value="$(find ur3e_hande_robot_description)/config/hande/physical_parameters.yaml"/>
+  <xacro:arg name="hande_visual_params" value="$(find ur3e_hande_robot_description)/config/hande/visual_parameters.yaml"/>
 
-    <xacro:property name="hande_base_inertia_radius" value="${intertia_links['hande_base']['radius']}" scope="parent"/>
-    <xacro:property name="hande_base_inertia_length" value="${intertia_links['hande_base']['length']}" scope="parent"/>
-    <xacro:property name="left_finger_inertia_radius" value="${intertia_links['left_finger']['radius']}" scope="parent"/>
-    <xacro:property name="left_finger_inertia_length" value="${intertia_links['left_finger']['length']}" scope="parent"/>
-    <xacro:property name="right_finger_inertia_radius" value="${intertia_links['right_finger']['radius']}" scope="parent"/>
-    <xacro:property name="right_finger_inertia_length" value="${intertia_links['right_finger']['length']}" scope="parent"/>
-
-    <xacro:property name="prop_hande_cog" value="${sec_inertia_parameters['center_of_mass']['hande_cog']}" scope="parent"/>
-    <xacro:property name="prop_finger_cog" value="${sec_inertia_parameters['center_of_mass']['finger_cog']}" scope="parent"/>
-
-    <xacro:property name="hande_base_cog" value="${prop_hande_cog['x']} ${prop_hande_cog['y']} ${prop_hande_cog['z']}" scope="parent"/>
-    <xacro:property name="finger_cog" value="${prop_finger_cog['x']} ${prop_finger_cog['y']} ${prop_finger_cog['z']}" scope="parent"/>
-
-    <xacro:property name="hande_base_radius" value="${sec_inertia_parameters['hande_base_radius']}" scope="parent"/>
-    <xacro:property name="finger_radius" value="${sec_inertia_parameters['finger_radius']}" scope="parent"/>
-
-</xacro:macro>
-
- <xacro:macro name="ur_ros2_control" params="
-    name
-    prefix
-    use_fake_hardware:=false fake_sensor_commands:=false
-    sim_gazebo:=false
-    sim_ignition:=false
-    headless_mode:=false
-    initial_positions:=${dict(shoulder_pan_joint=0.0,shoulder_lift_joint=-1.57,elbow_joint=0.0,wrist_1_joint=-1.57,wrist_2_joint=0.0,wrist_3_joint=0.0,joint_finger=0.01,robotiq_hande_base_to_right_finger=0.01)}
-    use_tool_communication:=false
-    script_filename output_recipe_filename
-    input_recipe_filename tf_prefix
-    hash_kinematics robot_ip
-    tool_voltage:=0 tool_parity:=0 tool_baud_rate:=115200 tool_stop_bits:=1
-    tool_rx_idle_chars:=1.5 tool_tx_idle_chars:=3.5 tool_device_name:=/tmp/ttyUR tool_tcp_port:=54321
-    reverse_port:=50001
-    script_sender_port:=50002
-    reverse_ip:=0.0.0.0
-    script_command_port:=50004">
-
-    <ros2_control name="${name}" type="system">
-
-      <!-- custom changes for hande -->
-      <joint name="${prefix}joint_finger">
-        <command_interface name="position">
-          <param name="min">-0.1</param>
-          <param name="max">0.1</param>
-        </command_interface>
-        <command_interface name="velocity">
-          <param name="min">-0.025</param>
-          <param name="max">0.025</param>
-        </command_interface>
-        <state_interface name="position">
-          <!-- initial position for the FakeSystem and simulation -->
-          <param name="initial_value">${initial_positions['joint_finger']}</param>
-        </state_interface>
-        <state_interface name="velocity"/>
-        <state_interface name="effort"/>
-      </joint>
-
-      <joint name="robotiq_hande_base_to_${prefix}right_finger">
-        <command_interface name="position">
-          <param name="min">-0.1</param>
-          <param name="max">0.1</param>
-        </command_interface>
-        <command_interface name="velocity">
-          <param name="min">-0.025</param>
-          <param name="max">0.025</param>
-        </command_interface>
-        <state_interface name="position">
-          <!-- initial position for the FakeSystem and simulation -->
-          <param name="initial_value">${initial_positions['joint_finger']}</param>
-        </state_interface>
-        <state_interface name="velocity"/>
-        <state_interface name="effort"/>
-      </joint>
-
-  </ros2_control>
+  <xacro:macro name="cylinder_inertial" params="radius length mass *origin">
+    <inertial>
+      <mass value="${mass}" />
+      <xacro:insert_block name="origin" />
+      <inertia ixx="${0.0833333 * mass * (3 * radius * radius + length * length)}" ixy="0.0" ixz="0.0"
+        iyy="${0.0833333 * mass * (3 * radius * radius + length * length)}" iyz="0.0"
+        izz="${0.5 * mass * radius * radius}" />
+    </inertial>
   </xacro:macro>
 
+  <xacro:property name="config_physical_parameters" value="${xacro.load_yaml(hande_physical_params)}"/>
 
-<xacro:macro name="ur_robot">
+
+  <!-- Extract subsections from yaml dictionaries -->
+  <!-- <xacro:property name="sec_limits" value="${config_joint_limit_parameters['joint_limits']}"/> -->
+  <!-- <xacro:property name="sec_dh_parameters" value="${config_physical_parameters['dh_parameters']}"/> -->
+  <!-- <xacro:property name="sec_offsets" value="${config_physical_parameters['offsets']}"/> -->
+  <xacro:property name="sec_inertia_parameters" value="${config_physical_parameters['inertia_parameters']}" />
+  <!-- <xacro:property name="sec_mesh_files" value="${config_visual_parameters['mesh_files']}" scope="parent"/> -->
+  <!-- <xacro:property name="sec_kinematics" value="${config_kinematics_parameters['kinematics']}" /> -->
+
+  <xacro:property name="intertia_links" value="${sec_inertia_parameters['links']}" scope="parent"/>
+
+  <xacro:property name="hande_base_mass" value="${sec_inertia_parameters['hande_base_mass']}" scope="parent"/>
+  <xacro:property name="left_finger_mass" value="${sec_inertia_parameters['left_finger_mass']}" scope="parent"/>
+  <xacro:property name="right_finger_mass" value="${sec_inertia_parameters['right_finger_mass']}" scope="parent"/>
+
+  <xacro:property name="hande_base_inertia_radius" value="${intertia_links['hande_base']['radius']}" scope="parent"/>
+  <xacro:property name="hande_base_inertia_length" value="${intertia_links['hande_base']['length']}" scope="parent"/>
+  <xacro:property name="left_finger_inertia_radius" value="${intertia_links['left_finger']['radius']}" scope="parent"/>
+  <xacro:property name="left_finger_inertia_length" value="${intertia_links['left_finger']['length']}" scope="parent"/>
+  <xacro:property name="right_finger_inertia_radius" value="${intertia_links['right_finger']['radius']}" scope="parent"/>
+  <xacro:property name="right_finger_inertia_length" value="${intertia_links['right_finger']['length']}" scope="parent"/>
+
+  <xacro:property name="prop_hande_cog" value="${sec_inertia_parameters['center_of_mass']['hande_cog']}" scope="parent"/>
+  <xacro:property name="prop_finger_cog" value="${sec_inertia_parameters['center_of_mass']['finger_cog']}" scope="parent"/>
+
+  <xacro:property name="hande_base_cog" value="${prop_hande_cog['x']} ${prop_hande_cog['y']} ${prop_hande_cog['z']}" scope="parent"/>
+  <xacro:property name="finger_cog" value="${prop_finger_cog['x']} ${prop_finger_cog['y']} ${prop_finger_cog['z']}" scope="parent"/>
+
+  <xacro:property name="hande_base_radius" value="${sec_inertia_parameters['hande_base_radius']}" scope="parent"/>
+  <xacro:property name="finger_radius" value="${sec_inertia_parameters['finger_radius']}" scope="parent"/>
+
+
+<xacro:macro name="robotiq_hande" params="
+    name
+    prefix
+    parent
+    *origin
+    joint_limits_parameters_file
+    kinematics_parameters_file
+    physical_parameters_file
+    visual_parameters_file
+    initial_positions:=${dict(joint_finger=0.01,robotiq_hande_base_to_right_finger=0.01)}" >
 
     <!-- customization to include hande -->
     <link name="${prefix}robotiq_hande_base_link">
@@ -185,25 +159,6 @@
       <limit effort="130" lower="0" upper="0.025" velocity="0.15"/>
       <mimic joint="${prefix}joint_finger" multiplier="1" offset="0"/>
     </joint>
-<!--     <link name="${prefix}ft_frame"/>
-    <joint name="${prefix}wrist_3_link-ft_frame" type="fixed">
-      <parent link="${prefix}wrist_3_link"/>
-      <child link="${prefix}ft_frame"/>
-      <origin xyz="0 0 0" rpy="${pi} 0 0"/>
-    </joint> -->
-
-    <!-- ROS-Industrial 'base' frame - base_link to UR 'Base' Coordinates transform -->
-    <link name="${prefix}base"/>
-    <joint name="${prefix}base_link-base_fixed_joint" type="fixed">
-      <!-- Note the rotation over Z of pi radians - as base_link is REP-103
-           aligned (i.e., has X+ forward, Y+ left and Z+ up), this is needed
-           to correctly align 'base' with the 'Base' coordinate system of
-           the UR controller.
-      -->
-      <origin xyz="0 0 0" rpy="0 0 ${pi}"/>
-      <parent link="${prefix}base_link"/>
-      <child link="${prefix}base"/>
-    </joint>
 
     <!-- ROS-Industrial 'flange' frame - attachment point for EEF models -->
     <!-- <link name="${prefix}flange" />
@@ -213,53 +168,16 @@
       <origin xyz="0 0 0" rpy="0 ${-pi/2.0} ${-pi/2.0}" />
     </joint> -->
 
-    <joint name="${prefix}hande_to_wrist_flange" type="fixed">
-      <parent link="${prefix}tool0" />
-      <child link="${prefix}robotiq_hande_base_link" />
-      <origin xyz="0 0 0" rpy="0 0 0" />
-    </joint>
 </xacro:macro>
 
 
-   <!-- arm -->
-   <xacro:ur_robot
-     name="$(arg name)"
-     tf_prefix="$(arg tf_prefix)"
-     parent="world"
-     joint_limits_parameters_file="$(arg joint_limit_params)"
-     kinematics_parameters_file="$(arg kinematics_params)"
-     physical_parameters_file="$(arg physical_params)"
-     visual_parameters_file="$(arg visual_params)"
-     transmission_hw_interface="$(arg transmission_hw_interface)"
-     safety_limits="$(arg safety_limits)"
-     safety_pos_margin="$(arg safety_pos_margin)"
-     safety_k_position="$(arg safety_k_position)"
-     use_fake_hardware="$(arg use_fake_hardware)"
-     fake_sensor_commands="$(arg fake_sensor_commands)"
-     sim_gazebo="$(arg sim_gazebo)"
-     sim_ignition="$(arg sim_ignition)"
-     headless_mode="$(arg headless_mode)"
-     initial_positions="${xacro.load_yaml(initial_positions_file)}"
-     use_tool_communication="$(arg use_tool_communication)"
-     tool_voltage="$(arg tool_voltage)"
-     tool_parity="$(arg tool_parity)"
-     tool_baud_rate="$(arg tool_baud_rate)"
-     tool_stop_bits="$(arg tool_stop_bits)"
-     tool_rx_idle_chars="$(arg tool_rx_idle_chars)"
-     tool_tx_idle_chars="$(arg tool_tx_idle_chars)"
-     tool_device_name="$(arg tool_device_name)"
-     tool_tcp_port="$(arg tool_tcp_port)"
-     robot_ip="$(arg robot_ip)"
-     script_filename="$(arg script_filename)"
-     output_recipe_filename="$(arg output_recipe_filename)"
-     input_recipe_filename="$(arg input_recipe_filename)"
-     reverse_ip="$(arg reverse_ip)"
-     script_command_port="$(arg script_command_port)"
-     reverse_port="$(arg reverse_port)"
-     script_sender_port="$(arg script_sender_port)"
-     trajectory_port="$(arg trajectory_port)"
-     >
-     <origin xyz="0 0 0" rpy="0 0 0" />          <!-- position robot in the world -->
-   </xacro:ur_robot>
+
+
+
+
+
+
+
+
 
 </robot>
