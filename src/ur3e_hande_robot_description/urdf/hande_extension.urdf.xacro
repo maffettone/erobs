@@ -2,7 +2,7 @@
 <robot xmlns:xacro="http://wiki.ros.org/xacro" name="$(arg name)">
  
   <xacro:include filename="$(find ur_description)/urdf/ur_macro.xacro"/>
-  <xacro:include filename="$(find ur3e_hande_robot_description)/urdf/hande.xacro"/>
+  <!-- <xacro:include filename="$(find ur3e_hande_robot_description)/urdf/hande.xacro"/> -->
 
    <xacro:arg name="ur_type" default="ur5x"/>
 
@@ -49,7 +49,7 @@
    <xacro:arg name="sim_ignition" default="false" />
    <xacro:arg name="simulation_controllers" default="" />
 
-    <xacro:robotiq_hande 
+    <!-- <xacro:robotiq_hande 
      name="$(arg name)"
      prefix="$(arg prefix)"
      parent="world"
@@ -57,7 +57,7 @@
      kinematics_parameters_file="$(arg hande_kinematics_params)"
      physical_parameters_file="$(arg hande_physical_params)"
      visual_parameters_file="$(arg hande_visual_params)"
-   />
+   /> -->
 
     <!-- name
     prefix
