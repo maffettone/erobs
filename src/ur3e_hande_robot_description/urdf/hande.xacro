@@ -5,7 +5,7 @@
 
 <xacro:macro name="robotiq_hande" params="
     name
-    prefix
+    tf_prefix
     ur_type" >
 
   <xacro:property name="hande_joint_limit_params" value="$(find ur3e_hande_robot_description)/config/$(arg ur_type)/joint_limits.yaml"/>
@@ -57,7 +57,7 @@
 
 
     <!-- customization to include hande -->
-    <link name="${prefix}robotiq_hande_base_link">
+    <link name="${tf_prefix}robotiq_hande_base_link">
       <visual>
         <origin xyz="0 0 0" rpy="0 0 0" />
         <geometry>
@@ -78,7 +78,7 @@
       </xacro:cylinder_inertial>
     </link>
 
-    <link name="${prefix}left_finger">
+    <link name="${tf_prefix}left_finger">
       <visual>
         <origin rpy="0 0 0" xyz="0 0 0"/>
         <geometry>
@@ -99,7 +99,7 @@
       </xacro:cylinder_inertial>
     </link>
 
-    <link name="${prefix}right_finger">
+    <link name="${tf_prefix}right_finger">
       <visual>
         <origin rpy="0 0 0" xyz="0 0 0"/>
         <geometry>
@@ -121,21 +121,21 @@
     </link>
 
     <!-- hande installation -->
-    <joint name="${prefix}joint_finger" type="prismatic">
+    <joint name="${tf_prefix}joint_finger" type="prismatic">
       <origin rpy="0 0 0" xyz="0 0 0.099"/>
-      <parent link="${prefix}robotiq_hande_base_link"/>
-      <child link="${prefix}left_finger"/>
+      <parent link="${tf_prefix}robotiq_hande_base_link"/>
+      <child link="${tf_prefix}left_finger"/>
       <axis xyz="-1 0 0"/>
       <limit effort="130" lower="0" upper="0.025" velocity="0.15"/>
     </joint>
 
-    <joint name="robotiq_hande_base_to_${prefix}right_finger" type="prismatic">
+    <joint name="robotiq_hande_base_to_${tf_prefix}right_finger" type="prismatic">
       <origin rpy="0 0 0" xyz="0 0 0.099"/>
-      <parent link="${prefix}robotiq_hande_base_link"/>
-      <child link="${prefix}right_finger"/>
+      <parent link="${tf_prefix}robotiq_hande_base_link"/>
+      <child link="${tf_prefix}right_finger"/>
       <axis xyz="1 0 0"/>
       <limit effort="130" lower="0" upper="0.025" velocity="0.15"/>
-      <mimic joint="${prefix}joint_finger" multiplier="1" offset="0"/>
+      <mimic joint="${tf_prefix}joint_finger" multiplier="1" offset="0"/>
     </joint>
 
 </xacro:macro>

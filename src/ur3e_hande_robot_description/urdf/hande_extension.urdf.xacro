@@ -101,7 +101,7 @@
 
     <xacro:robotiq_hande 
      name="$(arg name)"
-     prefix="$(arg prefix)"
+     tf_prefix="$(arg tf_prefix)"
      ur_type="$(arg ur_type)"
    />
 
