@@ -20,7 +20,6 @@
 
   <xacro:property name="config_physical_parameters" value="${xacro.load_yaml(hande_physical_params)}"/>
 
-
   <!-- Extract subsections from yaml dictionaries -->
   <!-- <xacro:property name="sec_limits" value="${config_joint_limit_parameters['joint_limits']}"/> -->
   <!-- <xacro:property name="sec_dh_parameters" value="${config_physical_parameters['dh_parameters']}"/> -->
@@ -51,24 +50,13 @@
   <xacro:property name="hande_base_radius" value="${sec_inertia_parameters['hande_base_radius']}" scope="parent"/>
   <xacro:property name="finger_radius" value="${sec_inertia_parameters['finger_radius']}" scope="parent"/>
 
-<!-- 
+
 <xacro:macro name="robotiq_hande" params="
     name
-    prefix
-    parent
-    *origin
-    joint_limits_parameters_file
-    kinematics_parameters_file
-    physical_parameters_file
-    visual_parameters_file" >
+    prefix" >
 
     <!-- customization to include hande -->
     <link name="${prefix}robotiq_hande_base_link">
-<!--       <inertial>
-        <origin xyz="0 0 0.04607" rpy="0 0 0" />
-        <mass value="0.86387" />
-        <inertia ixx="1017560E-9" ixy="0" ixz="2235E-9" iyy="1028041E-9" iyz="0" izz="489810E-9" />
-      </inertial> -->
       <visual>
         <origin xyz="0 0 0" rpy="0 0 0" />
         <geometry>
@@ -90,11 +78,6 @@
     </link>
 
     <link name="${prefix}left_finger">
-<!--       <inertial>
-        <origin rpy="0 0 0" xyz="0.02262 -0.00759 0.00738"/>
-        <mass value="0.03804"/>
-        <inertia ixx="13567E-9" ixy="1849E-9" ixz="3622E-9" iyy="15784E-9" iyz="3616E-9" izz="7478E-9"/>
-      </inertial> -->
       <visual>
         <origin rpy="0 0 0" xyz="0 0 0"/>
         <geometry>
@@ -116,11 +99,6 @@
     </link>
 
     <link name="${prefix}right_finger">
-<!--       <inertial>
-        <origin rpy="0 0 0" xyz="-0.02262 0.00759 0.00738"/>
-        <mass value="0.03804"/>
-        <inertia ixx="13567E-9" ixy="1849E-9" ixz="-3622E-9" iyy="15784E-9" iyz="-3616E-9" izz="7478E-9"/>
-      </inertial> -->
       <visual>
         <origin rpy="0 0 0" xyz="0 0 0"/>
         <geometry>
@@ -159,15 +137,7 @@
       <mimic joint="${prefix}joint_finger" multiplier="1" offset="0"/>
     </joint>
 
-    <!-- ROS-Industrial 'flange' frame - attachment point for EEF models -->
-    <!-- <link name="${prefix}flange" />
-    <joint name="${prefix}wrist_3-flange" type="fixed">
-      <parent link="${prefix}wrist_3_link" />
-      <child link="${prefix}flange" />
-      <origin xyz="0 0 0" rpy="0 ${-pi/2.0} ${-pi/2.0}" />
-    </joint> -->
-
-</xacro:macro> -->
+</xacro:macro>
 
 
 
