@@ -6,7 +6,8 @@
 <xacro:macro name="robotiq_hande" params="
     name
     tf_prefix
-    ur_type" >
+    ur_type
+    parent" >
 
   <xacro:property name="hande_joint_limit_params" value="$(find ur3e_hande_robot_description)/config/$(arg ur_type)/joint_limits.yaml"/>
   <xacro:property name="hande_kinematics_params" value="$(find ur3e_hande_robot_description)/config/$(arg ur_type)/default_kinematics.yaml"/>
@@ -139,9 +140,9 @@
     </joint>
 
     <joint name="$(arg tf_prefix)hande_to_wrist_flange" type="fixed">
-      <parent link="world" />
-      <child link="$(arg tf_prefix)robotiq_hande_base_link" />
-      <origin xyz="0 0 0" rpy="0 0 0" />
+      <parent link="${parent}" />
+      <child link="${tf_prefix}robotiq_hande_base_link" />
+      <origin xyz="1 1 0" rpy="0 0 0" />
     </joint>
 
 
