@@ -57,8 +57,6 @@
      kinematics_parameters_file="$(arg hande_kinematics_params)"
      physical_parameters_file="$(arg hande_physical_params)"
      visual_parameters_file="$(arg hande_visual_params)"
-
-     initial_positions="${xacro.load_yaml(initial_positions_file)}"
    />
 
     <!-- name
@@ -71,6 +69,9 @@
     visual_parameters_file 
     initial_positions:=${dict(joint_finger=0.01,robotiq_hande_base_to_right_finger=0.01)}" >
   -->
+
+   <!-- create link fixed to the "world" -->
+   <link name="world" />
 
    <xacro:ur_robot
      name="$(arg name)"
@@ -106,12 +107,12 @@
      reverse_ip="$(arg reverse_ip)"
      script_command_port="$(arg script_command_port)"
      >
-
+<!-- 
     <joint name="${prefix}hande_to_wrist_flange" type="fixed">
       <parent link="${prefix}flange" />
       <child link="${prefix}robotiq_hande_base_link" />
       <origin xyz="0 0 0" rpy="0 0 0" />
-    </joint>
+    </joint> -->
 
      <origin xyz="0 0 0" rpy="0 0 0" />          <!-- position robot in the world -->
    </xacro:ur_robot>

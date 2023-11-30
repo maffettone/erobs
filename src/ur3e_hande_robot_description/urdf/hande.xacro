@@ -60,8 +60,7 @@
     joint_limits_parameters_file
     kinematics_parameters_file
     physical_parameters_file
-    visual_parameters_file
-    initial_positions:=${dict(joint_finger=0.01,robotiq_hande_base_to_right_finger=0.01)}" >
+    visual_parameters_file" >
 
     <!-- customization to include hande -->
     <link name="${prefix}robotiq_hande_base_link">
