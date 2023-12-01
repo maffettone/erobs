@@ -51,7 +51,6 @@
   <xacro:property name="hande_base_radius" value="${sec_inertia_parameters['hande_base_radius']}" scope="parent"/>
   <xacro:property name="finger_radius" value="${sec_inertia_parameters['finger_radius']}" scope="parent"/>
 
-
     <!-- customizations to include hande -->
     <link name="${tf_prefix}robotiq_hande_base_link">
       <visual>

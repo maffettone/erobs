@@ -22,9 +22,6 @@ inertia_parameters:
   wrist_1_mass: 0.8
   wrist_2_mass: 0.8
   wrist_3_mass: 0.35
-  hande_base_mass: 86387
-  left_finger_mass: 0.03804
-  right_finger_mass: 0.03804
 
 
   shoulder_radius: 0.060   # manually measured
@@ -32,8 +29,6 @@ inertia_parameters:
   elbow_radius: 0.060      # manually measured
   forearm_radius: 0.040    # manually measured
   wrist_radius: 0.045      # manually measured
-  hande_base_radius: 0.048
-  finger_radius: 0.006
 
   links:
     base:
@@ -57,15 +52,6 @@ inertia_parameters:
     wrist_3:
       radius: 0.032
       length: 0.04
-    hande_base:
-      radius: 0.038
-      length: 0.1
-    left_finger:
-      radius: 0.006
-      length: 0.046
-    right_finger:
-      radius: 0.006
-      length: 0.046
 
   center_of_mass:
     shoulder_cog:
@@ -91,13 +77,4 @@ inertia_parameters:
     wrist_3_cog:
       x: 0.0
       y: 0.0
-      z: -0.02
-    hande_cog:
-      x: 0.0
-      y: 0.0
-      z: 0.058
-    finger_cog:
-      x: 0.0
-      y: 0.0
-      z: 0.023 
-
+      z: -0.02 
