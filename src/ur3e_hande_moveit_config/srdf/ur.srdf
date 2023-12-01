@@ -23,7 +23,6 @@
         <joint name="wrist_3-flange"/>
     </group>
     <group name="hand">
-        <!-- <link name="hande_to_wrist_flange" /> -->
         <link name="robotiq_hande_base_link"/>
         <link name="left_finger"/>
         <link name="right_finger"/>

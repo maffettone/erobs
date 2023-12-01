@@ -9,10 +9,10 @@
     ur_type
     parent" >
 
-  <xacro:property name="hande_joint_limit_params" value="$(find ur3e_hande_robot_description)/config/$(arg ur_type)/joint_limits.yaml"/>
-  <xacro:property name="hande_kinematics_params" value="$(find ur3e_hande_robot_description)/config/$(arg ur_type)/default_kinematics.yaml"/>
-  <xacro:property name="hande_physical_params" value="$(find ur3e_hande_robot_description)/config/$(arg ur_type)/physical_parameters.yaml"/>
-  <xacro:property name="hande_visual_params" value="$(find ur3e_hande_robot_description)/config/$(arg ur_type)/visual_parameters.yaml"/>
+  <xacro:property name="hande_joint_limit_params" value="$(find ur3e_hande_robot_description)/config/hande/joint_limits.yaml"/>
+  <xacro:property name="hande_kinematics_params" value="$(find ur3e_hande_robot_description)/config/hande/default_kinematics.yaml"/>
+  <xacro:property name="hande_physical_params" value="$(find ur3e_hande_robot_description)/config/hande/physical_parameters.yaml"/>
+  <xacro:property name="hande_visual_params" value="$(find ur3e_hande_robot_description)/config/hande/visual_parameters.yaml"/>
 
   <xacro:macro name="cylinder_inertial" params="radius length mass *origin">
     <inertial>
@@ -27,12 +27,7 @@
   <xacro:property name="config_physical_parameters" value="${xacro.load_yaml(hande_physical_params)}"/>
 
   <!-- Extract subsections from yaml dictionaries -->
-  <!-- <xacro:property name="sec_limits" value="${config_joint_limit_parameters['joint_limits']}"/> -->
-  <!-- <xacro:property name="sec_dh_parameters" value="${config_physical_parameters['dh_parameters']}"/> -->
-  <!-- <xacro:property name="sec_offsets" value="${config_physical_parameters['offsets']}"/> -->
   <xacro:property name="sec_inertia_parameters" value="${config_physical_parameters['inertia_parameters']}" />
-  <!-- <xacro:property name="sec_mesh_files" value="${config_visual_parameters['mesh_files']}" scope="parent"/> -->
-  <!-- <xacro:property name="sec_kinematics" value="${config_kinematics_parameters['kinematics']}" /> -->
 
   <xacro:property name="intertia_links" value="${sec_inertia_parameters['links']}" scope="parent"/>
 
@@ -57,7 +52,7 @@
   <xacro:property name="finger_radius" value="${sec_inertia_parameters['finger_radius']}" scope="parent"/>
 
 
-    <!-- customization to include hande -->
+    <!-- customizations to include hande -->
     <link name="${tf_prefix}robotiq_hande_base_link">
       <visual>
         <origin xyz="0 0 0" rpy="0 0 0" />
@@ -139,16 +134,6 @@
       <mimic joint="${tf_prefix}joint_finger" multiplier="1" offset="0"/>
     </joint>
 
-    <!-- <joint name="$(arg tf_prefix)hande_to_wrist_flange" type="fixed">
-      <parent link="${parent}" />
-      <child link="${tf_prefix}robotiq_hande_base_link" />
-      <origin xyz="1 1 0" rpy="0 0 0" />
-    </joint> -->
-
-
 </xacro:macro>
-
-
-
 
 </robot>
