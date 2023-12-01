@@ -5,7 +5,6 @@ inertia_parameters:
   left_finger_mass: 0.03804
   right_finger_mass: 0.03804
 
-
   hande_base_radius: 0.048
   finger_radius: 0.006
 
@@ -29,4 +28,3 @@ inertia_parameters:
       x: 0.0
       y: 0.0
       z: 0.023 
-

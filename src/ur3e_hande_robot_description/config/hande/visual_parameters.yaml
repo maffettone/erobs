@@ -38,4 +38,3 @@ mesh_files:
       mesh:
         package: ur3e_hande_robot_description
         path: meshes/hande/collision/finger_2.stl
-          

@@ -99,13 +99,14 @@
      <origin xyz="0 0 0" rpy="0 0 0" />          <!-- position robot in the world -->
    </xacro:ur_robot>
 
+    <!-- Call the robot gripper -->
     <xacro:robotiq_hande 
      name="$(arg name)"
      tf_prefix="$(arg tf_prefix)"
-     ur_type="$(arg ur_type)"
      parent="world"
    />
 
+    <!-- attach the gripper to the arm -->
     <joint name="$(arg tf_prefix)hande_to_wrist_flange" type="fixed">
       <parent link="$(arg tf_prefix)flange" />
       <child link="$(arg tf_prefix)robotiq_hande_base_link" />

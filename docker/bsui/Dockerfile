@@ -29,7 +29,7 @@ RUN /bin/bash -c "source /opt/ros/${ROS_DISTRO}/setup.bash  && \
   rosdep install -r --from-paths . --ignore-src --rosdistro $ROS_DISTRO -y"
 WORKDIR  /root/ws/src
 RUN git clone https://maffettone:${GITHUB_TOKEN}@github.com/ChandimaFernando/ERoBS_ur3e.git -b action_client_basic
-WORKDIR  /root/ws/GITHUB_TOKEN
+WORKDIR  /root/ws/
 RUN /bin/bash -c "source /opt/ros/${ROS_DISTRO}/setup.bash && \
   colcon build --packages-select hello_moveit_interfaces custom_msgs"
 

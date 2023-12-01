@@ -12,7 +12,6 @@
     <group name="ur_arm">
         <joint name="virtual_joint"/>
         <joint name="base_joint"/>
-        <!-- <joint name="base_link-base_fixed_joint"/> -->
         <joint name="base_link-base_link_inertia"/>
         <joint name="shoulder_pan_joint"/>
         <joint name="shoulder_lift_joint"/>

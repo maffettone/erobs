@@ -23,7 +23,6 @@ inertia_parameters:
   wrist_2_mass: 0.8
   wrist_3_mass: 0.35
 
-
   shoulder_radius: 0.060   # manually measured
   upper_arm_radius: 0.054  # manually measured
   elbow_radius: 0.060      # manually measured

@@ -20,8 +20,6 @@ RUN mkdir /root/ws/src -p
 
 WORKDIR /root/ws/src
 
-ARG RANDOM_VAR=unknown
-
 RUN git clone https://github.com/ChandimaFernando/erobs.git -b humble_hande_integration
 
 WORKDIR /root/ws/
