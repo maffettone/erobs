@@ -71,6 +71,8 @@ private:
   const float total_states_ = 9.0;
   float progress_ = 0.0;
 
+  bool gripper_present_ = false;
+
   // Action server related callbacks
   rclcpp_action::GoalResponse handle_goal(
     const rclcpp_action::GoalUUID & uuid,
