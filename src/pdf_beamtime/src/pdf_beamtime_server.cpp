@@ -50,7 +50,6 @@ PdfBeamtimeServer::PdfBeamtimeServer(
   // // Initialize to home
   current_state_ = State::HOME;
   gripper_present_ = node_->get_parameter("gripper_present").as_bool();
-
 }
 rclcpp::node_interfaces::NodeBaseInterface::SharedPtr PdfBeamtimeServer::getNodeBaseInterface()
 // Expose the node base interface so that the node can be added to a component manager.
