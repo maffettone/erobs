@@ -1,3 +1,4 @@
+<!--Based on same file and version as the https://github.com/AcutronicRobotics/robotiq_modular_gripper/blob/4e708524e5dd20753f711686eb2cd1017a25a09e/robotiq_hande_gripper_description/urdf/robotiq_hande.urdf.xacro-->
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://wiki.ros.org/xacro" name="$(arg name)">
 

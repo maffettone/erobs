@@ -1,3 +1,4 @@
+# This file is taken from https://github.com/UniversalRobots/Universal_Robots_ROS2_Description/tree/29e90d5095fdf4af99eba3c3eae153d7d5d769c0/config/ur3e
 # Joints limits
 #
 # Sources:
@@ -7,6 +8,7 @@
 #  - Support > Articles > UR articles > Max. joint torques
 #    https://www.universal-robots.com/articles/ur-articles/max-joint-torques
 #    retrieved: 2020-06-16, last modified: 2020-06-09
+# TODO: Adjust the limits to suit the working consitions at beamline environment
 joint_limits:
   shoulder_pan_joint:
     # acceleration limits are not publicly available
