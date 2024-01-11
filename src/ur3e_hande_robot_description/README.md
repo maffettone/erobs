@@ -26,7 +26,7 @@ The description file for the hand-e gripper. This is inspired from *Acutronic Ro
 
 **urdf/ur_with_hande.urdf.xacro**
 
-This file creates the description for the ur3e robot and attaches the hande gripper. Ur3e robot module is created to be incompatible to the humble version of the the package [ur_description](https://github.com/UniversalRobots/Universal_Robots_ROS2_Description/blob/29e90d5095fdf4af99eba3c3eae153d7d5d769c0/urdf/ur.urdf.xacro) by the following line 
+This file creates the description for the ur3e robot and attaches the hande gripper. Ur3e robot module is created to be directly compatible with the humble version of the the package [ur_description](https://github.com/UniversalRobots/Universal_Robots_ROS2_Description/blob/29e90d5095fdf4af99eba3c3eae153d7d5d769c0/urdf/ur.urdf.xacro) by the following line 
 ```xml
 <xacro:include filename="$(find ur_description)/urdf/ur_macro.xacro"/>
 ```
