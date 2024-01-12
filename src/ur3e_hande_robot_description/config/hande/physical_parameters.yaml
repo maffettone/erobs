@@ -1,0 +1,30 @@
+# Physical parameters
+
+inertia_parameters:
+  hande_base_mass: 86387
+  left_finger_mass: 0.03804
+  right_finger_mass: 0.03804
+
+  hande_base_radius: 0.048
+  finger_radius: 0.006
+
+  links:
+    hande_base:
+      radius: 0.038
+      length: 0.1
+    left_finger:
+      radius: 0.006
+      length: 0.046
+    right_finger:
+      radius: 0.006
+      length: 0.046
+
+  center_of_mass:
+    hande_cog:
+      x: 0.0
+      y: 0.0
+      z: 0.058
+    finger_cog:
+      x: 0.0
+      y: 0.0
+      z: 0.023 

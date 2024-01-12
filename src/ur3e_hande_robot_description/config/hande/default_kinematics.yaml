@@ -1,0 +1,24 @@
+kinematics:
+  left_finger:
+    x: 0
+    y: 0
+    z: -0.023
+    roll: 0
+    pitch: 0
+    yaw: 0
+  right_finger:
+    x: 0
+    y: 0
+    z: -0.023
+    roll: 0
+    pitch: 0
+    yaw: 0
+  hande_base:
+    x: 0
+    y: 0
+    z: -0.05
+    roll: 0
+    pitch: 0
+    yaw: 0
+    
+  hash: calib_16756443741236045476

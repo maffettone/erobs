@@ -49,6 +49,7 @@ PdfBeamtimeServer::PdfBeamtimeServer(
 
   // // Initialize to home
   current_state_ = State::HOME;
+  gripper_present_ = node_->get_parameter("gripper_present").as_bool();
 }
 rclcpp::node_interfaces::NodeBaseInterface::SharedPtr PdfBeamtimeServer::getNodeBaseInterface()
 // Expose the node base interface so that the node can be added to a component manager.
@@ -329,8 +330,9 @@ bool PdfBeamtimeServer::run_fsm(
       break;
 
     case State::PICKUP:
-      // TODO(chandimafernando): Add a check for gipper availability before open/close
-      // gripper_close();
+      if (this->gripper_present_) {
+        // gripper_close()
+      }
       state_transition = true;
       break;
 
@@ -347,7 +349,9 @@ bool PdfBeamtimeServer::run_fsm(
       break;
 
     case State::PLACE:
-      // gripper_open();
+      if (this->gripper_present_) {
+        // gripper_open();
+      }
       state_transition = true;
       break;
 
@@ -382,7 +386,9 @@ bool PdfBeamtimeServer::reset_fsm(std::vector<double> joint_goal)
 {
   RCLCPP_INFO(node_->get_logger(), "State machine was RESET");
   current_state_ = State::HOME;
-  // gripper_open();
+  if (this->gripper_present_) {
+    // gripper_open();
+  }
   return set_joint_goal(joint_goal);
 }
 

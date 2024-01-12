@@ -16,7 +16,25 @@ RUN apt-get update \
 RUN pip3 install rosdep && \
         rosdep update
 
+RUN mkdir /root/ws/src -p
+
+WORKDIR /root/ws/src
+
+RUN git clone https://github.com/ChandimaFernando/erobs.git -b humble_hande_integration
+
+WORKDIR /root/ws/
+
+RUN /bin/bash -c "source /opt/ros/${ROS_DISTRO}/setup.bash && \
+        colcon build --symlink-install --packages-select ur3e_hande_robot_description"
+
 ENV ROBOT_IP=192.168.56.101
 ENV REVERSE_IP=192.168.56.102
 ENV UR_TYPE="ur3e"
-CMD ["/bin/sh", "-c", ".  /opt/ros/${ROS_DISTRO}/setup.sh &&  ros2 launch ur_robot_driver ur_control.launch.py ur_type:=${UR_TYPE} robot_ip:=${ROBOT_IP} launch_rviz:=false"]
+ENV DESCRIPTION_PKG="ur3e_hande_robot_description"
+ENV DESCRIPTION_FILE="ur_with_hande.urdf.xacro"
+
+# Copy entrypoint script
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+ENTRYPOINT [ "/entrypoint.sh" ]
