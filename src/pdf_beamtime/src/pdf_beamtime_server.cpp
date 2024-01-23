@@ -316,12 +316,18 @@ float PdfBeamtimeServer::get_action_completion_percentage()
 bool PdfBeamtimeServer::run_fsm(
   std::shared_ptr<const pdf_beamtime_interfaces::action::PickPlaceControlMsg_Goal> goal)
 {
+
+
+  FiniteStateMachine * home_fsm = new FiniteStateMachine(node_);
+
+
   RCLCPP_INFO(
     node_->get_logger(), "Executing state %s",
     state_names_[static_cast<int>(current_state_)].c_str());
   bool state_transition = false;
   switch (current_state_) {
     case State::HOME:
+      // FiniteStateMachine * home_fsm = new FiniteStateMachine(node_);
       state_transition = set_joint_goal(goal->pickup_approach);
       break;
 

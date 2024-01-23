@@ -25,7 +25,11 @@ set(dependencies
 
 include_directories(include)  # This makes sure the libraries are visible
 
-add_executable(pdf_beamtime_server src/pdf_beamtime_server.cpp)
+add_executable(pdf_beamtime_server 
+  src/pdf_beamtime_server.cpp
+  src/finite_state_machine.cpp
+  src/internal_state.cpp)
+  
 ament_target_dependencies(pdf_beamtime_server ${dependencies})
 
 install(TARGETS
