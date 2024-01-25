@@ -50,6 +50,7 @@ PdfBeamtimeServer::PdfBeamtimeServer(
   // // Initialize to home
   current_state_ = State::HOME;
   gripper_present_ = node_->get_parameter("gripper_present").as_bool();
+
 }
 rclcpp::node_interfaces::NodeBaseInterface::SharedPtr PdfBeamtimeServer::getNodeBaseInterface()
 // Expose the node base interface so that the node can be added to a component manager.
@@ -103,32 +104,34 @@ void PdfBeamtimeServer::execute(
     fsm_results = reset_fsm(goal_home);
   }
 
-  while (!state_transition_complete) {
-    fsm_results = run_fsm(goal);
-    if (!fsm_results) {
-      // Abort the execution if move_group_ fails
-      results->success = fsm_results;
-      goal_handle->abort(results);
-      RCLCPP_ERROR(node_->get_logger(), "Goal aborted !");
-      return;
-    }
+  fsm_results = run_fsm(goal);
 
-    if (goal_handle->is_canceling()) {
-      // Reset the fsm if goal is cancelled by the action client
-      results->success = false;
-      reset_fsm(goal_home);
-      goal_handle->canceled(results);
-      RCLCPP_WARN(node_->get_logger(), "Goal Cancelled !");
-      return;
-    }
-    feedback->status = get_action_completion_percentage();
-    goal_handle->publish_feedback(feedback);
+  // while (!state_transition_complete) {
+  //   fsm_results = run_fsm(goal);
+  //   if (!fsm_results) {
+  //     // Abort the execution if move_group_ fails
+  //     results->success = fsm_results;
+  //     goal_handle->abort(results);
+  //     RCLCPP_ERROR(node_->get_logger(), "Goal aborted !");
+  //     return;
+  //   }
 
-    // This marks the completion of a state transition cycle
-    if (current_state_ == State::HOME) {
-      state_transition_complete = true;
-    }
-  }
+  //   if (goal_handle->is_canceling()) {
+  //     // Reset the fsm if goal is cancelled by the action client
+  //     results->success = false;
+  //     reset_fsm(goal_home);
+  //     goal_handle->canceled(results);
+  //     RCLCPP_WARN(node_->get_logger(), "Goal Cancelled !");
+  //     return;
+  //   }
+  //   feedback->status = get_action_completion_percentage();
+  //   goal_handle->publish_feedback(feedback);
+
+  //   // This marks the completion of a state transition cycle
+  //   if (current_state_ == State::HOME) {
+  //     state_transition_complete = true;
+  //   }
+  // }
 
   if (current_state_ == State::HOME) {
     results->success = fsm_results;
@@ -157,6 +160,7 @@ bool PdfBeamtimeServer::set_joint_goal(std::vector<double> joint_goal)
   } else {
     RCLCPP_ERROR(node_->get_logger(), "Planning failed!");
   }
+
   return exec_results;
 }
 
@@ -317,9 +321,11 @@ bool PdfBeamtimeServer::run_fsm(
   std::shared_ptr<const pdf_beamtime_interfaces::action::PickPlaceControlMsg_Goal> goal)
 {
 
-
-  FiniteStateMachine * home_fsm = new FiniteStateMachine(node_);
-
+  FiniteStateMachine * state_holder_[num_of_states];
+  for (int i = 0; i < num_of_states; ++i) {
+    // state_holder_[i] = new FiniteStateMachine(node_);
+    state_holder_[i] = new FiniteStateMachine(node_, static_cast<State>(i));
+  }
 
   RCLCPP_INFO(
     node_->get_logger(), "Executing state %s",
@@ -327,8 +333,11 @@ bool PdfBeamtimeServer::run_fsm(
   bool state_transition = false;
   switch (current_state_) {
     case State::HOME:
-      // FiniteStateMachine * home_fsm = new FiniteStateMachine(node_);
-      state_transition = set_joint_goal(goal->pickup_approach);
+      // state_transition = set_joint_goal(goal->pickup_approach);
+      state_holder_[static_cast<int>(State::HOME)]->set_joint_goal(goal->pickup_approach);
+
+      // FiniteStateMachine * home_fsm = state_holder_[static_cast<int>(State::HOME)];
+
       break;
 
     case State::PICKUP_APPROACH:

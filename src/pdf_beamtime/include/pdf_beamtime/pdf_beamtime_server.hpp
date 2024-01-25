@@ -23,6 +23,7 @@ BSD 3 Clause License. See LICENSE.txt for details.*/
 #include <pdf_beamtime_interfaces/srv/box_obstacle_msg.hpp>
 #include <pdf_beamtime_interfaces/srv/cylinder_obstacle_msg.hpp>
 #include <pdf_beamtime/finite_state_machine.hpp>
+#include <pdf_beamtime/state_enum.hpp>
 
 /// @brief Create the obstacle environment and an simple action server for the robot to move
 class PdfBeamtimeServer
@@ -58,9 +59,7 @@ private:
   std::shared_ptr<rclcpp::ParameterEventHandler> param_subscriber_;
   std::shared_ptr<rclcpp::ParameterCallbackHandle> cb_handle_;
 
-  /// @brief States of the robot transitions
-  enum class State {HOME, PICKUP_APPROACH, PICKUP, GRASP_SUCCESS, PICKUP_RETREAT,
-    PLACE_APPROACH, PLACE, RELEASE_SUCCESS, PLACE_RETREAT};
+  const int num_of_states = 9;
 
   std::vector<std::string> state_names_ =
   {"HOME", "PICKUP_APPROACH", "PICKUP", "GRASP_SUCCESS", "PICKUP_RETREAT",

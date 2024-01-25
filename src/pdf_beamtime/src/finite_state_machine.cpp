@@ -1,6 +1,14 @@
 #include <pdf_beamtime/finite_state_machine.hpp>
 
 FiniteStateMachine::FiniteStateMachine(
+  const rclcpp::Node::SharedPtr node, State external_state_enum)
+: node_(node), move_group_interface_(node, "ur_manipulator"),
+  external_state_enum_(external_state_enum)
+{
+  state_ = static_cast<InternalState *>(new Resting());
+}
+
+FiniteStateMachine::FiniteStateMachine(
   const rclcpp::Node::SharedPtr node)
 : node_(node), move_group_interface_(node, "a")
 {
@@ -12,9 +20,9 @@ FiniteStateMachine::~FiniteStateMachine()
   delete state_;
 }
 
-void FiniteStateMachine::robot_moving()
+void FiniteStateMachine::move_robot()
 {
-  state_->robot_moving(*this);
+  state_->move_robot(*this);
 }
 
 void FiniteStateMachine::robot_moved_successfully()
@@ -54,4 +62,9 @@ void FiniteStateMachine::stop()
 void FiniteStateMachine::transition_to_next_external_state()
 {
 
+}
+
+void FiniteStateMachine::set_joint_goal(std::vector<double> joint_goal)
+{
+  this->joint_goal_ = joint_goal;
 }

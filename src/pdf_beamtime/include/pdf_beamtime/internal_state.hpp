@@ -12,7 +12,7 @@ private:
 public:
   InternalState(/* args */);
   virtual ~InternalState();
-  virtual void robot_moving(FiniteStateMachine & fsm);
+  virtual void move_robot(FiniteStateMachine & fsm);
   virtual void robot_moved_successfully(FiniteStateMachine & fsm);
   virtual void pause(FiniteStateMachine & fsm);
   virtual void resume(FiniteStateMachine & fsm);
@@ -31,7 +31,7 @@ protected:
 class Resting : public InternalState
 {
 public:
-  void robot_moving(FiniteStateMachine & fsm) override;
+  void move_robot(FiniteStateMachine & fsm) override;
   void pause(FiniteStateMachine & fsm) override;
   ~Resting();
 

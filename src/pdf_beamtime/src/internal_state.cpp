@@ -18,8 +18,7 @@ void InternalState::setState(FiniteStateMachine & fsm, InternalState * state)
 
 }
 
-
-void InternalState::robot_moving(FiniteStateMachine & fsm)
+void InternalState::move_robot(FiniteStateMachine & fsm)
 {
 
 }
@@ -62,8 +61,19 @@ void InternalState::stop(FiniteStateMachine & fsm)
 
 // ********** Class Resting ************
 
-void Resting::robot_moving(FiniteStateMachine & fsm)
+void Resting::move_robot(FiniteStateMachine & fsm)
 {
+
+  fsm.move_group_interface_.setJointValueTarget(fsm.joint_goal_);
+  // Create a plan to that target pose
+  auto const [success, plan] = [&fsm] {
+      moveit::planning_interface::MoveGroupInterface::Plan msg;
+      auto const ok = static_cast<bool>(fsm.move_group_interface_.plan(msg));
+      return std::make_pair(ok, msg);
+    }();
+  if (success) {
+    auto exec_results = static_cast<bool>(fsm.move_group_interface_.execute(plan));
+  }
   setState(fsm, new Moving());
 }
 
