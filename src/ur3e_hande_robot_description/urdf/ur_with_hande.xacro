@@ -1,6 +1,6 @@
-<!--Based on same file and version as https://github.com/UniversalRobots/Universal_Robots_ROS2_Description/blob/29e90d5095fdf4af99eba3c3eae153d7d5d769c0/urdf/ur.urdf.xacro-->
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://wiki.ros.org/xacro" name="$(arg name)">
+<!--Based on same file and version as https://github.com/UniversalRobots/Universal_Robots_ROS2_Description/blob/29e90d5095fdf4af99eba3c3eae153d7d5d769c0/urdf/ur.urdf.xacro-->
    <!-- robot name parameter -->
    <xacro:arg name="name" default="ur"/>
    <!-- import main macro -->
