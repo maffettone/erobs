@@ -31,7 +31,7 @@ ENV ROBOT_IP=192.168.56.101
 ENV REVERSE_IP=192.168.56.102
 ENV UR_TYPE="ur3e"
 ENV DESCRIPTION_PKG="ur3e_hande_robot_description"
-ENV DESCRIPTION_FILE="ur_with_hande.urdf.xacro"
+ENV DESCRIPTION_FILE="ur_with_hande.xacro"
 
 # Copy entrypoint script
 COPY entrypoint.sh /entrypoint.sh
