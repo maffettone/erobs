@@ -39,6 +39,12 @@ PdfBeamtimeServer::PdfBeamtimeServer(
     std::bind(
       &PdfBeamtimeServer::remove_obstacles_service_cb, this, _1, _2));
 
+  bluesky_override_service_ = node_->create_service<BlueskyOverrideMsg>(
+    "pdf_bluesky_override",
+    std::bind(
+      &PdfBeamtimeServer::bluesky_override_service_cb, this, _1, _2));
+
+
   // Create the action server
   action_server_ = rclcpp_action::create_server<PickPlaceControlMsg>(
     this->node_,
@@ -50,6 +56,12 @@ PdfBeamtimeServer::PdfBeamtimeServer(
   // // Initialize to home
   current_state_ = State::HOME;
   gripper_present_ = node_->get_parameter("gripper_present").as_bool();
+
+  // InnerStateMachine * state_holder_[num_of_states];
+  for (int i = 0; i < num_of_states; ++i) {
+    // state_holder_[i] = new FiniteStateMachine(node_);
+    state_holder_[i] = new InnerStateMachine(node_, static_cast<State>(i));
+  }
 
 }
 rclcpp::node_interfaces::NodeBaseInterface::SharedPtr PdfBeamtimeServer::getNodeBaseInterface()
@@ -141,25 +153,25 @@ void PdfBeamtimeServer::execute(
 
 bool PdfBeamtimeServer::set_joint_goal(std::vector<double> joint_goal)
 {
-  move_group_interface_.setJointValueTarget(joint_goal);
-  // Create a plan to that target pose
-  auto const [success, plan] = [this] {
-      moveit::planning_interface::MoveGroupInterface::Plan msg;
-      auto const ok = static_cast<bool>(move_group_interface_.plan(msg));
-      return std::make_pair(ok, msg);
-    }();
+  // move_group_interface_.setJointValueTarget(joint_goal);
+  // // Create a plan to that target pose
+  // auto const [success, plan] = [this] {
+  //     moveit::planning_interface::MoveGroupInterface::Plan msg;
+  //     auto const ok = static_cast<bool>(move_group_interface_.plan(msg));
+  //     return std::make_pair(ok, msg);
+  //   }();
   // Execute the plan
   bool exec_results = false;
-  if (success) {
-    exec_results = static_cast<bool>(move_group_interface_.execute(plan));
-    if (exec_results) {
-      RCLCPP_INFO(node_->get_logger(), "Execution Succeeded");
-    } else {
-      RCLCPP_ERROR(node_->get_logger(), "Execution failed!");
-    }
-  } else {
-    RCLCPP_ERROR(node_->get_logger(), "Planning failed!");
-  }
+  // if (success) {
+  //   exec_results = static_cast<bool>(move_group_interface_.execute(plan));
+  //   if (exec_results) {
+  //     RCLCPP_INFO(node_->get_logger(), "Execution Succeeded");
+  //   } else {
+  //     RCLCPP_ERROR(node_->get_logger(), "Execution failed!");
+  //   }
+  // } else {
+  //   RCLCPP_ERROR(node_->get_logger(), "Planning failed!");
+  // }
 
   return exec_results;
 }
@@ -321,23 +333,23 @@ bool PdfBeamtimeServer::run_fsm(
   std::shared_ptr<const pdf_beamtime_interfaces::action::PickPlaceControlMsg_Goal> goal)
 {
 
-  FiniteStateMachine * state_holder_[num_of_states];
-  for (int i = 0; i < num_of_states; ++i) {
-    // state_holder_[i] = new FiniteStateMachine(node_);
-    state_holder_[i] = new FiniteStateMachine(node_, static_cast<State>(i));
-  }
-
   RCLCPP_INFO(
     node_->get_logger(), "Executing state %s",
     state_names_[static_cast<int>(current_state_)].c_str());
   bool state_transition = false;
   switch (current_state_) {
-    case State::HOME:
-      // state_transition = set_joint_goal(goal->pickup_approach);
-      state_holder_[static_cast<int>(State::HOME)]->set_joint_goal(goal->pickup_approach);
-
-      // FiniteStateMachine * home_fsm = state_holder_[static_cast<int>(State::HOME)];
-
+    case State::HOME: {
+        // state_transition = set_joint_goal(goal->pickup_approach);
+        state_holder_[static_cast<int>(State::HOME)]->set_joint_goal(goal->pickup_approach);
+        auto future =
+          state_holder_[static_cast<int>(State::HOME)]->move_robot(move_group_interface_);
+        if (future.valid()) {
+          future.wait();
+          current_state_ = State::PICKUP_APPROACH;
+        } else {
+          RCLCPP_ERROR(node_->get_logger(), "Error in future");
+        }
+      }
       break;
 
     case State::PICKUP_APPROACH:
@@ -397,6 +409,31 @@ bool PdfBeamtimeServer::run_fsm(
   return state_transition;
 }
 
+void PdfBeamtimeServer::bluesky_override_service_cb(
+  const std::shared_ptr<BlueskyOverrideMsg::Request> request,
+  std::shared_ptr<BlueskyOverrideMsg::Response> response)
+{
+  if (request->pause) {
+    move_group_interface_.stop();
+    get_active_inner_state()->pause();
+  }
+
+  if (request->abort) {
+    move_group_interface_.stop();
+    get_active_inner_state()->abort();
+  }
+
+  if (request->stop) {
+    move_group_interface_.stop();
+    get_active_inner_state()->stop();
+  }
+
+  if (request->halt) {
+    move_group_interface_.stop();
+    get_active_inner_state()->halt();
+  }
+}
+
 bool PdfBeamtimeServer::reset_fsm(std::vector<double> joint_goal)
 {
   RCLCPP_INFO(node_->get_logger(), "State machine was RESET");
@@ -405,6 +442,15 @@ bool PdfBeamtimeServer::reset_fsm(std::vector<double> joint_goal)
     // gripper_open();
   }
   return set_joint_goal(joint_goal);
+}
+
+InnerStateMachine * PdfBeamtimeServer::get_active_inner_state()
+{
+  for (int i = 0; i < num_of_states; ++i) {
+    if (this->state_holder_[i]->is_active()) {
+      return state_holder_[i];
+    }
+  }
 }
 
 int main(int argc, char * argv[])
@@ -443,7 +489,7 @@ int main(int argc, char * argv[])
   });
 
   auto parent_node = std::make_shared<PdfBeamtimeServer>(
-    "ur_manipulator",
+    "ur_arm",
     node_options);
   rclcpp::spin(parent_node->getNodeBaseInterface());
   rclcpp::shutdown();

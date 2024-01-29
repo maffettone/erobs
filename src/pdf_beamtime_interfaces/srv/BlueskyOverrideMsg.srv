@@ -1,0 +1,6 @@
+bool pause
+bool abort
+bool stop
+bool halt
+---
+bool results
