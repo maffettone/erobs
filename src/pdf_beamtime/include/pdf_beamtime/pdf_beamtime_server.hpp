@@ -75,6 +75,8 @@ private:
   const float total_states_ = 9.0;
   float progress_ = 0.0;
 
+  std::shared_ptr<const pdf_beamtime_interfaces::action::PickPlaceControlMsg_Goal> goal_;
+
   bool gripper_present_ = false;
 
   // Action server related callbacks
@@ -128,8 +130,7 @@ private:
   float get_action_completion_percentage();
 
   /// @brief Performs the transitions for each State
-  bool run_fsm(
-    std::shared_ptr<const pdf_beamtime_interfaces::action::PickPlaceControlMsg_Goal> goal);
+  bool run_fsm();
 
   /// @brief Set the current state to HOME and move robot to home position
   bool reset_fsm(std::vector<double> joint_goal);

@@ -39,6 +39,10 @@ PdfBeamtimeServer::PdfBeamtimeServer(
     std::bind(
       &PdfBeamtimeServer::remove_obstacles_service_cb, this, _1, _2));
 
+
+  auto override_service_cb_group_ = node_->create_callback_group(
+    rclcpp::CallbackGroupType::Reentrant);
+
   bluesky_override_service_ = node_->create_service<BlueskyOverrideMsg>(
     "pdf_bluesky_override",
     std::bind(
@@ -91,14 +95,21 @@ rclcpp_action::CancelResponse PdfBeamtimeServer::handle_cancel(
   const std::shared_ptr<rclcpp_action::ServerGoalHandle<PickPlaceControlMsg>> goal_handle)
 {
   RCLCPP_INFO(node_->get_logger(), "Received request to cancel goal");
-  (void)goal_handle;
+  // auto results = std::make_shared<PickPlaceControlMsg::Result>();
+  // results->success = false;
+  // move_group_interface_.stop();
+  // get_active_inner_state()->pause();
+  RCLCPP_INFO(node_->get_logger(), "Sending back response ### ");
+  // goal_handle->abort(results);
+
+  // (void)goal_handle;
   return rclcpp_action::CancelResponse::ACCEPT;
 }
 
 void PdfBeamtimeServer::execute(
   const std::shared_ptr<rclcpp_action::ServerGoalHandle<PickPlaceControlMsg>> goal_handle)
 {
-  const auto goal = goal_handle->get_goal();
+  this->goal_ = goal_handle->get_goal();
   //  Variables for feedback and results
   auto feedback = std::make_shared<PickPlaceControlMsg::Feedback>();
   auto results = std::make_shared<PickPlaceControlMsg::Result>();
@@ -116,8 +127,8 @@ void PdfBeamtimeServer::execute(
     fsm_results = reset_fsm(goal_home);
   }
 
-  fsm_results = run_fsm(goal);
-
+  fsm_results = run_fsm();
+  return;
   // while (!state_transition_complete) {
   //   fsm_results = run_fsm(goal);
   //   if (!fsm_results) {
@@ -128,14 +139,14 @@ void PdfBeamtimeServer::execute(
   //     return;
   //   }
 
-  //   if (goal_handle->is_canceling()) {
-  //     // Reset the fsm if goal is cancelled by the action client
-  //     results->success = false;
-  //     reset_fsm(goal_home);
-  //     goal_handle->canceled(results);
-  //     RCLCPP_WARN(node_->get_logger(), "Goal Cancelled !");
-  //     return;
-  //   }
+  // if (goal_handle->is_canceling()) {
+  //   // Reset the fsm if goal is cancelled by the action client
+  //   results->success = false;
+  //   reset_fsm(goal_home);
+  //   goal_handle->canceled(results);
+  //   RCLCPP_WARN(node_->get_logger(), "Goal Cancelled !");
+  //   return;
+  // }
   //   feedback->status = get_action_completion_percentage();
   //   goal_handle->publish_feedback(feedback);
 
@@ -148,32 +159,11 @@ void PdfBeamtimeServer::execute(
   if (current_state_ == State::HOME) {
     results->success = fsm_results;
     goal_handle->succeed(results);
+  } else {
+    results->success = fsm_results;
+    goal_handle->succeed(results);
   }
-}
 
-bool PdfBeamtimeServer::set_joint_goal(std::vector<double> joint_goal)
-{
-  // move_group_interface_.setJointValueTarget(joint_goal);
-  // // Create a plan to that target pose
-  // auto const [success, plan] = [this] {
-  //     moveit::planning_interface::MoveGroupInterface::Plan msg;
-  //     auto const ok = static_cast<bool>(move_group_interface_.plan(msg));
-  //     return std::make_pair(ok, msg);
-  //   }();
-  // Execute the plan
-  bool exec_results = false;
-  // if (success) {
-  //   exec_results = static_cast<bool>(move_group_interface_.execute(plan));
-  //   if (exec_results) {
-  //     RCLCPP_INFO(node_->get_logger(), "Execution Succeeded");
-  //   } else {
-  //     RCLCPP_ERROR(node_->get_logger(), "Execution failed!");
-  //   }
-  // } else {
-  //   RCLCPP_ERROR(node_->get_logger(), "Planning failed!");
-  // }
-
-  return exec_results;
 }
 
 std::vector<moveit_msgs::msg::CollisionObject> PdfBeamtimeServer::create_env()
@@ -329,8 +319,7 @@ float PdfBeamtimeServer::get_action_completion_percentage()
   return progress_ / total_states_;
 }
 
-bool PdfBeamtimeServer::run_fsm(
-  std::shared_ptr<const pdf_beamtime_interfaces::action::PickPlaceControlMsg_Goal> goal)
+bool PdfBeamtimeServer::run_fsm()
 {
 
   RCLCPP_INFO(
@@ -339,21 +328,24 @@ bool PdfBeamtimeServer::run_fsm(
   bool state_transition = false;
   switch (current_state_) {
     case State::HOME: {
-        // state_transition = set_joint_goal(goal->pickup_approach);
-        state_holder_[static_cast<int>(State::HOME)]->set_joint_goal(goal->pickup_approach);
-        auto future =
+        state_holder_[static_cast<int>(State::HOME)]->set_active_true();
+        state_holder_[static_cast<int>(State::HOME)]->set_joint_goal(goal_->pickup_approach);
+        auto motion_results =
           state_holder_[static_cast<int>(State::HOME)]->move_robot(move_group_interface_);
-        if (future.valid()) {
-          future.wait();
+        if (motion_results == moveit::core::MoveItErrorCode::SUCCESS) {
+          // Robot has successfully moved. Safe to change the state.
           current_state_ = State::PICKUP_APPROACH;
+          state_holder_[static_cast<int>(State::HOME)]->set_active_false();
         } else {
-          RCLCPP_ERROR(node_->get_logger(), "Error in future");
+          RCLCPP_INFO(node_->get_logger(), "An error code other than SUCCESS");
+
         }
+
       }
       break;
 
     case State::PICKUP_APPROACH:
-      state_transition = set_joint_goal(goal->pickup);
+      // state_transition = set_joint_goal(goal_->pickup);
       break;
 
     case State::PICKUP:
@@ -364,15 +356,15 @@ bool PdfBeamtimeServer::run_fsm(
       break;
 
     case State::GRASP_SUCCESS:
-      state_transition = set_joint_goal(goal->pickup_approach);
+      // state_transition = set_joint_goal(goal_->pickup_approach);
       break;
 
     case State::PICKUP_RETREAT:
-      state_transition = set_joint_goal(goal->place_approach);
+      // state_transition = set_joint_goal(goal_->place_approach);
       break;
 
     case State::PLACE_APPROACH:
-      state_transition = set_joint_goal(goal->place);
+      // state_transition = set_joint_goal(goal_->place);
       break;
 
     case State::PLACE:
@@ -383,29 +375,19 @@ bool PdfBeamtimeServer::run_fsm(
       break;
 
     case State::RELEASE_SUCCESS:
-      state_transition = set_joint_goal(goal->place_approach);
+      // state_transition = set_joint_goal(goal_->place_approach);
       break;
 
     case State::PLACE_RETREAT:
-      state_transition = set_joint_goal(node_->get_parameter("home_angles").as_double_array());
+      // state_transition = set_joint_goal(node_->get_parameter("home_angles").as_double_array());
       break;
 
     default:
       break;
   }
-  // TODO(chandimafernando): Remove the 3 second wait in robot testing
-  RCLCPP_WARN(node_->get_logger(), "***** The thread will sleep for 3 seconds *****");
-  //  3 second wait for robot movement to complete
-  std::this_thread::sleep_for(std::chrono::seconds(3));
+
   progress_ = progress_ + 1.0;
-  // Propegate the current state here
-  if (current_state_ == State::PLACE_RETREAT && state_transition) {
-    // Complete the state transition cycle and go to HOME state
-    RCLCPP_INFO(node_->get_logger(), "Set current state to HOME");
-    current_state_ = State::HOME;
-  } else {
-    current_state_ = static_cast<State>(static_cast<int>(current_state_) + 1);
-  }
+
   return state_transition;
 }
 
@@ -416,10 +398,13 @@ void PdfBeamtimeServer::bluesky_override_service_cb(
   if (request->pause) {
     move_group_interface_.stop();
     get_active_inner_state()->pause();
+    RCLCPP_INFO(node_->get_logger(), "Sending back response ### ");
+    response->results = true;
+    RCLCPP_INFO(node_->get_logger(), "Response Sent ### ");
   }
 
   if (request->abort) {
-    move_group_interface_.stop();
+    RCLCPP_INFO(node_->get_logger(), "Abort received ### ");
     get_active_inner_state()->abort();
   }
 
@@ -431,6 +416,13 @@ void PdfBeamtimeServer::bluesky_override_service_cb(
   if (request->halt) {
     move_group_interface_.stop();
     get_active_inner_state()->halt();
+  }
+
+  if (request->resume) {
+    RCLCPP_INFO(node_->get_logger(), "Resume command received");
+    run_fsm();
+    response->results = true;
+
   }
 }
 
@@ -446,11 +438,13 @@ bool PdfBeamtimeServer::reset_fsm(std::vector<double> joint_goal)
 
 InnerStateMachine * PdfBeamtimeServer::get_active_inner_state()
 {
-  for (int i = 0; i < num_of_states; ++i) {
+  int i;
+  for (i = 0; i < num_of_states; ++i) {
     if (this->state_holder_[i]->is_active()) {
-      return state_holder_[i];
+      break;
     }
   }
+  return state_holder_[i];
 }
 
 int main(int argc, char * argv[])

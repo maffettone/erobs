@@ -9,12 +9,14 @@ class InnerStateMachine
 {
 
 private:
+  rclcpp::Node::SharedPtr node_;
   State external_state_enum_;
   Internal_State internal_state_enum_;
   /// @brief Holds the passed joint target
   std::vector<double> joint_goal_;
 
-  std::future<moveit::core::MoveItErrorCode> execute_future_;
+  std::future<moveit::core::MoveItErrorCode> move_future_;
+  moveit::core::MoveItErrorCode execute_future_;
   /// @brief true if this outer state machine works on this particular state, false otherwise
   bool state_active_ = false;
 
@@ -28,20 +30,20 @@ private:
   {"RESTING", "MOVING", "PAUSED", "ABORT", "HALT", "STOP"};
 
 public:
-  rclcpp::Node::SharedPtr node_;
-
   InnerStateMachine(const rclcpp::Node::SharedPtr node, State external_state_enum);
   /// @brief checks the state before calling set_joint_value_target
   /// @param mgi move_group_interface_
   /// @return future with the move_group_interface_ error code
-  std::future<moveit::core::MoveItErrorCode> move_robot(
-    moveit::planning_interface::MoveGroupInterface & mgi);
+  // moveit::core::MoveItErrorCode move_robot(
+  //   moveit::planning_interface::MoveGroupInterface & mgi);
 
   /// @brief move the robot to the passed joint angles
   /// @param mgi move_group_interface_
   /// @return true if successfully planned
-  bool set_joint_value_target(
-    moveit::planning_interface::MoveGroupInterface & mgi);
+  // moveit::core::MoveItErrorCode
+  // std::pair<std::future<moveit::core::MoveItErrorCode>, bool> move_robot(
+  //   moveit::planning_interface::MoveGroupInterface & mgi);
+  moveit::core::MoveItErrorCode move_robot(moveit::planning_interface::MoveGroupInterface & mgi);
   /// @brief state change if paused command was issues
   void pause();
   void resume();
