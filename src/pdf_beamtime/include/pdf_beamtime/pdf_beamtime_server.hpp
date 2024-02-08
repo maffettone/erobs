@@ -133,10 +133,10 @@ private:
   bool run_fsm();
 
   /// @brief Set the current state to HOME and move robot to home position
-  bool reset_fsm(std::vector<double> joint_goal);
+  // bool reset_fsm(std::vector<double> joint_goal);
 
   /// @brief use move_group_interface to set joint targets
-  bool set_joint_goal(std::vector<double> joint_goal);
+  // bool set_joint_goal(std::vector<double> joint_goal);
 
   InnerStateMachine * get_active_inner_state();
 };

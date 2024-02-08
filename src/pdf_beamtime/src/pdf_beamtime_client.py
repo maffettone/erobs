@@ -23,7 +23,7 @@ class SimpleClient(Node):
     def send_goal(self):
         """Send a working goal."""
         goal_msg = PickPlaceControlMsg.Goal()
-        goal_msg.pickup_approach = [-3.0, -2.2230397, -2.4030528 , -1.627018 , -1.541525, 3.141435]
+        goal_msg.pickup_approach = [3.0, -2.2230397, -2.4030528 , -1.627018 , -1.541525, 3.141435]
         goal_msg.pickup = [-4.251453 , -2.2230678 , -2.4030139 , -1.6269628 , -1.0731676, 3.1413669]
         goal_msg.place_approach = [-0.9322131, -1.4574486, -1.2510113 , -3.5442234 , -0.928826 , 3.14093]
         goal_msg.place = [-4.223015, -2.1772848 , -2.330709 , -1.745418, -0.9967396, 3.141905]
@@ -31,7 +31,6 @@ class SimpleClient(Node):
         self._action_client.wait_for_server()
         self.get_logger().warn("********** Sending Goal Now *********")
         self._send_goal_future = self._action_client.send_goal_async(goal_msg, feedback_callback=self.feedback_callback)
-        return self._send_goal_future
 
     def send_incompatible_goal(self):
         """Send a goal that gets rejected by the move group."""
@@ -68,6 +67,14 @@ class SimpleClient(Node):
         self.get_logger().warn("********** Goal Canceling Now *********")
         self._goal_handle.cancel_goal_async()
 
+    def cancel_goal(self):
+        self._goal_handle = self._send_goal_future.result()
+        if self._goal_handle is not None:
+            self._action_client._cancel_goal(self._goal_handle)
+            print("Goal cancelled successfully.")
+        else:
+            print("No active goal to cancel.")
+
     def send_pause(self):
         stop_msg = BlueskyOverrideMsg.Request()
         stop_msg.stop = False
@@ -99,15 +106,16 @@ def main(args=None):
 
     client = SimpleClient()
     client.send_goal()
-    time.sleep(2)
-    client.send_pause()
+    time.sleep(4)
+    client.cancel_goal()
+    # client.send_pause()
     # time.sleep(4)
     # client.send_resume()
 
     # client.send_incompatible_goal()
-    client.send_self_cancelling_goal()
+    # client.send_self_cancelling_goal()
 
-    rclpy.spin(client)
+    # rclpy.spin(client)
 
     client.destroy_node()
 

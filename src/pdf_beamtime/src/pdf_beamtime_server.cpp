@@ -124,11 +124,10 @@ void PdfBeamtimeServer::execute(
     state_names_[static_cast<int>(current_state_)].c_str());
   RCLCPP_INFO(node_->get_logger(), "Robot is moved the HOME state first for a new execution.");
   if (current_state_ != State::HOME) {
-    fsm_results = reset_fsm(goal_home);
+    // fsm_results = reset_fsm(goal_home);
   }
 
   fsm_results = run_fsm();
-  return;
   // while (!state_transition_complete) {
   //   fsm_results = run_fsm(goal);
   //   if (!fsm_results) {
@@ -426,15 +425,15 @@ void PdfBeamtimeServer::bluesky_override_service_cb(
   }
 }
 
-bool PdfBeamtimeServer::reset_fsm(std::vector<double> joint_goal)
-{
-  RCLCPP_INFO(node_->get_logger(), "State machine was RESET");
-  current_state_ = State::HOME;
-  if (this->gripper_present_) {
-    // gripper_open();
-  }
-  return set_joint_goal(joint_goal);
-}
+// bool PdfBeamtimeServer::reset_fsm(std::vector<double> joint_goal)
+// {
+//   RCLCPP_INFO(node_->get_logger(), "State machine was RESET");
+//   current_state_ = State::HOME;
+//   if (this->gripper_present_) {
+//     // gripper_open();
+//   }
+//   return set_joint_goal(joint_goal);
+// }
 
 InnerStateMachine * PdfBeamtimeServer::get_active_inner_state()
 {
