@@ -20,11 +20,9 @@ private:
   /// @brief true if this outer state machine works on this particular state, false otherwise
   bool state_active_ = false;
 
-  // moveit::planning_interface::MoveGroupInterface move_group_interface_;
-
   std::vector<std::string> external_state_names_ =
-  {"HOME", "PICKUP_APPROACH", "PICKUP", "GRASP_SUCCESS", "PICKUP_RETREAT",
-    "PLACE_APPROACH", "PLACE", "RELEASE_SUCCESS", "PLACE_RETREAT"};
+  {"HOME", "PICKUP_APPROACH", "PICKUP", "GRASP_SUCCESS", "GRASP_FAILURE", "PICKUP_RETREAT",
+    "PLACE_APPROACH", "PLACE", "RELEASE_SUCCESS", "RELEASE_FAILURE", "PLACE_RETREAT"};
 
   std::vector<std::string> internal_state_names =
   {"RESTING", "MOVING", "PAUSED", "ABORT", "HALT", "STOP"};
@@ -35,29 +33,26 @@ public:
   /// @brief move the robot to the passed joint angles
   /// @param mgi move_group_interface_
   /// @return next outer state
-  State move_robot(moveit::planning_interface::MoveGroupInterface & mgi);
+  moveit::core::MoveItErrorCode move_robot(
+    moveit::planning_interface::MoveGroupInterface & mgi,
+    std::vector<double> joint_goal);
 
   /// @brief state change if paused command was issues
-  void pause();
-  State resume(moveit::planning_interface::MoveGroupInterface & mgi);
+  void pause(moveit::planning_interface::MoveGroupInterface & mgi);
+  // State resume(moveit::planning_interface::MoveGroupInterface & mgi);
   /// @brief TODO: rewind the state back to RESTING
   void rewind();
-  State abort();
-  State halt();
+  void abort();
+  void halt();
   void stop();
 
-  State open_gripper();
+  void set_internal_state(Internal_State state);
+  Internal_State get_internal_state();
 
-  State close_gripper();
+  void set_external_state(State state);
 
-  /// @brief sets the joint target in a variable
-  /// @param joint_goal joint target
-  void set_joint_goal(std::vector<double> joint_goal);
-
-  /// @brief setters and getter for the active state
-  void set_active_true();
-  void set_active_false();
-  bool is_active();
+  moveit::core::MoveItErrorCode open_gripper();
+  moveit::core::MoveItErrorCode close_gripper();
 
   ~InnerStateMachine();
 };

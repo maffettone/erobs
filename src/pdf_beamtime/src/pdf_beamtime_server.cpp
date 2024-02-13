@@ -50,6 +50,7 @@ PdfBeamtimeServer::PdfBeamtimeServer(
   // // Initialize to home
   current_state_ = State::HOME;
   gripper_present_ = node_->get_parameter("gripper_present").as_bool();
+  inner_state_machine_ = new InnerStateMachine(node_, State::HOME);
 }
 rclcpp::node_interfaces::NodeBaseInterface::SharedPtr PdfBeamtimeServer::getNodeBaseInterface()
 // Expose the node base interface so that the node can be added to a component manager.
@@ -89,75 +90,59 @@ void PdfBeamtimeServer::execute(
   //  Variables for feedback and results
   auto feedback = std::make_shared<PickPlaceControlMsg::Feedback>();
   auto results = std::make_shared<PickPlaceControlMsg::Result>();
-  bool fsm_results = true;
-  bool state_transition_complete = false;
+  moveit::core::MoveItErrorCode fsm_results;
   progress_ = 0.0;
-  auto goal_home = node_->get_parameter("home_angles").as_double_array();
+  goal_home_ = node_->get_parameter("home_angles").as_double_array();
   feedback->status = get_action_completion_percentage();
 
   RCLCPP_INFO(
     node_->get_logger(), "Current state is state %s.",
-    state_names_[static_cast<int>(current_state_)].c_str());
+    external_state_names_[static_cast<int>(current_state_)].c_str());
+
   RCLCPP_INFO(node_->get_logger(), "Robot is moved the HOME state first for a new execution.");
   if (current_state_ != State::HOME) {
-    fsm_results = reset_fsm(goal_home);
+    fsm_results = reset_fsm();
   }
 
-  while (!state_transition_complete) {
-    fsm_results = run_fsm(goal);
-    if (!fsm_results) {
-      // Abort the execution if move_group_ fails
-      results->success = fsm_results;
-      goal_handle->abort(results);
-      RCLCPP_ERROR(node_->get_logger(), "Goal aborted !");
-      return;
-    }
+  while (get_action_completion_percentage() < 99.99999) {
+    // Variable paused_
+    switch (paused_) {
+      case 1:
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+        break;
 
-    if (goal_handle->is_canceling()) {
-      // Reset the fsm if goal is cancelled by the action client
-      results->success = false;
-      reset_fsm(goal_home);
-      goal_handle->canceled(results);
-      RCLCPP_WARN(node_->get_logger(), "Goal Cancelled !");
-      return;
-    }
-    feedback->status = get_action_completion_percentage();
-    goal_handle->publish_feedback(feedback);
+      default:
+        fsm_results = run_fsm(goal);
+        if (!fsm_results) {
+          // Abort the execution if move_group_ fails
+          results->success = false;
+          goal_handle->abort(results);
+          RCLCPP_ERROR(node_->get_logger(), "Goal aborted !");
+          return;
+        }
 
-    // This marks the completion of a state transition cycle
-    if (current_state_ == State::HOME) {
-      state_transition_complete = true;
+        if (goal_handle->is_canceling()) {
+          // Reset the fsm if goal is cancelled by the action client
+          results->success = false;
+          reset_fsm();
+          goal_handle->canceled(results);
+          RCLCPP_WARN(node_->get_logger(), "Goal Cancelled !");
+          return;
+        }
+        feedback->status = get_action_completion_percentage();
+        goal_handle->publish_feedback(feedback);
+
+        // Propegate the current state here
+        if (get_action_completion_percentage() - 100.00 < 0.00001) {
+          // Complete the state transition cycle and go to HOME state
+          RCLCPP_INFO(node_->get_logger(), "Set current state to HOME");
+          current_state_ = State::HOME;
+          results->success = true;
+          goal_handle->succeed(results);
+        }
+        break;
     }
   }
-
-  if (current_state_ == State::HOME) {
-    results->success = fsm_results;
-    goal_handle->succeed(results);
-  }
-}
-
-bool PdfBeamtimeServer::set_joint_goal(std::vector<double> joint_goal)
-{
-  move_group_interface_.setJointValueTarget(joint_goal);
-  // Create a plan to that target pose
-  auto const [success, plan] = [this] {
-      moveit::planning_interface::MoveGroupInterface::Plan msg;
-      auto const ok = static_cast<bool>(move_group_interface_.plan(msg));
-      return std::make_pair(ok, msg);
-    }();
-  // Execute the plan
-  bool exec_results = false;
-  if (success) {
-    exec_results = static_cast<bool>(move_group_interface_.execute(plan));
-    if (exec_results) {
-      RCLCPP_INFO(node_->get_logger(), "Execution Succeeded");
-    } else {
-      RCLCPP_ERROR(node_->get_logger(), "Execution failed!");
-    }
-  } else {
-    RCLCPP_ERROR(node_->get_logger(), "Planning failed!");
-  }
-  return exec_results;
 }
 
 std::vector<moveit_msgs::msg::CollisionObject> PdfBeamtimeServer::create_env()
@@ -313,84 +298,205 @@ float PdfBeamtimeServer::get_action_completion_percentage()
   return progress_ / total_states_;
 }
 
-bool PdfBeamtimeServer::run_fsm(
+moveit::core::MoveItErrorCode PdfBeamtimeServer::run_fsm(
   std::shared_ptr<const pdf_beamtime_interfaces::action::PickPlaceControlMsg_Goal> goal)
 {
   RCLCPP_INFO(
     node_->get_logger(), "Executing state %s",
-    state_names_[static_cast<int>(current_state_)].c_str());
-  bool state_transition = false;
+    external_state_names_[static_cast<int>(current_state_)].c_str());
+  moveit::core::MoveItErrorCode motion_results = moveit::core::MoveItErrorCode::FAILURE;
   switch (current_state_) {
     case State::HOME:
-      state_transition = set_joint_goal(goal->pickup_approach);
+      motion_results = inner_state_machine_->move_robot(
+        move_group_interface_,
+        goal->pickup_approach);
+      if (motion_results == moveit::core::MoveItErrorCode::SUCCESS) {
+        current_state_ = State::PICKUP_APPROACH;
+        progress_ = progress_ + 1.0;
+      }
       break;
 
     case State::PICKUP_APPROACH:
-      state_transition = set_joint_goal(goal->pickup);
+      motion_results = inner_state_machine_->move_robot(
+        move_group_interface_,
+        goal->pickup);
+      if (motion_results == moveit::core::MoveItErrorCode::SUCCESS) {
+        current_state_ = State::PICKUP;
+        progress_ = progress_ + 1.0;
+      }
       break;
 
     case State::PICKUP:
       if (this->gripper_present_) {
-        // gripper_close()
+        //motion_results = gripper_close()
+        if (motion_results == moveit::core::MoveItErrorCode::SUCCESS) {
+          progress_ = progress_ + 1.0;
+          current_state_ = State::GRASP_SUCCESS;
+        } else {
+          current_state_ = State::GRASP_FAILURE;
+        }
+        motion_results = moveit::core::MoveItErrorCode::SUCCESS;
       }
-      state_transition = true;
+
       break;
 
     case State::GRASP_SUCCESS:
-      state_transition = set_joint_goal(goal->pickup_approach);
+      motion_results = inner_state_machine_->move_robot(
+        move_group_interface_,
+        goal->pickup_approach);
+      if (motion_results == moveit::core::MoveItErrorCode::SUCCESS) {
+        current_state_ = State::PICKUP_RETREAT;
+        progress_ = progress_ + 1.0;
+      }
       break;
 
     case State::PICKUP_RETREAT:
-      state_transition = set_joint_goal(goal->place_approach);
+      motion_results = inner_state_machine_->move_robot(
+        move_group_interface_,
+        goal->place_approach);
+      if (motion_results == moveit::core::MoveItErrorCode::SUCCESS) {
+        current_state_ = State::PLACE_APPROACH;
+        progress_ = progress_ + 1.0;
+      }
       break;
 
     case State::PLACE_APPROACH:
-      state_transition = set_joint_goal(goal->place);
+      motion_results = inner_state_machine_->move_robot(
+        move_group_interface_,
+        goal->place);
+      if (motion_results == moveit::core::MoveItErrorCode::SUCCESS) {
+        current_state_ = State::PLACE;
+        progress_ = progress_ + 1.0;
+      }
       break;
 
     case State::PLACE:
       if (this->gripper_present_) {
-        // gripper_open();
+        // motion_results = gripper_open();
+        if (motion_results == moveit::core::MoveItErrorCode::SUCCESS) {
+          progress_ = progress_ + 1.0;
+          current_state_ = State::RELEASE_SUCCESS;
+        } else {
+          current_state_ = State::RELEASE_FAILURE;
+        }
       }
-      state_transition = true;
       break;
 
     case State::RELEASE_SUCCESS:
-      state_transition = set_joint_goal(goal->place_approach);
+      motion_results = inner_state_machine_->move_robot(
+        move_group_interface_,
+        goal->place_approach);
+      if (motion_results == moveit::core::MoveItErrorCode::SUCCESS) {
+        current_state_ = State::PLACE_RETREAT;
+        progress_ = progress_ + 1.0;
+      }
       break;
 
     case State::PLACE_RETREAT:
-      state_transition = set_joint_goal(node_->get_parameter("home_angles").as_double_array());
+      motion_results = inner_state_machine_->move_robot(
+        move_group_interface_, goal_home_);
+      if (motion_results == moveit::core::MoveItErrorCode::SUCCESS) {
+        current_state_ = State::PLACE_RETREAT;
+        progress_ = progress_ + 1.0;
+      }
       break;
 
     default:
       break;
   }
-  // TODO(chandimafernando): Remove the 3 second wait in robot testing
-  RCLCPP_WARN(node_->get_logger(), "***** The thread will sleep for 3 seconds *****");
-  //  3 second wait for robot movement to complete
-  std::this_thread::sleep_for(std::chrono::seconds(3));
-  progress_ = progress_ + 1.0;
-  // Propegate the current state here
-  if (current_state_ == State::PLACE_RETREAT && state_transition) {
-    // Complete the state transition cycle and go to HOME state
-    RCLCPP_INFO(node_->get_logger(), "Set current state to HOME");
-    current_state_ = State::HOME;
-  } else {
-    current_state_ = static_cast<State>(static_cast<int>(current_state_) + 1);
-  }
-  return state_transition;
+
+  return motion_results;
 }
 
-bool PdfBeamtimeServer::reset_fsm(std::vector<double> joint_goal)
+bool PdfBeamtimeServer::reset_fsm()
 {
-  RCLCPP_INFO(node_->get_logger(), "State machine was RESET");
-  current_state_ = State::HOME;
+  bool reset_results = false;
+  auto motion_results = inner_state_machine_->move_robot(move_group_interface_, goal_home_);
   if (this->gripper_present_) {
     // gripper_open();
   }
-  return set_joint_goal(joint_goal);
+  if (motion_results == moveit::core::MoveItErrorCode::SUCCESS) {
+    current_state_ = State::HOME;
+    inner_state_machine_->set_internal_state(Internal_State::RESTING);
+    reset_results = true;
+    RCLCPP_INFO(node_->get_logger(), "State machine was RESET");
+  } else {
+    RCLCPP_INFO(node_->get_logger(), "State machine reset FAILED");
+  }
+  progress_ = 0.0;
+
+  return reset_results;
 }
+
+void PdfBeamtimeServer::handle_pause()
+{
+  paused_ = 1;
+  inner_state_machine_->pause(move_group_interface_);
+}
+
+void PdfBeamtimeServer::handle_stop()
+{
+  switch (current_state_) {
+    case State::HOME:
+      inner_state_machine_->stop();
+      break;
+
+    case State::PICKUP_APPROACH:
+      /* code */
+      break;
+
+    case State::PICKUP:
+      /* code */
+      break;
+
+    case State::GRASP_SUCCESS:
+      /* code */
+      break;
+
+    case State::GRASP_FAILURE:
+      /* code */
+      break;
+
+    case State::PICKUP_RETREAT:
+      /* code */
+      break;
+
+    case State::PLACE_APPROACH:
+      /* code */
+      break;
+
+    case State::PLACE:
+      /* code */
+      break;
+
+    case State::RELEASE_SUCCESS:
+      /* code */
+      break;
+
+    case State::RELEASE_FAILURE:
+      /* code */
+      break;
+
+    case State::PLACE_RETREAT:
+      /* code */
+      break;
+
+    default:
+      break;
+  }
+}
+
+void PdfBeamtimeServer::handle_abort()
+{
+  inner_state_machine_->abort();
+  // reset_fsm();
+}
+
+void PdfBeamtimeServer::handle_resume()
+{
+  paused_ = 0;
+}
+
 
 int main(int argc, char * argv[])
 {
