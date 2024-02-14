@@ -37,10 +37,6 @@ moveit::core::MoveItErrorCode InnerStateMachine::move_robot(
       }
       break;
 
-    case Internal_State::PAUSED:
-      // Handle resume here
-      break;
-
     default:
       RCLCPP_ERROR(
         node_->get_logger(), "Robot's current internal state is %s ",
@@ -99,7 +95,6 @@ void InnerStateMachine::halt()
 void InnerStateMachine::stop()
 {
   set_internal_state(Internal_State::STOP);
-
 }
 
 void InnerStateMachine::rewind()
@@ -107,7 +102,6 @@ void InnerStateMachine::rewind()
   if (internal_state_enum_ == Internal_State::PAUSED) {
     set_internal_state(Internal_State::RESTING);
   }
-
 }
 
 void InnerStateMachine::set_internal_state(Internal_State state)
@@ -123,7 +117,8 @@ void InnerStateMachine::set_internal_state(Internal_State state)
 void InnerStateMachine::set_external_state(State state)
 {
   RCLCPP_INFO(
-    node_->get_logger(), "[%s]: Internal state changed to %s ",
+    node_->get_logger(), "[%s]: External state inside inner state machine changed from %s to %s ",
+    external_state_names_[static_cast<int>(external_state_enum_)].c_str(),
     external_state_names_[static_cast<int>(external_state_enum_)].c_str(),
     external_state_names_[static_cast<int>(state)].c_str());
   external_state_enum_ = state;

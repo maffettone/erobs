@@ -15,6 +15,7 @@ BSD 3 Clause License. See LICENSE.txt for details.*/
 #include <string>
 #include <map>
 #include <vector>
+#include <cmath>
 #include <rclcpp/rclcpp.hpp>
 #include <rclcpp_action/rclcpp_action.hpp>
 #include <pdf_beamtime_interfaces/action/pick_place_control_msg.hpp>
@@ -42,6 +43,7 @@ public:
 
 private:
   rclcpp::Node::SharedPtr node_;
+
   moveit::planning_interface::MoveGroupInterface move_group_interface_;
 
   moveit::planning_interface::PlanningSceneInterface planning_scene_interface_;
@@ -56,18 +58,19 @@ private:
   /// @brief Pointer to the action server
   rclcpp_action::Server<PickPlaceControlMsg>::SharedPtr action_server_;
 
-  std::shared_ptr<rclcpp::ParameterEventHandler> param_subscriber_;
-  std::shared_ptr<rclcpp::ParameterCallbackHandle> cb_handle_;
-
+  /// @brief Pointer to the inner state machine object
   InnerStateMachine * inner_state_machine_;
 
+  /// @brief records home state
   std::vector<double, std::allocator<double>> goal_home_;
 
+  /// @brief a trigger variable to start pause sequence
   int paused_ = 0;
 
   std::vector<std::string> external_state_names_ =
   {"HOME", "PICKUP_APPROACH", "PICKUP", "GRASP_SUCCESS", "GRASP_FAILURE", "PICKUP_RETREAT",
-    "PLACE_APPROACH", "PLACE", "RELEASE_SUCCESS", "RELEASE_FAILURE", "PLACE_RETREAT"};
+    "PLACE_APPROACH", "PLACE", "RELEASE_SUCCESS", "RELEASE_FAILURE", "PLACE_RETREAT",
+    "RETRY_PICKUP"};
 
   std::vector<std::string> internal_state_names =
   {"RESTING", "MOVING", "PAUSED", "ABORT", "HALT", "STOP"};
@@ -78,6 +81,7 @@ private:
   const float total_states_ = 9.0;
   float progress_ = 0.0;
 
+/// @todo @ChandimaFernando Implement to see if gripper is attached
   bool gripper_present_ = false;
 
   // Action server related callbacks
@@ -130,10 +134,15 @@ private:
   /// @brief Set the current state to HOME and move robot to home position
   bool reset_fsm();
 
+  /// @brief Handles bluesky interrups to PAUSE, STOP, HALT, ABORT, and RESUME
   void handle_pause();
   void handle_stop();
+  void execute_stop();
   void handle_abort();
   void handle_resume();
+
+  /// @brief change the current state here
+  void set_current_state(State state);
 };
 
 #endif  // PDF_BEAMTIME__PDF_BEAMTIME_SERVER_HPP_
