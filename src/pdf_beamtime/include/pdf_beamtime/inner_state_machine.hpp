@@ -4,11 +4,11 @@ BSD 3 Clause License. See LICENSE.txt for details.*/
 
 #include <moveit/move_group_interface/move_group_interface.h>
 
-#include <rclcpp/node.hpp>
 #include <future>
 #include <string>
 #include <map>
 #include <vector>
+#include <rclcpp/node.hpp>
 #include <pdf_beamtime/state_enum.hpp>
 
 class InnerStateMachine
