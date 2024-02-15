@@ -37,7 +37,7 @@ ros2 service call /pdf_new_cylinder_obstacle pdf_beamtime_interfaces/srv/Cylinde
 ros2 service call /pdf_remove_obstacle pdf_beamtime_interfaces/srv/DeleteObstacleMsg "{name: 'inbeam_platform'}"
 ```
 
-## Testing of the FSM
+## Testing of the FSM with its internal FSM. 
 
 FSM is tested for its four main functionality:
 1. Execute a full cycle of state transitions beginning from State:Home to State:Place_Retreat.
@@ -46,9 +46,50 @@ FSM is tested for its four main functionality:
   `ros2 launch pdf_beamtime pdf_beamtime.launch.py &`
  - Execute the action client by uncommenting function send_goal() inside the main method in file /src/pdf_beamtime_client.py:
   `python3 src/pdf_beamtime/src/pdf_beamtime_client.py `
- -  Expected results: Robot performs pick up, drop off, and returns to the home position (Upright). The terminal should print "Set current state to HOME" 
+ -  Expected results: Robot performs pick up, drop off, and returns to the home position (Upright).
+ -  See below for the expected set of terminal messages:
+```bash
+[pdf_beamtime_server]: Current state is state HOME.
+[pdf_beamtime_server]: Executing state HOME
+[pdf_beamtime_server]: [HOME]: Internal state changed from RESTING to MOVING 
+[pdf_beamtime_server]: [HOME] Current state changed to PICKUP_APPROACH.
+[pdf_beamtime_server]: [HOME]: External state inside inner state machine changed from HOME to PICKUP_APPROACH 
+[pdf_beamtime_server]: [PICKUP_APPROACH]: Internal state changed from MOVING to RESTING 
+[pdf_beamtime_server]: [PICKUP_APPROACH]: Internal state changed from RESTING to MOVING 
+[pdf_beamtime_server]: [PICKUP_APPROACH] Current state changed to PICKUP.
+[pdf_beamtime_server]: [PICKUP_APPROACH]: External state inside inner state machine changed from PICKUP_APPROACH to PICKUP 
+[pdf_beamtime_server]: [PICKUP]: Internal state changed from MOVING to RESTING 
+[pdf_beamtime_server]: [PICKUP] Current state changed to GRASP_SUCCESS.
+[pdf_beamtime_server]: [PICKUP]: External state inside inner state machine changed from PICKUP to GRASP_SUCCESS 
+[pdf_beamtime_server]: [GRASP_SUCCESS]: Internal state changed from RESTING to RESTING 
+[pdf_beamtime_server]: [GRASP_SUCCESS]: Internal state changed from RESTING to MOVING 
+[pdf_beamtime_server]: [GRASP_SUCCESS] Current state changed to PICKUP_RETREAT.
+[pdf_beamtime_server]: [GRASP_SUCCESS]: External state inside inner state machine changed from GRASP_SUCCESS to PICKUP_RETREAT 
+[pdf_beamtime_server]: [PICKUP_RETREAT]: Internal state changed from MOVING to RESTING 
+[pdf_beamtime_server]: [PICKUP_RETREAT]: Internal state changed from RESTING to MOVING 
+[pdf_beamtime_server]: [PICKUP_RETREAT] Current state changed to PLACE_APPROACH.
+[pdf_beamtime_server]: [PICKUP_RETREAT]: External state inside inner state machine changed from PICKUP_RETREAT to PLACE_APPROACH 
+[pdf_beamtime_server]: [PLACE_APPROACH]: Internal state changed from MOVING to RESTING 
+[pdf_beamtime_server]: [PLACE_APPROACH]: Internal state changed from RESTING to MOVING 
+[pdf_beamtime_server]: [PLACE_APPROACH] Current state changed to PLACE.
+[pdf_beamtime_server]: [PLACE_APPROACH]: External state inside inner state machine changed from PLACE_APPROACH to PLACE 
+[pdf_beamtime_server]: [PLACE]: Internal state changed from MOVING to RESTING 
+[pdf_beamtime_server]: [PLACE] Current state changed to RELEASE_SUCCESS.
+[pdf_beamtime_server]: [PLACE]: External state inside inner state machine changed from PLACE to RELEASE_SUCCESS 
+[pdf_beamtime_server]: [RELEASE_SUCCESS]: Internal state changed from RESTING to RESTING 
+[pdf_beamtime_server]: [RELEASE_SUCCESS]: Internal state changed from RESTING to MOVING 
+[pdf_beamtime_server]: [RELEASE_SUCCESS] Current state changed to PLACE_RETREAT.
+[pdf_beamtime_server]: [RELEASE_SUCCESS]: External state inside inner state machine changed from RELEASE_SUCCESS to PLACE_RETREAT 
+[pdf_beamtime_server]: [PLACE_RETREAT]: Internal state changed from MOVING to RESTING 
+[pdf_beamtime_server]: [PLACE_RETREAT]: Internal state changed from RESTING to MOVING 
+[pdf_beamtime_server]: [PLACE_RETREAT] Current state changed to HOME.
+[pdf_beamtime_server]: [PLACE_RETREAT]: External state inside inner state machine changed from PLACE_RETREAT to HOME 
+[pdf_beamtime_server]: [HOME]: Internal state changed from MOVING to RESTING 
+[pdf_beamtime_server]: [HOME] Current state changed to HOME.
+[pdf_beamtime_server]: [HOME]: External state inside inner state machine changed from HOME to HOME 
+```
  
-2. Abort the FSM if move_group_interface fails to plan.
+1. Abort the FSM if move_group_interface fails to plan.
  - Make sure you have the containers ursim, urdriver, and urmoveit running
  - Launch pdf_beamtime node by running:
   `ros2 launch pdf_beamtime pdf_beamtime.launch.py &`
@@ -56,7 +97,7 @@ FSM is tested for its four main functionality:
   `python3 src/pdf_beamtime/src/pdf_beamtime_client.py `
  - Expected results: Robot performs pick up, but robot planning fails at the state "State:Place_Approach" . No further state transitions happen and the terminal prints "Goal aborted"
  
-2. Abort the FSM if the gall is canceled by the action client.
+1. Abort the FSM if the gall is canceled by the action client.
  - Make sure you have the containers ursim, urdriver, and urmoveit running
  - Launch pdf_beamtime node by running:
   `ros2 launch pdf_beamtime pdf_beamtime.launch.py &`
@@ -64,7 +105,7 @@ FSM is tested for its four main functionality:
   `python3 src/pdf_beamtime/src/pdf_beamtime_client.py `
  - Expected results: In 15 seconds after the goal is accepted by the action server, the action client sends a goal cancellation command.  The terminal prints "Received request to cancel goal", and "State machine was RESET". No further state transitions happen, the robot is moved to the State:Home state. Upon a successful transition to the state:Home, the terminal prints "Goal Cancelled !"
 
-4. Print the completion percentage:
+1. Print the completion percentage:
 - Upon running any of the functionalities in 1,2 or 3, node 'pdf_beamtime_client' should print the completion percentage after each state transition on the terminal. For 1, it should print up to 100%, and for 2, it should print only up to 55%
 
 **Testing via Bluesky Run Engine**
