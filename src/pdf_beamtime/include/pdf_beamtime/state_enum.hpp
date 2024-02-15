@@ -1,3 +1,5 @@
+/*Copyright 2023 Brookhaven National Laboratory
+BSD 3 Clause License. See LICENSE.txt for details.*/
 #pragma once
 
 /// @brief States of the robot transitions

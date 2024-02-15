@@ -304,7 +304,8 @@ moveit::core::MoveItErrorCode PdfBeamtimeServer::run_fsm(
   moveit::core::MoveItErrorCode motion_results = moveit::core::MoveItErrorCode::FAILURE;
   switch (current_state_) {
     case State::HOME:
-      // Moves the robot to pickup approach. If success: change state, increment progress, reset internel state
+      // Moves the robot to pickup approach.
+      // If success: change state, increment progress, reset internel state
       motion_results = inner_state_machine_->move_robot(
         move_group_interface_,
         goal->pickup_approach);
@@ -316,7 +317,8 @@ moveit::core::MoveItErrorCode PdfBeamtimeServer::run_fsm(
       break;
 
     case State::PICKUP_APPROACH:
-      // Moves the robot to pickup. If success: change state, increment progress, reset internel state
+      // Moves the robot to pickup.
+      // If success: change state, increment progress, reset internel state
       motion_results = inner_state_machine_->move_robot(
         move_group_interface_,
         goal->pickup);
@@ -329,7 +331,7 @@ moveit::core::MoveItErrorCode PdfBeamtimeServer::run_fsm(
 
     case State::PICKUP:
       // Pick up object by closing gripper. If success: move to grasp success with progress.
-      //if fails, move to grasp_failure
+      // if fails, move to grasp_failure
       if (this->gripper_present_) {
         motion_results = inner_state_machine_->close_gripper();
         if (motion_results == moveit::core::MoveItErrorCode::SUCCESS) {
@@ -438,7 +440,7 @@ moveit::core::MoveItErrorCode PdfBeamtimeServer::run_fsm(
       if (motion_results == moveit::core::MoveItErrorCode::SUCCESS) {
         set_current_state(State::PICKUP_APPROACH);
         inner_state_machine_->set_internal_state(Internal_State::RESTING);
-        progress_ = 1.0; // Reset the progress to 1 because this is a retry
+        progress_ = 1.0;  // Reset the progress to 1 because this is a retry
       }
       break;
 
@@ -482,7 +484,7 @@ void PdfBeamtimeServer::handle_stop()
 
 void PdfBeamtimeServer::execute_stop()
 {
-///@todo @ChandimaFernando This needs testing
+  // @todo @ChandimaFernando This needs testing
   switch (current_state_) {
     case State::GRASP_SUCCESS:
       // handle the decision to pick up something else after successfully grabing the sample

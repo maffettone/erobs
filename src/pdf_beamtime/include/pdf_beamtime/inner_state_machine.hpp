@@ -1,13 +1,18 @@
+/*Copyright 2023 Brookhaven National Laboratory
+BSD 3 Clause License. See LICENSE.txt for details.*/
 #pragma once
 
-#include <rclcpp/node.hpp>
 #include <moveit/move_group_interface/move_group_interface.h>
-#include <pdf_beamtime/state_enum.hpp>
+
+#include <rclcpp/node.hpp>
 #include <future>
+#include <string>
+#include <map>
+#include <vector>
+#include <pdf_beamtime/state_enum.hpp>
 
 class InnerStateMachine
 {
-
 private:
   rclcpp::Node::SharedPtr node_;
   State external_state_enum_;

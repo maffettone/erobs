@@ -1,3 +1,5 @@
+/*Copyright 2023 Brookhaven National Laboratory
+BSD 3 Clause License. See LICENSE.txt for details.*/
 #include <pdf_beamtime/inner_state_machine.hpp>
 
 InnerStateMachine::InnerStateMachine(
