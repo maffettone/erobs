@@ -50,7 +50,7 @@ PdfBeamtimeServer::PdfBeamtimeServer(
   // Initialize to home
   current_state_ = State::HOME;
   gripper_present_ = node_->get_parameter("gripper_present").as_bool();
-  inner_state_machine_ = new InnerStateMachine(node_, State::HOME);
+  inner_state_machine_ = new InnerStateMachine(node_);
 }
 rclcpp::node_interfaces::NodeBaseInterface::SharedPtr PdfBeamtimeServer::getNodeBaseInterface()
 // Expose the node base interface so that the node can be added to a component manager.
@@ -535,7 +535,6 @@ void PdfBeamtimeServer::set_current_state(State state)
     external_state_names_[static_cast<int>(current_state_)].c_str(),
     external_state_names_[static_cast<int>(state)].c_str());
   current_state_ = state;
-  inner_state_machine_->set_external_state(state);
 }
 
 int main(int argc, char * argv[])

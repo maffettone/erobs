@@ -15,7 +15,6 @@ class InnerStateMachine
 {
 private:
   rclcpp::Node::SharedPtr node_;
-  State external_state_enum_;
   Internal_State internal_state_enum_;
   /// @brief Holds the passed joint target
   std::vector<double> joint_goal_;
@@ -29,7 +28,7 @@ private:
   {"RESTING", "MOVING", "PAUSED", "ABORT", "HALT", "STOP"};
 
 public:
-  InnerStateMachine(const rclcpp::Node::SharedPtr node, State external_state_enum);
+  InnerStateMachine(const rclcpp::Node::SharedPtr node);
 
   /// @brief move the robot to the passed joint angles
   /// @param mgi move_group_interface_
@@ -56,7 +55,6 @@ public:
   /// @brief  Self explantory
   void set_internal_state(Internal_State state);
   Internal_State get_internal_state();
-  void set_external_state(State state);
 
   /// @brief  Gripper object is not set at the pdf_beamtime level
   /// @todo ChandimaFernando

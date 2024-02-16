@@ -3,8 +3,8 @@ BSD 3 Clause License. See LICENSE.txt for details.*/
 #include <pdf_beamtime/inner_state_machine.hpp>
 
 InnerStateMachine::InnerStateMachine(
-  const rclcpp::Node::SharedPtr node, State external_state_enum)
-: node_(node), external_state_enum_(external_state_enum)
+  const rclcpp::Node::SharedPtr node)
+: node_(node)
 {
   internal_state_enum_ = Internal_State::RESTING;
 }
@@ -61,8 +61,7 @@ void InnerStateMachine::pause(moveit::planning_interface::MoveGroupInterface & m
   switch (internal_state_enum_) {
     case Internal_State::RESTING:
       RCLCPP_INFO(
-        node_->get_logger(), "[%s] Paused while at internal state %s ",
-        external_state_names_[static_cast<int>(external_state_enum_)].c_str(),
+        node_->get_logger(), "Paused while at internal state %s ",
         internal_state_names[static_cast<int>(internal_state_enum_)].c_str());
       set_internal_state(Internal_State::PAUSED);
       break;
@@ -70,8 +69,7 @@ void InnerStateMachine::pause(moveit::planning_interface::MoveGroupInterface & m
     case Internal_State::MOVING:
       mgi.stop();
       RCLCPP_INFO(
-        node_->get_logger(), "[%s] Paused while at internal state %s ",
-        external_state_names_[static_cast<int>(external_state_enum_)].c_str(),
+        node_->get_logger(), " Paused while at internal state %s ",
         internal_state_names[static_cast<int>(internal_state_enum_)].c_str());
       set_internal_state(Internal_State::PAUSED);
       break;
@@ -105,21 +103,10 @@ void InnerStateMachine::rewind()
 void InnerStateMachine::set_internal_state(Internal_State state)
 {
   RCLCPP_INFO(
-    node_->get_logger(), "[%s]: Internal state changed from %s to %s ",
-    external_state_names_[static_cast<int>(external_state_enum_)].c_str(),
+    node_->get_logger(), "Internal state changed from %s to %s ",
     internal_state_names[static_cast<int>(internal_state_enum_)].c_str(),
     internal_state_names[static_cast<int>(state)].c_str());
   internal_state_enum_ = state;
-}
-
-void InnerStateMachine::set_external_state(State state)
-{
-  RCLCPP_INFO(
-    node_->get_logger(), "[%s]: External state inside inner state machine changed from %s to %s ",
-    external_state_names_[static_cast<int>(external_state_enum_)].c_str(),
-    external_state_names_[static_cast<int>(external_state_enum_)].c_str(),
-    external_state_names_[static_cast<int>(state)].c_str());
-  external_state_enum_ = state;
 }
 
 Internal_State InnerStateMachine::get_internal_state()
