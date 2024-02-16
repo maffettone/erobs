@@ -64,5 +64,4 @@ public:
   moveit::core::MoveItErrorCode open_gripper();
   moveit::core::MoveItErrorCode close_gripper();
 
-  ~InnerStateMachine();
 };
