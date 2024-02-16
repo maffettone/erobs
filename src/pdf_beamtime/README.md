@@ -53,40 +53,39 @@ FSM is tested for its four main functionality:
 [pdf_beamtime_server]: Executing state HOME
 [pdf_beamtime_server]: Internal state changed from RESTING to MOVING 
 [pdf_beamtime_server]: [HOME] Current state changed to PICKUP_APPROACH.
-[pdf_beamtime_server]: External state inside inner state machine changed from HOME to PICKUP_APPROACH 
 [pdf_beamtime_server]: Internal state changed from MOVING to RESTING 
+[pdf_beamtime_server]: Executing state PICKUP_APPROACH
 [pdf_beamtime_server]: Internal state changed from RESTING to MOVING 
 [pdf_beamtime_server]: [PICKUP_APPROACH] Current state changed to PICKUP.
-[pdf_beamtime_server]: External state inside inner state machine changed from PICKUP_APPROACH to PICKUP 
 [pdf_beamtime_server]: Internal state changed from MOVING to RESTING 
+[pdf_beamtime_server]: Executing state PICKUP
 [pdf_beamtime_server]: [PICKUP] Current state changed to GRASP_SUCCESS.
-[pdf_beamtime_server]: External state inside inner state machine changed from PICKUP to GRASP_SUCCESS 
 [pdf_beamtime_server]: Internal state changed from RESTING to RESTING 
+[pdf_beamtime_server]: Executing state GRASP_SUCCESS
 [pdf_beamtime_server]: Internal state changed from RESTING to MOVING 
 [pdf_beamtime_server]: [GRASP_SUCCESS] Current state changed to PICKUP_RETREAT.
-[pdf_beamtime_server]: External state inside inner state machine changed from GRASP_SUCCESS to PICKUP_RETREAT 
 [pdf_beamtime_server]: Internal state changed from MOVING to RESTING 
+[pdf_beamtime_server]: Executing state PICKUP_RETREAT
 [pdf_beamtime_server]: Internal state changed from RESTING to MOVING 
 [pdf_beamtime_server]: [PICKUP_RETREAT] Current state changed to PLACE_APPROACH.
-[pdf_beamtime_server]: External state inside inner state machine changed from PICKUP_RETREAT to PLACE_APPROACH 
 [pdf_beamtime_server]: Internal state changed from MOVING to RESTING 
+[pdf_beamtime_server]: Executing state PLACE_APPROACH
 [pdf_beamtime_server]: Internal state changed from RESTING to MOVING 
 [pdf_beamtime_server]: [PLACE_APPROACH] Current state changed to PLACE.
-[pdf_beamtime_server]: External state inside inner state machine changed from PLACE_APPROACH to PLACE 
 [pdf_beamtime_server]: Internal state changed from MOVING to RESTING 
+[pdf_beamtime_server]: Executing state PLACE
 [pdf_beamtime_server]: [PLACE] Current state changed to RELEASE_SUCCESS.
-[pdf_beamtime_server]: External state inside inner state machine changed from PLACE to RELEASE_SUCCESS 
 [pdf_beamtime_server]: Internal state changed from RESTING to RESTING 
+[pdf_beamtime_server]: Executing state RELEASE_SUCCESS
 [pdf_beamtime_server]: Internal state changed from RESTING to MOVING 
 [pdf_beamtime_server]: [RELEASE_SUCCESS] Current state changed to PLACE_RETREAT.
-[pdf_beamtime_server]: External state inside inner state machine changed from RELEASE_SUCCESS to PLACE_RETREAT 
 [pdf_beamtime_server]: Internal state changed from MOVING to RESTING 
+[pdf_beamtime_server]: Executing state PLACE_RETREAT
 [pdf_beamtime_server]: Internal state changed from RESTING to MOVING 
 [pdf_beamtime_server]: [PLACE_RETREAT] Current state changed to HOME.
-[pdf_beamtime_server]: External state inside inner state machine changed from PLACE_RETREAT to HOME 
 [pdf_beamtime_server]: Internal state changed from MOVING to RESTING 
+[pdf_beamtime_server]: Set current state to HOME
 [pdf_beamtime_server]: [HOME] Current state changed to HOME.
-[pdf_beamtime_server]: External state inside inner state machine changed from HOME to HOME 
 ```
  
 2. Abort the FSM if move_group_interface fails to plan.
