@@ -89,7 +89,7 @@ FSM is tested for its four main functionality:
 [pdf_beamtime_server]: [HOME]: External state inside inner state machine changed from HOME to HOME 
 ```
  
-1. Abort the FSM if move_group_interface fails to plan.
+2. Abort the FSM if move_group_interface fails to plan.
  - Make sure you have the containers ursim, urdriver, and urmoveit running
  - Launch pdf_beamtime node by running:
   `ros2 launch pdf_beamtime pdf_beamtime.launch.py &`
@@ -97,7 +97,7 @@ FSM is tested for its four main functionality:
   `python3 src/pdf_beamtime/src/pdf_beamtime_client.py `
  - Expected results: Robot performs pick up, but robot planning fails at the state "State:Place_Approach" . No further state transitions happen and the terminal prints "Goal aborted"
  
-1. Abort the FSM if the gall is canceled by the action client.
+3. Abort the FSM if the gall is canceled by the action client.
  - Make sure you have the containers ursim, urdriver, and urmoveit running
  - Launch pdf_beamtime node by running:
   `ros2 launch pdf_beamtime pdf_beamtime.launch.py &`
@@ -105,7 +105,7 @@ FSM is tested for its four main functionality:
   `python3 src/pdf_beamtime/src/pdf_beamtime_client.py `
  - Expected results: In 15 seconds after the goal is accepted by the action server, the action client sends a goal cancellation command.  The terminal prints "Received request to cancel goal", and "State machine was RESET". No further state transitions happen, the robot is moved to the State:Home state. Upon a successful transition to the state:Home, the terminal prints "Goal Cancelled !"
 
-1. Print the completion percentage:
+4. Print the completion percentage:
 - Upon running any of the functionalities in 1,2 or 3, node 'pdf_beamtime_client' should print the completion percentage after each state transition on the terminal. For 1, it should print up to 100%, and for 2, it should print only up to 55%
 
 **Testing via Bluesky Run Engine**

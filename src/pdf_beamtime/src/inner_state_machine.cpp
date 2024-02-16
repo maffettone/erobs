@@ -9,10 +9,6 @@ InnerStateMachine::InnerStateMachine(
   internal_state_enum_ = Internal_State::RESTING;
 }
 
-InnerStateMachine::~InnerStateMachine()
-{
-}
-
 moveit::core::MoveItErrorCode InnerStateMachine::move_robot(
   moveit::planning_interface::MoveGroupInterface & mgi, std::vector<double> joint_goal)
 {
