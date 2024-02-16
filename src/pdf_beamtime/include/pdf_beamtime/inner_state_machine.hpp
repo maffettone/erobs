@@ -63,5 +63,4 @@ public:
   /// @return Moveit error code
   moveit::core::MoveItErrorCode open_gripper();
   moveit::core::MoveItErrorCode close_gripper();
-
 };
