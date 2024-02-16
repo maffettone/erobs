@@ -28,7 +28,7 @@ private:
   {"RESTING", "MOVING", "PAUSED", "ABORT", "HALT", "STOP"};
 
 public:
-  InnerStateMachine(const rclcpp::Node::SharedPtr node);
+  explicit InnerStateMachine(const rclcpp::Node::SharedPtr node);
 
   /// @brief move the robot to the passed joint angles
   /// @param mgi move_group_interface_
