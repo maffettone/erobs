@@ -15,6 +15,7 @@ BSD 3 Clause License. See LICENSE.txt for details.*/
 #include <string>
 #include <map>
 #include <vector>
+#include <cmath>
 #include <rclcpp/rclcpp.hpp>
 #include <rclcpp_action/rclcpp_action.hpp>
 #include <pdf_beamtime_interfaces/action/pick_place_control_msg.hpp>
@@ -22,6 +23,8 @@ BSD 3 Clause License. See LICENSE.txt for details.*/
 #include <pdf_beamtime_interfaces/srv/delete_obstacle_msg.hpp>
 #include <pdf_beamtime_interfaces/srv/box_obstacle_msg.hpp>
 #include <pdf_beamtime_interfaces/srv/cylinder_obstacle_msg.hpp>
+#include <pdf_beamtime/inner_state_machine.hpp>
+#include <pdf_beamtime/state_enum.hpp>
 
 /// @brief Create the obstacle environment and an simple action server for the robot to move
 class PdfBeamtimeServer
@@ -40,6 +43,7 @@ public:
 
 private:
   rclcpp::Node::SharedPtr node_;
+
   moveit::planning_interface::MoveGroupInterface move_group_interface_;
 
   moveit::planning_interface::PlanningSceneInterface planning_scene_interface_;
@@ -54,16 +58,22 @@ private:
   /// @brief Pointer to the action server
   rclcpp_action::Server<PickPlaceControlMsg>::SharedPtr action_server_;
 
-  std::shared_ptr<rclcpp::ParameterEventHandler> param_subscriber_;
-  std::shared_ptr<rclcpp::ParameterCallbackHandle> cb_handle_;
+  /// @brief Pointer to the inner state machine object
+  InnerStateMachine * inner_state_machine_;
 
-  /// @brief States of the robot transitions
-  enum class State {HOME, PICKUP_APPROACH, PICKUP, GRASP_SUCCESS, PICKUP_RETREAT,
-    PLACE_APPROACH, PLACE, RELEASE_SUCCESS, PLACE_RETREAT};
+  /// @brief records home state
+  std::vector<double, std::allocator<double>> goal_home_;
 
-  std::vector<std::string> state_names_ =
-  {"HOME", "PICKUP_APPROACH", "PICKUP", "GRASP_SUCCESS", "PICKUP_RETREAT",
-    "PLACE_APPROACH", "PLACE", "RELEASE_SUCCESS", "PLACE_RETREAT"};
+  /// @brief a trigger variable to start pause sequence
+  int paused_ = 0;
+
+  std::vector<std::string> external_state_names_ =
+  {"HOME", "PICKUP_APPROACH", "PICKUP", "GRASP_SUCCESS", "GRASP_FAILURE", "PICKUP_RETREAT",
+    "PLACE_APPROACH", "PLACE", "RELEASE_SUCCESS", "RELEASE_FAILURE", "PLACE_RETREAT",
+    "RETRY_PICKUP"};
+
+  std::vector<std::string> internal_state_names =
+  {"RESTING", "MOVING", "PAUSED", "ABORT", "HALT", "STOP"};
 
   /// @brief current state of the robot
   State current_state_;
@@ -71,6 +81,7 @@ private:
   const float total_states_ = 9.0;
   float progress_ = 0.0;
 
+/// @todo @ChandimaFernando Implement to see if gripper is attached
   bool gripper_present_ = false;
 
   // Action server related callbacks
@@ -117,14 +128,21 @@ private:
   float get_action_completion_percentage();
 
   /// @brief Performs the transitions for each State
-  bool run_fsm(
+  moveit::core::MoveItErrorCode run_fsm(
     std::shared_ptr<const pdf_beamtime_interfaces::action::PickPlaceControlMsg_Goal> goal);
 
   /// @brief Set the current state to HOME and move robot to home position
-  bool reset_fsm(std::vector<double> joint_goal);
+  bool reset_fsm();
 
-  /// @brief use move_group_interface to set joint targets
-  bool set_joint_goal(std::vector<double> joint_goal);
+  /// @brief Handles bluesky interrups to PAUSE, STOP, HALT, ABORT, and RESUME
+  void handle_pause();
+  void handle_stop();
+  void execute_stop();
+  void handle_abort();
+  void handle_resume();
+
+  /// @brief change the current state here
+  void set_current_state(State state);
 };
 
 #endif  // PDF_BEAMTIME__PDF_BEAMTIME_SERVER_HPP_
