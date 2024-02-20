@@ -72,7 +72,8 @@ rclcpp::node_interfaces::NodeBaseInterface::SharedPtr PdfBeamtimeServer::getNode
 }
 
 rclcpp::node_interfaces::NodeBaseInterface::SharedPtr PdfBeamtimeServer::getNodeBaseInterface_BIN()
-// Expose the node base interface of the bluesky interrupt node so that the node can be added to a component manager.
+// Expose the node base interface of the bluesky interrupt node
+// so that the node can be added to a component manager.
 {
   return interrupt_node_->get_node_base_interface();
 }
