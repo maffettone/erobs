@@ -10,6 +10,7 @@ PdfBeamtimeServer::PdfBeamtimeServer(
   const rclcpp::NodeOptions & options = rclcpp::NodeOptions(),
   std::string action_name = "pdf_beamtime_action_server")
 : node_(std::make_shared<rclcpp::Node>("pdf_beamtime_server", options)),
+  interrupt_node_(std::make_shared<rclcpp::Node>("interrupt_server")),
   move_group_interface_(node_, move_group_name),
   planning_scene_interface_()
 {
@@ -51,11 +52,29 @@ PdfBeamtimeServer::PdfBeamtimeServer(
   current_state_ = State::HOME;
   gripper_present_ = node_->get_parameter("gripper_present").as_bool();
   inner_state_machine_ = new InnerStateMachine(node_);
+
+  bluesky_interrupt_service_ = interrupt_node_->create_service<BlueskyInterruptMsg>(
+    "bluesky_interrupt",
+    std::bind(
+      &PdfBeamtimeServer::bluesky_interrupt_cb, this, _1, _2));
+}
+
+void PdfBeamtimeServer::bluesky_interrupt_cb(
+  const std::shared_ptr<BlueskyInterruptMsg::Request> request,
+  std::shared_ptr<BlueskyInterruptMsg::Response> response)
+{
+  handle_pause();
 }
 rclcpp::node_interfaces::NodeBaseInterface::SharedPtr PdfBeamtimeServer::getNodeBaseInterface()
 // Expose the node base interface so that the node can be added to a component manager.
 {
   return node_->get_node_base_interface();
+}
+
+rclcpp::node_interfaces::NodeBaseInterface::SharedPtr PdfBeamtimeServer::getNodeBaseInterface_BIN()
+// Expose the node base interface of the bluesky interrupt node so that the node can be added to a component manager.
+{
+  return interrupt_node_->get_node_base_interface();
 }
 
 rclcpp_action::GoalResponse PdfBeamtimeServer::handle_goal(
@@ -109,7 +128,7 @@ void PdfBeamtimeServer::execute(
 
       default:
         fsm_results = run_fsm(goal);
-        if (!fsm_results) {
+        if (!fsm_results && std::abs(paused_ - 0) <= 0.0000001) {
           // Abort the execution if move_group_ fails
           results->success = false;
           goal_handle->abort(results);
@@ -473,6 +492,7 @@ bool PdfBeamtimeServer::reset_fsm()
 
 void PdfBeamtimeServer::handle_pause()
 {
+  RCLCPP_INFO(node_->get_logger(), "PAUSED command received");
   paused_ = 1;
   inner_state_machine_->pause(move_group_interface_);
 }
@@ -572,10 +592,16 @@ int main(int argc, char * argv[])
     {"robot_description", parameters[1].value_to_string()}
   });
 
+  rclcpp::executors::MultiThreadedExecutor executor;
+
   auto parent_node = std::make_shared<PdfBeamtimeServer>(
     "ur_arm",
     node_options);
-  rclcpp::spin(parent_node->getNodeBaseInterface());
+
+  executor.add_node(parent_node->getNodeBaseInterface());
+  executor.add_node(parent_node->getNodeBaseInterface_BIN());
+  executor.spin();
+
   rclcpp::shutdown();
   return 0;
 }
