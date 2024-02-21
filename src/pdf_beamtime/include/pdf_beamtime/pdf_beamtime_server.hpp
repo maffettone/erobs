@@ -23,6 +23,7 @@ BSD 3 Clause License. See LICENSE.txt for details.*/
 #include <pdf_beamtime_interfaces/srv/delete_obstacle_msg.hpp>
 #include <pdf_beamtime_interfaces/srv/box_obstacle_msg.hpp>
 #include <pdf_beamtime_interfaces/srv/cylinder_obstacle_msg.hpp>
+#include <pdf_beamtime_interfaces/srv/bluesky_interrupt_msg.hpp>
 #include <pdf_beamtime/inner_state_machine.hpp>
 #include <pdf_beamtime/state_enum.hpp>
 
@@ -35,14 +36,17 @@ public:
   using CylinderObstacleMsg = pdf_beamtime_interfaces::srv::CylinderObstacleMsg;
   using UpdateObstaclesMsg = pdf_beamtime_interfaces::srv::UpdateObstacleMsg;
   using DeleteObstacleMsg = pdf_beamtime_interfaces::srv::DeleteObstacleMsg;
+  using BlueskyInterruptMsg = pdf_beamtime_interfaces::srv::BlueskyInterruptMsg;
 
   explicit PdfBeamtimeServer(
     const std::string & move_group_name, const rclcpp::NodeOptions & options,
     std::string action_name);
   rclcpp::node_interfaces::NodeBaseInterface::SharedPtr getNodeBaseInterface();
+  rclcpp::node_interfaces::NodeBaseInterface::SharedPtr getInterruptNodeBaseInterface();
 
 private:
   rclcpp::Node::SharedPtr node_;
+  rclcpp::Node::SharedPtr interrupt_node_;
 
   moveit::planning_interface::MoveGroupInterface move_group_interface_;
 
@@ -54,6 +58,7 @@ private:
   rclcpp::Service<CylinderObstacleMsg>::SharedPtr new_cylinder_obstacle_service_;
   rclcpp::Service<UpdateObstaclesMsg>::SharedPtr update_obstacles_service_;
   rclcpp::Service<DeleteObstacleMsg>::SharedPtr remove_obstacles_service_;
+  rclcpp::Service<BlueskyInterruptMsg>::SharedPtr bluesky_interrupt_service_;
 
   /// @brief Pointer to the action server
   rclcpp_action::Server<PickPlaceControlMsg>::SharedPtr action_server_;
@@ -115,6 +120,13 @@ private:
   void remove_obstacles_service_cb(
     const std::shared_ptr<DeleteObstacleMsg::Request> request,
     std::shared_ptr<DeleteObstacleMsg::Response> response);
+
+  /// @brief Callback to handle interrupts frm bluesky
+  /// @param request type of interrupt: int
+  /// @param response Success / Failure : bool
+  void bluesky_interrupt_cb(
+    const std::shared_ptr<BlueskyInterruptMsg::Request> request,
+    std::shared_ptr<BlueskyInterruptMsg::Response> response);
 
   /// @brief Callback for adding a new obstacle
   /// @param request a CylinderObstacleMsg or BoxObstacleMsg
