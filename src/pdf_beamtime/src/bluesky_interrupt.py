@@ -14,6 +14,7 @@ class BlueskyInterrupt(Node):
         self.req = BlueskyInterruptMsg.Request()
 
     def send_request(self):
+        self.req.interrupt_type = 1
         self.future = self.cli.call_async(self.req)
         rclpy.spin_until_future_complete(self, self.future)
         return self.future.result()
