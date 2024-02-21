@@ -59,9 +59,7 @@ PdfBeamtimeServer::PdfBeamtimeServer(
       &PdfBeamtimeServer::bluesky_interrupt_cb, this, _1, _2));
 }
 
-void PdfBeamtimeServer::bluesky_interrupt_cb(
-  const std::shared_ptr<BlueskyInterruptMsg::Request> request,
-  std::shared_ptr<BlueskyInterruptMsg::Response> response)
+void PdfBeamtimeServer::bluesky_interrupt_cb()
 {
   handle_pause();
 }
@@ -71,7 +69,8 @@ rclcpp::node_interfaces::NodeBaseInterface::SharedPtr PdfBeamtimeServer::getNode
   return node_->get_node_base_interface();
 }
 
-rclcpp::node_interfaces::NodeBaseInterface::SharedPtr PdfBeamtimeServer::getNodeBaseInterface_BIN()
+rclcpp::node_interfaces::NodeBaseInterface::SharedPtr PdfBeamtimeServer::
+getInterruptNodeBaseInterface()
 // Expose the node base interface of the bluesky interrupt node
 // so that the node can be added to a component manager.
 {
@@ -595,12 +594,12 @@ int main(int argc, char * argv[])
 
   rclcpp::executors::MultiThreadedExecutor executor;
 
-  auto parent_node = std::make_shared<PdfBeamtimeServer>(
+  auto beamtime_server = std::make_shared<PdfBeamtimeServer>(
     "ur_arm",
     node_options);
 
-  executor.add_node(parent_node->getNodeBaseInterface());
-  executor.add_node(parent_node->getNodeBaseInterface_BIN());
+  executor.add_node(beamtime_server->getNodeBaseInterface());
+  executor.add_node(beamtime_server->getInterruptNodeBaseInterface());
   executor.spin();
 
   rclcpp::shutdown();

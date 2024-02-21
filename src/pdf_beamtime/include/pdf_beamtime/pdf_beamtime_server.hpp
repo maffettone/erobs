@@ -42,7 +42,7 @@ public:
     const std::string & move_group_name, const rclcpp::NodeOptions & options,
     std::string action_name);
   rclcpp::node_interfaces::NodeBaseInterface::SharedPtr getNodeBaseInterface();
-  rclcpp::node_interfaces::NodeBaseInterface::SharedPtr getNodeBaseInterface_BIN();
+  rclcpp::node_interfaces::NodeBaseInterface::SharedPtr getInterruptNodeBaseInterface();
 
 private:
   rclcpp::Node::SharedPtr node_;
@@ -121,9 +121,7 @@ private:
     const std::shared_ptr<DeleteObstacleMsg::Request> request,
     std::shared_ptr<DeleteObstacleMsg::Response> response);
 
-  void bluesky_interrupt_cb(
-    const std::shared_ptr<BlueskyInterruptMsg::Request> request,
-    std::shared_ptr<BlueskyInterruptMsg::Response> response);
+  void bluesky_interrupt_cb();
 
   /// @brief Callback for adding a new obstacle
   /// @param request a CylinderObstacleMsg or BoxObstacleMsg
