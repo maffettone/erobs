@@ -121,7 +121,12 @@ private:
     const std::shared_ptr<DeleteObstacleMsg::Request> request,
     std::shared_ptr<DeleteObstacleMsg::Response> response);
 
-  void bluesky_interrupt_cb();
+  /// @brief Callback to handle interrupts frm bluesky
+  /// @param request type of interrupt: int
+  /// @param response Success / Failure : bool
+  void bluesky_interrupt_cb(
+    const std::shared_ptr<BlueskyInterruptMsg::Request> request,
+    std::shared_ptr<BlueskyInterruptMsg::Response> response);
 
   /// @brief Callback for adding a new obstacle
   /// @param request a CylinderObstacleMsg or BoxObstacleMsg

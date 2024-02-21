@@ -59,9 +59,21 @@ PdfBeamtimeServer::PdfBeamtimeServer(
       &PdfBeamtimeServer::bluesky_interrupt_cb, this, _1, _2));
 }
 
-void PdfBeamtimeServer::bluesky_interrupt_cb()
+void PdfBeamtimeServer::bluesky_interrupt_cb(
+  const std::shared_ptr<BlueskyInterruptMsg::Request> request,
+  std::shared_ptr<BlueskyInterruptMsg::Response> response)
 {
-  handle_pause();
+  switch (request->interrupt_type) {
+    case 1:
+      handle_pause();
+      response->results = true;
+      break;
+
+    default:
+      RCLCPP_ERROR(node_->get_logger(), "Incorrect interrput type");
+      response->results = false;
+      break;
+  }
 }
 rclcpp::node_interfaces::NodeBaseInterface::SharedPtr PdfBeamtimeServer::getNodeBaseInterface()
 // Expose the node base interface so that the node can be added to a component manager.
