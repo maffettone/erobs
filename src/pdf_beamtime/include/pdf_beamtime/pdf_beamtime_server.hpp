@@ -146,11 +146,13 @@ private:
   /// @brief Set the current state to HOME and move robot to home position
   bool reset_fsm();
 
-  /// @brief Handles bluesky interrups to PAUSE, STOP, HALT, ABORT, and RESUME
+  /// @brief Handles bluesky interrupt to PAUSE
   void handle_pause();
   void handle_stop();
   void execute_stop();
   void handle_abort();
+
+  /// @brief Handles bluesky interrupt to RESUME
   void handle_resume();
 
   /// @brief change the current state here
