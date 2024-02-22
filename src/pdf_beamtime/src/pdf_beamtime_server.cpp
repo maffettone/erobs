@@ -137,16 +137,17 @@ void PdfBeamtimeServer::execute(
 
   // Keep executing the states until the a goal is completed or cancelled
   while (get_action_completion_percentage() < 99.99999) {
-    /// @todo @ChandimaFernando test the pause functionality
     switch (paused_) {
       case 1:
+        // Upon triggering pause_, the execution while loop switches to 1HZ.
+        // The external and internal states are handled separately by the FSM
         std::this_thread::sleep_for(std::chrono::seconds(1));
         break;
 
       default:
         fsm_results = run_fsm(goal);
         if (!fsm_results && std::abs(paused_ - 0) <= 0.0000001) {
-          // Abort the execution if move_group_ fails
+          // Abort the execution if move_group_ fails except when paused
           results->success = false;
           goal_handle->abort(results);
           RCLCPP_ERROR(node_->get_logger(), "Goal aborted !");
