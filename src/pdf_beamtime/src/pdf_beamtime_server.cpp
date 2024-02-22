@@ -64,6 +64,11 @@ void PdfBeamtimeServer::bluesky_interrupt_cb(
   std::shared_ptr<BlueskyInterruptMsg::Response> response)
 {
   switch (request->interrupt_type) {
+    case 0:
+      handle_resume();
+      response->results = true;
+      break;
+
     case 1:
       handle_pause();
       response->results = true;
@@ -557,6 +562,8 @@ void PdfBeamtimeServer::handle_abort()
 
 void PdfBeamtimeServer::handle_resume()
 {
+  RCLCPP_INFO(node_->get_logger(), "RESUME command received");
+  inner_state_machine_->set_internal_state(Internal_State::RESTING);
   paused_ = 0;
 }
 
