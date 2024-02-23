@@ -20,7 +20,7 @@ class BlueskyInterrupt(Node):
 
     def send_pause_request(self):
         """Populate and the send the pause request."""
-        self.req.interrupt_type = 1
+        self.req.interrupt_type = 'PAUSE'
         self.get_logger().info('Pause request sent')
         self.future = self.cli.call_async(self.req)
         rclpy.spin_until_future_complete(self, self.future)
@@ -28,7 +28,7 @@ class BlueskyInterrupt(Node):
 
     def send_resume_request(self):
         """Populate and the send the resume request."""
-        self.req.interrupt_type = 0
+        self.req.interrupt_type = 'RESUME'
         self.get_logger().info('Resume request sent')
         self.future = self.cli.call_async(self.req)
         rclpy.spin_until_future_complete(self, self.future)
