@@ -140,7 +140,6 @@ void PdfBeamtimeServer::execute(
 
   // Keep executing the states until the a goal is completed or cancelled
   while (get_action_completion_percentage() < 99.99999) {
-
     if (inner_state_machine_->get_internal_state() == Internal_State::PAUSED) {
       // Upon triggering pause_, the execution while loop switches to 1HZ.
       // The external and internal states are handled separately by the FSM
@@ -176,7 +175,6 @@ void PdfBeamtimeServer::execute(
         return;
       }
     }
-
   }
 }
 
