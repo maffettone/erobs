@@ -69,7 +69,7 @@ private:
   /// @brief records home state
   std::vector<double, std::allocator<double>> goal_home_;
 
-  /// @brief map the interrupt command strings to enums
+  /// @brief map the Bluesky syntax interrupt command strings to enums
   /// Note the re-use of Internal_state enums for dual purposes.
   std::map<std::string, Internal_State> interrupt_map = {
     {"PAUSE", Internal_State::PAUSED},
