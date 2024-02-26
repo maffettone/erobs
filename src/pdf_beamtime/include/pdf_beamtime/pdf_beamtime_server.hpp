@@ -69,8 +69,15 @@ private:
   /// @brief records home state
   std::vector<double, std::allocator<double>> goal_home_;
 
-  /// @brief a trigger variable to start pause sequence
-  int paused_ = 0;
+  /// @brief map the Bluesky syntax interrupt command strings to enums
+  /// Note the re-use of Internal_state enums for dual purposes.
+  std::map<std::string, Internal_State> interrupt_map = {
+    {"PAUSE", Internal_State::PAUSED},
+    {"STOP", Internal_State::STOP},
+    {"HALT", Internal_State::HALT},
+    {"ABORT", Internal_State::ABORT},
+    {"RESUME", Internal_State::MOVING}
+  };
 
   std::vector<std::string> external_state_names_ =
   {"HOME", "PICKUP_APPROACH", "PICKUP", "GRASP_SUCCESS", "GRASP_FAILURE", "PICKUP_RETREAT",
@@ -146,11 +153,13 @@ private:
   /// @brief Set the current state to HOME and move robot to home position
   bool reset_fsm();
 
-  /// @brief Handles bluesky interrups to PAUSE, STOP, HALT, ABORT, and RESUME
+  /// @brief Handles bluesky interrupt to PAUSE
   void handle_pause();
   void handle_stop();
   void execute_stop();
   void handle_abort();
+
+  /// @brief Handles bluesky interrupt to RESUME
   void handle_resume();
 
   /// @brief change the current state here

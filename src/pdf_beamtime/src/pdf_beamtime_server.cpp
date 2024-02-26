@@ -63,8 +63,16 @@ void PdfBeamtimeServer::bluesky_interrupt_cb(
   const std::shared_ptr<BlueskyInterruptMsg::Request> request,
   std::shared_ptr<BlueskyInterruptMsg::Response> response)
 {
-  switch (request->interrupt_type) {
-    case 1:
+  // conver the request string to the mapping enum
+  Internal_State request_enum = interrupt_map[request->interrupt_type];
+
+  switch (request_enum) {
+    case Internal_State::MOVING:
+      handle_resume();
+      response->results = true;
+      break;
+
+    case Internal_State::PAUSED:
       handle_pause();
       response->results = true;
       break;
@@ -132,43 +140,40 @@ void PdfBeamtimeServer::execute(
 
   // Keep executing the states until the a goal is completed or cancelled
   while (get_action_completion_percentage() < 99.99999) {
-    /// @todo @ChandimaFernando test the pause functionality
-    switch (paused_) {
-      case 1:
-        std::this_thread::sleep_for(std::chrono::seconds(1));
-        break;
+    if (inner_state_machine_->get_internal_state() == Internal_State::PAUSED) {
+      // Upon triggering pause_, the execution while loop switches to 1HZ.
+      // The external and internal states are handled separately by the FSM
+      std::this_thread::sleep_for(std::chrono::seconds(1));
+    } else {
+      fsm_results = run_fsm(goal);
+      if (!fsm_results && inner_state_machine_->get_internal_state() != Internal_State::PAUSED) {
+        // Abort the execution if move_group_ fails except when paused
+        results->success = false;
+        goal_handle->abort(results);
+        RCLCPP_ERROR(node_->get_logger(), "Goal aborted !");
+        return;
+      }
 
-      default:
-        fsm_results = run_fsm(goal);
-        if (!fsm_results && std::abs(paused_ - 0) <= 0.0000001) {
-          // Abort the execution if move_group_ fails
-          results->success = false;
-          goal_handle->abort(results);
-          RCLCPP_ERROR(node_->get_logger(), "Goal aborted !");
-          return;
-        }
+      if (goal_handle->is_canceling()) {
+        // Reset the fsm if goal is cancelled by the action client
+        results->success = false;
+        reset_fsm();
+        goal_handle->canceled(results);
+        RCLCPP_WARN(node_->get_logger(), "Goal Cancelled !");
+        return;
+      }
+      feedback->status = get_action_completion_percentage();
+      goal_handle->publish_feedback(feedback);
 
-        if (goal_handle->is_canceling()) {
-          // Reset the fsm if goal is cancelled by the action client
-          results->success = false;
-          reset_fsm();
-          goal_handle->canceled(results);
-          RCLCPP_WARN(node_->get_logger(), "Goal Cancelled !");
-          return;
-        }
-        feedback->status = get_action_completion_percentage();
-        goal_handle->publish_feedback(feedback);
-
-        // Send back results upon task completion
-        if (std::abs(get_action_completion_percentage() - 1.00) < 0.000001) {
-          // Complete the state transition cycle and go to HOME state
-          RCLCPP_INFO(node_->get_logger(), "Set current state to HOME");
-          set_current_state(State::HOME);
-          results->success = true;
-          goal_handle->succeed(results);
-          return;
-        }
-        break;
+      // Send back results upon task completion
+      if (std::abs(get_action_completion_percentage() - 1.00) < 0.000001) {
+        // Complete the state transition cycle and go to HOME state
+        RCLCPP_INFO(node_->get_logger(), "Set current state to HOME");
+        set_current_state(State::HOME);
+        results->success = true;
+        goal_handle->succeed(results);
+        return;
+      }
     }
   }
 }
@@ -505,7 +510,6 @@ bool PdfBeamtimeServer::reset_fsm()
 void PdfBeamtimeServer::handle_pause()
 {
   RCLCPP_INFO(node_->get_logger(), "PAUSED command received");
-  paused_ = 1;
   inner_state_machine_->pause(move_group_interface_);
 }
 
@@ -557,7 +561,8 @@ void PdfBeamtimeServer::handle_abort()
 
 void PdfBeamtimeServer::handle_resume()
 {
-  paused_ = 0;
+  RCLCPP_INFO(node_->get_logger(), "RESUME command received");
+  inner_state_machine_->set_internal_state(Internal_State::RESTING);
 }
 
 void PdfBeamtimeServer::set_current_state(State state)
