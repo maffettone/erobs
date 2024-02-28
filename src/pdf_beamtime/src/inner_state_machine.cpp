@@ -69,7 +69,7 @@ void InnerStateMachine::pause(moveit::planning_interface::MoveGroupInterface & m
     case Internal_State::MOVING:
       mgi.stop();
       RCLCPP_INFO(
-        node_->get_logger(), " Paused while at internal state %s ",
+        node_->get_logger(), "Paused while at internal state %s ",
         internal_state_names[static_cast<int>(internal_state_enum_)].c_str());
       set_internal_state(Internal_State::PAUSED);
       break;
@@ -78,19 +78,22 @@ void InnerStateMachine::pause(moveit::planning_interface::MoveGroupInterface & m
   }
 }
 
-void InnerStateMachine::abort()
+void InnerStateMachine::abort(moveit::planning_interface::MoveGroupInterface & mgi)
 {
+  mgi.stop();
+  RCLCPP_INFO(
+    node_->get_logger(), "Stopped while at internal state %s ",
+    internal_state_names[static_cast<int>(internal_state_enum_)].c_str());
   set_internal_state(Internal_State::ABORT);
 }
 
-void InnerStateMachine::halt()
+void InnerStateMachine::halt(moveit::planning_interface::MoveGroupInterface & mgi)
 {
+  mgi.stop();
+  RCLCPP_INFO(
+    node_->get_logger(), "Halted while at internal state %s ",
+    internal_state_names[static_cast<int>(internal_state_enum_)].c_str());
   set_internal_state(Internal_State::HALT);
-}
-
-void InnerStateMachine::stop()
-{
-  set_internal_state(Internal_State::STOP);
 }
 
 void InnerStateMachine::rewind()

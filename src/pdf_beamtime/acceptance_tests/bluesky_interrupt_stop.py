@@ -19,7 +19,7 @@ class BlueskyInterrupt(Node):
         self.req = BlueskyInterruptMsg.Request()
 
     def send_pause_request(self):
-        """Populate and the send the pause request."""
+        """Populate and send the pause request."""
         self.req.interrupt_type = 'PAUSE'
         self.get_logger().info('Pause request sent')
         self.future = self.cli.call_async(self.req)
@@ -27,9 +27,33 @@ class BlueskyInterrupt(Node):
         return self.future.result()
 
     def send_resume_request(self):
-        """Populate and the send the resume request."""
+        """Populate and send the resume request."""
         self.req.interrupt_type = 'RESUME'
         self.get_logger().info('Resume request sent')
+        self.future = self.cli.call_async(self.req)
+        rclpy.spin_until_future_complete(self, self.future)
+        return self.future.result()
+
+    def send_stop_request(self):
+        """Populate and send the stop request."""
+        self.req.interrupt_type = 'STOP'
+        self.get_logger().info('Stop request sent')
+        self.future = self.cli.call_async(self.req)
+        rclpy.spin_until_future_complete(self, self.future)
+        return self.future.result()
+
+    def send_abort_request(self):
+        """Populate and send the abort request."""
+        self.req.interrupt_type = 'ABORT'
+        self.get_logger().info('Abort request sent')
+        self.future = self.cli.call_async(self.req)
+        rclpy.spin_until_future_complete(self, self.future)
+        return self.future.result()
+
+    def send_halt_request(self):
+        """Populate and send the halt request."""
+        self.req.interrupt_type = 'HALT'
+        self.get_logger().info('Halt request sent')
         self.future = self.cli.call_async(self.req)
         rclpy.spin_until_future_complete(self, self.future)
         return self.future.result()
@@ -43,9 +67,9 @@ def main(args=None):
     pause_future_results = minimal_client.send_pause_request()
     minimal_client.get_logger().info('Pause request results: ' + str(pause_future_results))
 
-    time.sleep(10.0)
+    time.sleep(2.0)
 
-    resume_future_results = minimal_client.send_resume_request()
+    resume_future_results = minimal_client.send_stop_request()
     minimal_client.get_logger().info('Resume request results: ' + str(resume_future_results))
 
     minimal_client.destroy_node()

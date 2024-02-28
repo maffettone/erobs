@@ -158,7 +158,7 @@ private:
   void handle_stop();
   void execute_stop();
   void handle_abort();
-
+  void handle_halt();
   /// @brief Handles bluesky interrupt to RESUME
   void handle_resume();
 
