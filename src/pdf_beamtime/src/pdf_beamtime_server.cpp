@@ -156,7 +156,7 @@ void PdfBeamtimeServer::execute(
   feedback->status = get_action_completion_percentage();
 
   RCLCPP_INFO(
-    node_->get_logger(), "Current state is state %s.",
+    node_->get_logger(), "Current state is %s.",
     external_state_names_[static_cast<int>(current_state_)].c_str());
 
   // Reset inner_state_machine at new goal
@@ -546,7 +546,6 @@ void PdfBeamtimeServer::handle_stop()
 
 void PdfBeamtimeServer::execute_stop()
 {
-  ///@todo @ChandimaFernando This needs testing
   switch (current_state_) {
     case State::GRASP_SUCCESS:
       // handle the decision to pick up something else after successfully grabing the sample
@@ -568,6 +567,7 @@ void PdfBeamtimeServer::execute_stop()
       execute_stop();
       break;
 
+    /// @todo @ChandimaFernando This needs testing
     case State::PLACE:
       set_current_state(State::PICKUP_RETREAT);
       inner_state_machine_->set_internal_state(Internal_State::STOP);
