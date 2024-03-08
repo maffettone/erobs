@@ -16,7 +16,8 @@ moveit::core::MoveItErrorCode InnerStateMachine::move_robot(
   joint_goal_ = joint_goal;
 
   switch (internal_state_enum_) {
-    case Internal_State::RESTING: {
+    case Internal_State::RESTING:
+    case Internal_State::CLEANUP: {
         mgi.setJointValueTarget(joint_goal_);
         // Create a plan to that target pose
         auto const [planing_success, plan] = [&mgi] {
@@ -25,8 +26,10 @@ moveit::core::MoveItErrorCode InnerStateMachine::move_robot(
             return std::make_pair(ok, msg);
           }();
         if (planing_success) {
-          // Change inner state to Moving if the robot is ready to move
-          set_internal_state(Internal_State::MOVING);
+          // Change inner state to Moving if the robot is ready to move and not on clean up
+          if (internal_state_enum_ == Internal_State::RESTING) {
+            set_internal_state(Internal_State::MOVING);
+          }
           auto exec_results = mgi.execute(plan);
           return_error_code = exec_results;
         } else {

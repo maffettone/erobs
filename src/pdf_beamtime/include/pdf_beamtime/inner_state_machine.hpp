@@ -21,11 +21,10 @@ private:
 
   std::vector<std::string> external_state_names_ =
   {"HOME", "PICKUP_APPROACH", "PICKUP", "GRASP_SUCCESS", "GRASP_FAILURE", "PICKUP_RETREAT",
-    "PLACE_APPROACH", "PLACE", "RELEASE_SUCCESS", "RELEASE_FAILURE", "PLACE_RETREAT",
-    "RETRY_PICKUP"};
+    "PLACE_APPROACH", "PLACE", "RELEASE_SUCCESS", "RELEASE_FAILURE", "PLACE_RETREAT"};
 
   std::vector<std::string> internal_state_names =
-  {"RESTING", "MOVING", "PAUSED", "ABORT", "HALT", "STOP"};
+  {"RESTING", "MOVING", "PAUSED", "ABORT", "HALT", "STOP", "CLEANUP"};
 
 public:
   explicit InnerStateMachine(const rclcpp::Node::SharedPtr node);
