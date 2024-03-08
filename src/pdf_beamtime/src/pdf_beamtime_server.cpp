@@ -573,7 +573,6 @@ void PdfBeamtimeServer::execute_cleanup()
   reset_fsm();
   inner_state_machine_->set_internal_state(Internal_State::RESTING);
   RCLCPP_INFO(node_->get_logger(), "Cleanup is complete");
-
 }
 
 void PdfBeamtimeServer::handle_abort()
