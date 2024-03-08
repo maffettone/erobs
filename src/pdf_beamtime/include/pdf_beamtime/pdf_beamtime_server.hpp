@@ -81,7 +81,7 @@ private:
 
   std::vector<std::string> external_state_names_ =
   {"HOME", "PICKUP_APPROACH", "PICKUP", "GRASP_SUCCESS", "GRASP_FAILURE", "PICKUP_RETREAT",
-    "PLACE_APPROACH", "PLACE", "RELEASE_SUCCESS", "RELEASE_FAILURE", "PLACE_RETREAT", "CLEAN_UP"};
+    "PLACE_APPROACH", "PLACE", "RELEASE_SUCCESS", "RELEASE_FAILURE", "PLACE_RETREAT"};
 
   std::vector<std::string> internal_state_names =
   {"RESTING", "MOVING", "PAUSED", "ABORT", "HALT", "STOP", "CLEANUP"};
