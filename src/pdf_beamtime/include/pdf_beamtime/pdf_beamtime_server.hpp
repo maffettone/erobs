@@ -81,14 +81,17 @@ private:
 
   std::vector<std::string> external_state_names_ =
   {"HOME", "PICKUP_APPROACH", "PICKUP", "GRASP_SUCCESS", "GRASP_FAILURE", "PICKUP_RETREAT",
-    "PLACE_APPROACH", "PLACE", "RELEASE_SUCCESS", "RELEASE_FAILURE", "PLACE_RETREAT",
-    "RETRY_PICKUP"};
+    "PLACE_APPROACH", "PLACE", "RELEASE_SUCCESS", "RELEASE_FAILURE", "PLACE_RETREAT"};
 
   std::vector<std::string> internal_state_names =
-  {"RESTING", "MOVING", "PAUSED", "ABORT", "HALT", "STOP"};
+  {"RESTING", "MOVING", "PAUSED", "ABORT", "HALT", "STOP", "CLEANUP"};
 
   /// @brief current state of the robot
   State current_state_;
+
+  /// @brief holds the current goal to be used by return_sample() function
+  std::shared_ptr<const pdf_beamtime_interfaces::action::PickPlaceControlMsg_Goal> goal;
+
   /// @brief used to calculate the completion precentage
   const float total_states_ = 9.0;
   float progress_ = 0.0;
@@ -153,11 +156,16 @@ private:
   /// @brief Set the current state to HOME and move robot to home position
   bool reset_fsm();
 
-  /// @brief Handles bluesky interrupt to PAUSE
+  /// @brief Put back the sample
+  moveit::core::MoveItErrorCode return_sample();
+
+  /// @brief Handles bluesky interrupt to PAUSE, STOP, ABORT, and HALT
   void handle_pause();
   void handle_stop();
-  void execute_stop();
+  /// @brief returns the sample to where it was picked and ready robot to receive a new goal
+  void execute_cleanup();
   void handle_abort();
+  void handle_halt();
 
   /// @brief Handles bluesky interrupt to RESUME
   void handle_resume();

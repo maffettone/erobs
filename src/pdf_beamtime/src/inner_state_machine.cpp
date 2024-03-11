@@ -16,7 +16,8 @@ moveit::core::MoveItErrorCode InnerStateMachine::move_robot(
   joint_goal_ = joint_goal;
 
   switch (internal_state_enum_) {
-    case Internal_State::RESTING: {
+    case Internal_State::RESTING:
+    case Internal_State::CLEANUP: {
         mgi.setJointValueTarget(joint_goal_);
         // Create a plan to that target pose
         auto const [planing_success, plan] = [&mgi] {
@@ -25,8 +26,10 @@ moveit::core::MoveItErrorCode InnerStateMachine::move_robot(
             return std::make_pair(ok, msg);
           }();
         if (planing_success) {
-          // Change inner state to Moving if the robot is ready to move
-          set_internal_state(Internal_State::MOVING);
+          // Change inner state to Moving if the robot is ready to move and not on clean up
+          if (internal_state_enum_ == Internal_State::RESTING) {
+            set_internal_state(Internal_State::MOVING);
+          }
           auto exec_results = mgi.execute(plan);
           return_error_code = exec_results;
         } else {
@@ -69,7 +72,7 @@ void InnerStateMachine::pause(moveit::planning_interface::MoveGroupInterface & m
     case Internal_State::MOVING:
       mgi.stop();
       RCLCPP_INFO(
-        node_->get_logger(), " Paused while at internal state %s ",
+        node_->get_logger(), "Paused while at internal state %s ",
         internal_state_names[static_cast<int>(internal_state_enum_)].c_str());
       set_internal_state(Internal_State::PAUSED);
       break;
@@ -78,19 +81,22 @@ void InnerStateMachine::pause(moveit::planning_interface::MoveGroupInterface & m
   }
 }
 
-void InnerStateMachine::abort()
+void InnerStateMachine::abort(moveit::planning_interface::MoveGroupInterface & mgi)
 {
+  mgi.stop();
+  RCLCPP_INFO(
+    node_->get_logger(), "Stopped while at internal state %s ",
+    internal_state_names[static_cast<int>(internal_state_enum_)].c_str());
   set_internal_state(Internal_State::ABORT);
 }
 
-void InnerStateMachine::halt()
+void InnerStateMachine::halt(moveit::planning_interface::MoveGroupInterface & mgi)
 {
+  mgi.stop();
+  RCLCPP_INFO(
+    node_->get_logger(), "Halted while at internal state %s ",
+    internal_state_names[static_cast<int>(internal_state_enum_)].c_str());
   set_internal_state(Internal_State::HALT);
-}
-
-void InnerStateMachine::stop()
-{
-  set_internal_state(Internal_State::STOP);
 }
 
 void InnerStateMachine::rewind()

@@ -21,11 +21,10 @@ private:
 
   std::vector<std::string> external_state_names_ =
   {"HOME", "PICKUP_APPROACH", "PICKUP", "GRASP_SUCCESS", "GRASP_FAILURE", "PICKUP_RETREAT",
-    "PLACE_APPROACH", "PLACE", "RELEASE_SUCCESS", "RELEASE_FAILURE", "PLACE_RETREAT",
-    "RETRY_PICKUP"};
+    "PLACE_APPROACH", "PLACE", "RELEASE_SUCCESS", "RELEASE_FAILURE", "PLACE_RETREAT"};
 
   std::vector<std::string> internal_state_names =
-  {"RESTING", "MOVING", "PAUSED", "ABORT", "HALT", "STOP"};
+  {"RESTING", "MOVING", "PAUSED", "ABORT", "HALT", "STOP", "CLEANUP"};
 
 public:
   explicit InnerStateMachine(const rclcpp::Node::SharedPtr node);
@@ -44,13 +43,10 @@ public:
   void rewind();
 
   /// @brief  Set the state to abort. This follows a pause command.
-  void abort();
+  void abort(moveit::planning_interface::MoveGroupInterface & mgi);
 
   /// @brief  Set the state to halt. This follows a pause command.
-  void halt();
-
-  /// @brief  Set the state to Stop. This follows a pause command.
-  void stop();
+  void halt(moveit::planning_interface::MoveGroupInterface & mgi);
 
   /// @brief  Self explantory
   void set_internal_state(Internal_State state);
