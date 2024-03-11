@@ -164,6 +164,14 @@ void PdfBeamtimeServer::execute(
       // The external and internal states are handled separately by the FSM
       std::this_thread::sleep_for(std::chrono::seconds(1));
     } else {
+      if (inner_state_machine_->get_internal_state() == Internal_State::CLEANUP) {
+        // Abort the goal and return at cleanup
+        results->success = false;
+        goal_handle->abort(results);
+        RCLCPP_ERROR(node_->get_logger(), "Goal aborted !");
+        return;
+      }
+
       fsm_results = run_fsm(goal);
       if (!fsm_results && inner_state_machine_->get_internal_state() != Internal_State::PAUSED) {
         // Abort the execution if move_group_ fails except when paused
@@ -521,17 +529,17 @@ moveit::core::MoveItErrorCode PdfBeamtimeServer::return_sample()
 {
   moveit::core::MoveItErrorCode motion_results = moveit::core::MoveItErrorCode::FAILURE;
 
-  // Moves to pickup approach
+  // Move to pickup approach
   motion_results = inner_state_machine_->move_robot(
     move_group_interface_,
     goal->pickup_approach);
-  // Moves to pick up
+  // Move to pick up
   motion_results = inner_state_machine_->move_robot(
     move_group_interface_,
     goal->pickup);
   // Open the gripper
   inner_state_machine_->open_gripper();
-  // Moves back to pickup approach
+  // Move back to pickup approach
   motion_results = inner_state_machine_->move_robot(
     move_group_interface_,
     goal->pickup_approach);
@@ -548,23 +556,39 @@ void PdfBeamtimeServer::handle_pause()
 void PdfBeamtimeServer::handle_stop()
 {
   RCLCPP_INFO(node_->get_logger(), "STOP command received");
-  inner_state_machine_->set_internal_state(Internal_State::CLEANUP);
   execute_cleanup();
 }
 
 void PdfBeamtimeServer::execute_cleanup()
 {
+  inner_state_machine_->set_internal_state(Internal_State::CLEANUP);
   RCLCPP_INFO(node_->get_logger(), "Cleanup is in progress");
 
   switch (current_state_) {
     case State::GRASP_SUCCESS:
+      inner_state_machine_->move_robot(move_group_interface_, goal->pickup);
       inner_state_machine_->open_gripper();
+      inner_state_machine_->move_robot(move_group_interface_, goal->pickup_approach);
+      break;
+
+    case State::PICKUP_APPROACH:
+      inner_state_machine_->move_robot(move_group_interface_, goal->pickup_approach);
       break;
 
     case State::PICKUP_RETREAT:
     case State::PLACE_APPROACH:
     case State::PLACE:
       return_sample();
+      break;
+
+    case State::PICKUP:
+    case State::GRASP_FAILURE:
+      inner_state_machine_->move_robot(move_group_interface_, goal->pickup_approach);
+      break;
+
+    case State::RELEASE_FAILURE:
+    case State::RELEASE_SUCCESS:
+      inner_state_machine_->move_robot(move_group_interface_, goal->place_approach);
       break;
 
     default:
@@ -578,7 +602,6 @@ void PdfBeamtimeServer::execute_cleanup()
 void PdfBeamtimeServer::handle_abort()
 {
   RCLCPP_INFO(node_->get_logger(), "ABORT command received");
-  inner_state_machine_->set_internal_state(Internal_State::CLEANUP);
   execute_cleanup();
 }
 

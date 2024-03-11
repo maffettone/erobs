@@ -13,8 +13,8 @@ class BlueskyInterrupt(Node):
     def __init__(self):
         """Create the client here."""
         super().__init__('bluesky_interrupt')
-        self.cli = self.create_client(BlueskyInterruptMsg, 'bluesky_interrupt')
-        while not self.cli.wait_for_service(timeout_sec=1.0):
+        self.client = self.create_client(BlueskyInterruptMsg, 'bluesky_interrupt')
+        while not self.client.wait_for_service(timeout_sec=1.0):
             self.get_logger().info('service not available, waiting again...')
         self.req = BlueskyInterruptMsg.Request()
 
@@ -22,7 +22,7 @@ class BlueskyInterrupt(Node):
         """Populate and send the pause request."""
         self.req.interrupt_type = 'PAUSE'
         self.get_logger().info('Pause request sent')
-        self.future = self.cli.call_async(self.req)
+        self.future = self.client.call_async(self.req)
         rclpy.spin_until_future_complete(self, self.future)
         return self.future.result()
 
@@ -30,7 +30,7 @@ class BlueskyInterrupt(Node):
         """Populate and send the resume request."""
         self.req.interrupt_type = 'RESUME'
         self.get_logger().info('Resume request sent')
-        self.future = self.cli.call_async(self.req)
+        self.future = self.client.call_async(self.req)
         rclpy.spin_until_future_complete(self, self.future)
         return self.future.result()
 
@@ -38,7 +38,7 @@ class BlueskyInterrupt(Node):
         """Populate and send the stop request."""
         self.req.interrupt_type = 'STOP'
         self.get_logger().info('Stop request sent')
-        self.future = self.cli.call_async(self.req)
+        self.future = self.client.call_async(self.req)
         rclpy.spin_until_future_complete(self, self.future)
         return self.future.result()
 
@@ -46,7 +46,7 @@ class BlueskyInterrupt(Node):
         """Populate and send the abort request."""
         self.req.interrupt_type = 'ABORT'
         self.get_logger().info('Abort request sent')
-        self.future = self.cli.call_async(self.req)
+        self.future = self.client.call_async(self.req)
         rclpy.spin_until_future_complete(self, self.future)
         return self.future.result()
 
@@ -54,7 +54,7 @@ class BlueskyInterrupt(Node):
         """Populate and send the halt request."""
         self.req.interrupt_type = 'HALT'
         self.get_logger().info('Halt request sent')
-        self.future = self.cli.call_async(self.req)
+        self.future = self.client.call_async(self.req)
         rclpy.spin_until_future_complete(self, self.future)
         return self.future.result()
 
