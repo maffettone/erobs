@@ -53,6 +53,11 @@ services:
     depends_on:
       - urdriver
 
+  urhandecontrol:
+    image: ur-hande-control:latest
+    networks:
+      - ursim_net
+      
 networks:
   ursim_net:
     ipam:
