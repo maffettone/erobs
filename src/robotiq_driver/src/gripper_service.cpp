@@ -1,82 +1,104 @@
-// constexpr auto kComPort = "/tmp/ttyUR";
-// constexpr auto kSlaveID = 0x09;
-
 #include <robotiq_driver/gripper_service.hpp>
 
+using namespace std::placeholders;
 
 GripperService::GripperService()
+: node_(std::make_shared<rclcpp::Node>("gripper_server_node")),
+  gripper_(kComPort, kSlaveID)
 {
-  RobotiqGripperInterface gripper(kComPort, kSlaveID);
+  RCLCPP_INFO(rclcpp::get_logger("gripper_controller"), "Activate the gripper ...");
+  // Clear the registers
+  gripper_.deactivateGripper();
+  std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+  // Activate the gripper
+  gripper_.activateGripper();
+
+  std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+  gripper_.setSpeed(0x0F);
+
+  RCLCPP_INFO(rclcpp::get_logger("gripper_controller"), "Activation successful");
+
+  rclcpp::Service<pdf_beamtime_interfaces::srv::GripperControlMsg>::SharedPtr service =
+    node_->create_service<pdf_beamtime_interfaces::srv::GripperControlMsg>(
+    "gripper_service",
+    std::bind(
+      &GripperService::gripper_controller, this, _1, _2));                                                                                                                                                             // CHANGE
+
+  RCLCPP_INFO(rclcpp::get_logger("gripper_controller"), "Ready to receive gripper commands.");                     // CHANGE
+
 }
 
-void gripper_controller(
-  const std::shared_ptr<custom_msgs::srv::GripperCmd::Request> request,
-  std::shared_ptr<custom_msgs::srv::GripperCmd::Response> response)
+rclcpp::node_interfaces::NodeBaseInterface::SharedPtr GripperService::getNodeBaseInterface()
+// Expose the node base interface so that the node can be added to a component manager.
 {
+  return node_->get_node_base_interface();
+}
 
+void GripperService::gripper_controller(
+  const std::shared_ptr<pdf_beamtime_interfaces::srv::GripperControlMsg::Request> request,
+  std::shared_ptr<pdf_beamtime_interfaces::srv::GripperControlMsg::Response> response)
+{
   // This function sends the gripper control command
-  bool status = false;
-  try {
-    char cmd = request->cmd;
+  // moveit::core::MoveItErrorCode gripper_results = moveit::core::MoveItErrorCode::FAILURE;
 
-    switch (cmd) {
-      case 'A':
+  int status = 0;
+  try {
+    // conver the request command string to the mapping enum
+    Gripper_State gripper_command_enum = gripper_command_map_[request->command];
+
+    switch (gripper_command_enum) {
+      case Gripper_State::ACTIVE:
         // Activate the gripper
-        gripper.deactivateGripper();
+        gripper_.deactivateGripper();
         std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-        gripper.activateGripper();
+        gripper_.activateGripper();
         RCLCPP_INFO(rclcpp::get_logger("gripper_controller"), "Activation successful");
 
         break;
 
-      case 'D':
+      case Gripper_State::DEACTIVE:
         // Deactivate the gripper
-        gripper.deactivateGripper();
+        gripper_.deactivateGripper();
         RCLCPP_INFO(rclcpp::get_logger("gripper_controller"), "Deactivated");
 
         break;
 
-      case 'M':
+      case Gripper_State::PARTIAL:
         {
           // Closes the gripper to the percentage set by request->grip
           uint8_t val = request->grip * 2.55; // convert the scales from 01-100 to 0-255
           // std::cout << "######### request and val : " << std::endl ;
           // std::cout << static_cast<int16_t>(request->grip) << std::endl ;
           // std::cout << static_cast<int16_t>(val) << std::endl ;
-          gripper.setGripperPosition(val);
+          gripper_.setGripperPosition(val);
           RCLCPP_INFO(rclcpp::get_logger("gripper_controller"), "Gripper Open");
         }
         break;
 
-      case 'O':
+      case Gripper_State::OPEN:
         /* Open the grippper fully */
-        gripper.setGripperPosition(0x00);
+        gripper_.setGripperPosition(0x00);
         RCLCPP_INFO(rclcpp::get_logger("gripper_controller"), "Gripper Open");
         break;
 
-      case 'C':
+      case Gripper_State::CLOSE:
         /* Close the grippper fully */
-        gripper.setGripperPosition(0xFF);
+        gripper_.setGripperPosition(0xFF);
         RCLCPP_INFO(rclcpp::get_logger("gripper_controller"), "Gripper Open");
         break;
-
-      // case 'S':
-      //   /* Close the grippper fully */
-      //   gripper.setGripperPosition(0xFF);
-      //   break;
 
       default:
         break;
     }
 
-    status = true;
+    status = 1;
   } catch (const std::exception & e) {
     std::cerr << e.what() << '\n';
-    status = false;
+    status = 0;
   }
 
   // Send the response back
-  response->status = status;
+  response->results = status;
 
 }
 
@@ -85,26 +107,11 @@ int main(int argc, char ** argv)
 
   rclcpp::init(argc, argv);
 
-  std::shared_ptr<rclcpp::Node> node = rclcpp::Node::make_shared("gripper_service");   // CHANGE
+  auto gripper_server = std::make_shared<GripperService>();
 
-  RCLCPP_INFO(rclcpp::get_logger("gripper_controller"), "Activate the gripper ...");
-  // Clear the registers
-  gripper.deactivateGripper();
-  std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-  // Activate the gripper
-  gripper.activateGripper();
+  // std::shared_ptr<rclcpp::Node> node = rclcpp::Node::make_shared("gripper_service");   // CHANGE
 
-  std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-  gripper.setSpeed(0x0F);
-
-  RCLCPP_INFO(rclcpp::get_logger("gripper_controller"), "Activation successful");
-
-  rclcpp::Service<custom_msgs::srv::GripperCmd>::SharedPtr service =
-    node->create_service<custom_msgs::srv::GripperCmd>("gripper_service", &gripper_controller);                                                                     // CHANGE
-
-  RCLCPP_INFO(rclcpp::get_logger("gripper_controller"), "Ready to recieve gripper commands.");                     // CHANGE
-
-  rclcpp::spin(node);
+  rclcpp::spin(gripper_server->getNodeBaseInterface());
   rclcpp::shutdown();
 
   return 0;

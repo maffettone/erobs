@@ -17,7 +17,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "srv/BoxObstacleMsg.srv"
   "srv/CylinderObstacleMsg.srv"
   "srv/BlueskyInterruptMsg.srv"
-  # "srv/GriiperControlMsg.srv"
+  "srv/GripperControlMsg.srv"
 )
 
 
