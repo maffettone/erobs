@@ -25,7 +25,6 @@ ARG GITHUB_TOKEN
 RUN mkdir /root/ws/src -p
 WORKDIR  /root/ws/src
 RUN git clone https://maffettone:${GITHUB_TOKEN}@github.com/maffettone/erobs.git -b humble
-
 WORKDIR  /root/ws/
 RUN /bin/bash -c "source /opt/ros/${ROS_DISTRO}/setup.bash  && \
   rosdep install -r --from-paths . --ignore-src --rosdistro $ROS_DISTRO -y"
