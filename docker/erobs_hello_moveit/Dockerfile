@@ -24,8 +24,7 @@ RUN pip3 install numpy rosdep && \
 ARG GITHUB_TOKEN
 RUN mkdir /root/ws/src -p
 WORKDIR  /root/ws/src
-# RUN git clone https://maffettone:${GITHUB_TOKEN}@github.com/maffettone/erobs.git -b humble
-RUN git clone https://github.com/ChandimaFernando/erobs.git -b humble_hande_control
+RUN git clone https://maffettone:${GITHUB_TOKEN}@github.com/maffettone/erobs.git -b humble
 
 WORKDIR  /root/ws/
 RUN /bin/bash -c "source /opt/ros/${ROS_DISTRO}/setup.bash  && \
