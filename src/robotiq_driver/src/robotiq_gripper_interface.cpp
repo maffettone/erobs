@@ -91,17 +91,6 @@ void RobotiqGripperInterface::activateGripper()
                                                                                           // other registers.
   );
 
-  // std::stringstream ss;
-  // for (std::size_t i = 0; i < cmd.size(); i++)
-  // {
-  //     if (i != 0)
-  //     {
-  //         ss << ", ";
-  //     }
-  //     ss << "0x" << std::hex << static_cast<int>(cmd[i]);
-  // }
-  // std::cout << ss.str() <<std::endl;
-
   try {
     sendCommand(cmd);
     readResponse(kWriteResponseSize);
@@ -214,18 +203,6 @@ std::vector<uint8_t> RobotiqGripperInterface::createWriteCommand(
   const std::vector<uint16_t> & data)
 {
 
-  // std::stringstream ss;
-  // for (std::size_t i = 0; i < data.size(); i++)
-  // {
-  //     if (i != 0)
-  //     {
-  //         ss << ", ";
-  //     }
-  //     ss << "0x" << std::hex << static_cast<int>(data[i]);
-  // }
-  // std::cout << ss.str() <<std::endl;
-
-
   uint16_t num_registers = data.size();
   uint8_t num_bytes = 2 * num_registers;
 
@@ -245,19 +222,6 @@ std::vector<uint8_t> RobotiqGripperInterface::createWriteCommand(
   auto crc = computeCRC(cmd);
   cmd.push_back(getFirstByte(crc));
   cmd.push_back(getSecondByte(crc));
-
-  // std::cout << " The final command cmd: " << std::endl ;
-  // std::stringstream ss3;
-  // for (std::size_t i = 0; i < cmd.size(); i++)
-  // {
-  //     if (i != 0)
-  //     {
-  //         ss3 << ", ";
-  //     }
-  //     ss3 << "0x" << std::hex << static_cast<int>(cmd[i]);
-  // }
-  // std::cout << ss3.str() <<std::endl;
-
 
   return cmd;
 }

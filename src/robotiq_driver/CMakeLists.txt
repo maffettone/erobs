@@ -48,17 +48,10 @@ ament_target_dependencies(
 pluginlib_export_plugin_description_file(hardware_interface hardware_interface_plugin.xml)
 
 add_executable(gripper_service src/gripper_service.cpp)
-# add_executable(gripper_cmds src/test_interface.cpp)
 
-#add_executable(gripper_interface_test src/gripper_interface_test.cpp)
 target_include_directories(gripper_service PRIVATE include)
 ament_target_dependencies(gripper_service serial pdf_beamtime_interfaces)
 target_link_libraries(gripper_service ${PROJECT_NAME})
-
-# target_include_directories(gripper_cmds PRIVATE include)
-# ament_target_dependencies(gripper_cmds serial pdf_beamtime_interfaces)
-# target_link_libraries(gripper_cmds ${PROJECT_NAME})
-
 
 # INSTALL
 install(
@@ -68,23 +61,15 @@ install(
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin
 )
+
 install(
   TARGETS gripper_service 
-  # gripper_cmds
-
   DESTINATION lib/${PROJECT_NAME}
 )
+
 install(
   DIRECTORY include/ 
   DESTINATION include
-)
-install(
-  DIRECTORY config
-  DESTINATION share/${PROJECT_NAME}
-)
-install(
-  DIRECTORY launch
-  DESTINATION share/${PROJECT_NAME}
 )
 
 if(BUILD_TESTING)
@@ -98,19 +83,5 @@ if(BUILD_TESTING)
   set(ament_cmake_cpplint_FOUND TRUE)
   ament_lint_auto_find_test_dependencies()
 endif()
-
-## EXPORTS
-ament_export_include_directories(
-  include
-)
-ament_export_libraries(
-  ${PROJECT_NAME}
-)
-ament_export_targets(
-  export_${PROJECT_NAME}
-)
-ament_export_dependencies(
-  ${THIS_PACKAGE_INCLUDE_DEPENDS}
-)
 
 ament_package()

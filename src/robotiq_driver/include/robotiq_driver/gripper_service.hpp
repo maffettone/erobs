@@ -15,23 +15,25 @@ class GripperService
 {
 
 private:
+  /// @brief your serial port goes here
   const char * kComPort = "/tmp/ttyUR";
   const int kSlaveID = 0x09;
 
   rclcpp::Node::SharedPtr node_;
   RobotiqGripperInterface gripper_;
 
-/// @brief Gripper states
-  enum class Gripper_State {OPEN, CLOSE, PARTIAL, MOVING, ACTIVE, DEACTIVE};
+/// @brief Gripper commands as enums for ease of use
+  enum class Gripper_Command {OPEN, CLOSE, PARTIAL, ACTIVE, DEACTIVE};
 
-  std::map<std::string, Gripper_State> gripper_command_map_ = {
-    {"ACTIVE", Gripper_State::ACTIVE},
-    {"DEACTIVE", Gripper_State::DEACTIVE},
-    {"OPEN", Gripper_State::OPEN},
-    {"CLOSE", Gripper_State::CLOSE},
-    {"PARTIAL", Gripper_State::PARTIAL}
+  std::map<std::string, Gripper_Command> gripper_command_map_ = {
+    {"ACTIVE", Gripper_Command::ACTIVE},
+    {"DEACTIVE", Gripper_Command::DEACTIVE},
+    {"OPEN", Gripper_Command::OPEN},
+    {"CLOSE", Gripper_Command::CLOSE},
+    {"PARTIAL", Gripper_Command::PARTIAL}
   };
 
+  /// @brief callback function for the gripper service
   void gripper_controller(
     const std::shared_ptr<pdf_beamtime_interfaces::srv::GripperControlMsg::Request> request,
     std::shared_ptr<pdf_beamtime_interfaces::srv::GripperControlMsg::Response> response);
@@ -39,5 +41,4 @@ private:
 public:
   explicit GripperService();
   rclcpp::node_interfaces::NodeBaseInterface::SharedPtr getNodeBaseInterface();
-
 };
