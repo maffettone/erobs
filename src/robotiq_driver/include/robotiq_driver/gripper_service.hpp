@@ -8,7 +8,6 @@ BSD 3 Clause License. See LICENSE.txt for details.*/
 
 #include "pdf_beamtime_interfaces/srv/gripper_control_msg.hpp"
 
-// #include "robotiq_driver/robotiq_gripper_interface.hpp"
 #include <robotiq_driver/robotiq_gripper_interface.hpp>
 
 class GripperService
