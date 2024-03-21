@@ -21,11 +21,13 @@ RUN mkdir /root/ws/src -p
 WORKDIR /root/ws/src
 
 RUN git clone https://github.com/PickNikRobotics/serial-release.git -b release/humble/serial
-RUN git clone https://github.com/ChandimaFernando/erobs.git -b humble_hande_control
+RUN git clone https://github.com/PickNikRobotics/ros2_robotiq_gripper.git -b cmake-external-project-serial
+# RUN git clone https://github.com/ChandimaFernando/erobs.git -b humble_hande_control
 
 WORKDIR /root/ws/
 
 RUN /bin/bash -c "source /opt/ros/${ROS_DISTRO}/setup.bash && \
         colcon build --symlink-install --packages-select pdf_beamtime_interfaces serial robotiq_driver"
 
-CMD ["/bin/sh", "-c", ".  /opt/ros/${ROS_DISTRO}/setup.sh && .  /root/ws/install/setup.sh && ros2 run robotiq_driver gripper_service"]
+CMD [ "/bin/bash" ]
+# CMD ["/bin/sh", "-c", ".  /opt/ros/${ROS_DISTRO}/setup.sh && .  /root/ws/install/setup.sh && ros2 run robotiq_driver gripper_service"]
