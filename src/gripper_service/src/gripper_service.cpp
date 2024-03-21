@@ -1,6 +1,6 @@
 /*Copyright 2023 Brookhaven National Laboratory
 BSD 3 Clause License. See LICENSE.txt for details.*/
-#include <robotiq_driver/gripper_service.hpp>
+#include <gripper_service/gripper_service.hpp>
 
 using namespace std::placeholders;
 

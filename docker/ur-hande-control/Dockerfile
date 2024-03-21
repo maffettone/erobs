@@ -27,7 +27,11 @@ RUN git clone https://github.com/ChandimaFernando/erobs.git -b humble_hande_cont
 WORKDIR /root/ws/
 
 RUN /bin/bash -c "source /opt/ros/${ROS_DISTRO}/setup.bash && \
-        colcon build --symlink-install --packages-select pdf_beamtime_interfaces serial robotiq_driver gripper_service"
+        colcon build --symlink-install --packages-select pdf_beamtime_interfaces serial robotiq_driver"
+
+RUN /bin/bash -c "source /opt/ros/${ROS_DISTRO}/setup.bash && \
+        source /root/ws/install/setup.bash && \  
+        colcon build --symlink-install --packages-select gripper_service"
 
 CMD [ "/bin/bash" ]
 # CMD ["/bin/sh", "-c", ".  /opt/ros/${ROS_DISTRO}/setup.sh && .  /root/ws/install/setup.sh && ros2 run robotiq_driver gripper_service"]
