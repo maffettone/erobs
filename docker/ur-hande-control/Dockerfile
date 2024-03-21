@@ -33,5 +33,4 @@ RUN /bin/bash -c "source /opt/ros/${ROS_DISTRO}/setup.bash && \
         source /root/ws/install/setup.bash && \  
         colcon build --symlink-install --packages-select gripper_service"
 
-CMD [ "/bin/bash" ]
-# CMD ["/bin/sh", "-c", ".  /opt/ros/${ROS_DISTRO}/setup.sh && .  /root/ws/install/setup.sh && ros2 run robotiq_driver gripper_service"]
+CMD ["/bin/sh", "-c", ".  /opt/ros/${ROS_DISTRO}/setup.sh && .  /root/ws/install/setup.sh && ros2 run gripper_service gripper_service"]
