@@ -11,11 +11,9 @@ GripperService::GripperService()
   RCLCPP_INFO(this->get_logger(), "Activate the gripper ...");
   // Clear the registers
   gripper_.deactivateGripper();
-  std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+
   // Activate the gripper
   gripper_.activateGripper();
-
-  std::this_thread::sleep_for(std::chrono::milliseconds(1000));
   gripper_.setSpeed(0x0F);
 
   RCLCPP_INFO(this->get_logger(), "Activation is successful");
@@ -34,14 +32,13 @@ void GripperService::gripper_controller(
 {
   int status = 0;
   try {
-    // conver the request command string to the mapping enum
+    //  conver the request command string to the mapping enum
     Gripper_Command gripper_command_enum = gripper_command_map_[request->command];
 
     switch (gripper_command_enum) {
       case Gripper_Command::ACTIVE:
         // Activate the gripper
         gripper_.deactivateGripper();
-        std::this_thread::sleep_for(std::chrono::milliseconds(1000));
         gripper_.activateGripper();
         RCLCPP_INFO(this->get_logger(), "Activation is successful");
 
@@ -55,22 +52,20 @@ void GripperService::gripper_controller(
         break;
 
       case Gripper_Command::PARTIAL:
-        {
-          // Closes the gripper to the percentage set by request->grip
-          uint8_t val = request->grip * 2.55; // convert the scales from 01-100 to 0-255
-          gripper_.setGripperPosition(val);
-          RCLCPP_INFO(this->get_logger(), "Gripper is Open");
-        }
+        //  Closes the gripper to the percentage set by request->grip
+        uint8_t val = request->grip * 2.55;   //  convert the scales from 01-100 to 0-255
+        gripper_.setGripperPosition(val);
+        RCLCPP_INFO(this->get_logger(), "Gripper is Open");
         break;
 
       case Gripper_Command::OPEN:
-        /* Open the gripper fully */
+        //  Open the gripper fully
         gripper_.setGripperPosition(0x00);
         RCLCPP_INFO(this->get_logger(), "Gripper is Open");
         break;
 
       case Gripper_Command::CLOSE:
-        /* Close the gripper fully */
+        //  Close the gripper fully
         gripper_.setGripperPosition(0xFF);
         RCLCPP_INFO(this->get_logger(), "Gripper is Close");
         break;
@@ -84,7 +79,7 @@ void GripperService::gripper_controller(
     status = 0;
   }
 
-  // Send the response back
+  //  Send the response back
   response->results = status;
 }
 

@@ -4,7 +4,11 @@ BSD 3 Clause License. See LICENSE.txt for details.*/
 
 #include <iostream>
 #include <thread>
-#include "rclcpp/rclcpp.hpp"
+#include <memory>
+#include <string>
+#include <map>
+
+#include <rclcpp/rclcpp.hpp>
 
 #include "pdf_beamtime_interfaces/srv/gripper_control_msg.hpp"
 
@@ -12,7 +16,6 @@ BSD 3 Clause License. See LICENSE.txt for details.*/
 
 class GripperService : public rclcpp::Node
 {
-
 private:
   /// @brief your serial port goes here
   const char * kComPort = "/tmp/ttyUR";
@@ -38,5 +41,5 @@ private:
     std::shared_ptr<pdf_beamtime_interfaces::srv::GripperControlMsg::Response> response);
 
 public:
-  explicit GripperService();
+  GripperService();
 };
