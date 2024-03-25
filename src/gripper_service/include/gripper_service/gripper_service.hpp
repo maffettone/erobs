@@ -10,7 +10,7 @@ BSD 3 Clause License. See LICENSE.txt for details.*/
 
 #include <robotiq_driver/robotiq_gripper_interface.hpp>
 
-class GripperService
+class GripperService : public rclcpp::Node
 {
 
 private:
@@ -18,7 +18,7 @@ private:
   const char * kComPort = "/tmp/ttyUR";
   const int kSlaveID = 0x09;
 
-  rclcpp::Node::SharedPtr node_;
+  // rclcpp::Node::SharedPtr node_;
   RobotiqGripperInterface gripper_;
 
 /// @brief Gripper commands as enums for ease of use
@@ -39,5 +39,4 @@ private:
 
 public:
   explicit GripperService();
-  rclcpp::node_interfaces::NodeBaseInterface::SharedPtr getNodeBaseInterface();
 };
