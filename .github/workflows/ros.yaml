@@ -3,6 +3,9 @@ name: ROS
 on:
   pull_request:
   push:
+    paths-ignore:
+      - './src/serial/**'
+      - './src/gripper/**'
   workflow_dispatch:
 
 jobs:
