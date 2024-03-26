@@ -1,4 +1,5 @@
 """Copyright 2023 Brookhaven National Laboratory BSD 3 Clause License. See LICENSE.txt for details."""
+
 import math
 import time
 
