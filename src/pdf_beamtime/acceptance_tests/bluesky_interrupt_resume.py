@@ -1,4 +1,5 @@
 """Copyright 2023 Brookhaven National Laboratory BSD 3 Clause License. See LICENSE.txt for details."""
+
 import time
 
 import rclpy
@@ -12,24 +13,24 @@ class BlueskyInterrupt(Node):
 
     def __init__(self):
         """Create the client here."""
-        super().__init__('bluesky_interrupt')
-        self.client = self.create_client(BlueskyInterruptMsg, 'bluesky_interrupt')
+        super().__init__("bluesky_interrupt")
+        self.client = self.create_client(BlueskyInterruptMsg, "bluesky_interrupt")
         while not self.client.wait_for_service(timeout_sec=1.0):
-            self.get_logger().info('service not available, waiting again...')
+            self.get_logger().info("service not available, waiting again...")
         self.req = BlueskyInterruptMsg.Request()
 
     def send_pause_request(self):
         """Populate and send the pause request."""
-        self.req.interrupt_type = 'PAUSE'
-        self.get_logger().info('Pause request sent')
+        self.req.interrupt_type = "PAUSE"
+        self.get_logger().info("Pause request sent")
         self.future = self.client.call_async(self.req)
         rclpy.spin_until_future_complete(self, self.future)
         return self.future.result()
 
     def send_resume_request(self):
         """Populate and send the resume request."""
-        self.req.interrupt_type = 'RESUME'
-        self.get_logger().info('Resume request sent')
+        self.req.interrupt_type = "RESUME"
+        self.get_logger().info("Resume request sent")
         self.future = self.client.call_async(self.req)
         rclpy.spin_until_future_complete(self, self.future)
         return self.future.result()
@@ -41,16 +42,16 @@ def main(args=None):
 
     minimal_client = BlueskyInterrupt()
     pause_future_results = minimal_client.send_pause_request()
-    minimal_client.get_logger().info('Pause request results: ' + str(pause_future_results))
+    minimal_client.get_logger().info("Pause request results: " + str(pause_future_results))
 
     time.sleep(10.0)
 
     resume_future_results = minimal_client.send_resume_request()
-    minimal_client.get_logger().info('Resume request results: ' + str(resume_future_results))
+    minimal_client.get_logger().info("Resume request results: " + str(resume_future_results))
 
     minimal_client.destroy_node()
     rclpy.shutdown()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
