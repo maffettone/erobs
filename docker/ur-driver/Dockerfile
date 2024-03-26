@@ -35,6 +35,4 @@ ENV DESCRIPTION_FILE="ur_with_hande.xacro"
 
 # Copy entrypoint script
 COPY entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
-
-ENTRYPOINT [ "/entrypoint.sh" ]
+ENTRYPOINT [ "/bin/bash", "/entrypoint.sh" ]

@@ -17,29 +17,40 @@ Ongoing developments of integrating ROS2 and Bluesky. Currently targeted towards
 - ur-example: Generally unused example movement for testing. 
 
 ## Using Docker
-A sensible workflow would be:
+
+### Running the ur-example
+In order to run the `ur-example` with Docker, follow this procedure:
+
+1. Create the required images.
 ```bash
-cd docker/ursim
-docker build -t ursim:latest .
-cd ../ur-driver
-docker build -t urdriver:latest .
-cd ../ur-moveit
-docker build -t urmoveit:latest .
-cd ../
-docker compose up -d ursim
+cd docker
+docker build -t ursim:latest ./ursim
+docker build -t ur-driver:latest ./ur-driver
+docker build -t ur-example:latest ./ur-example
 ```
-Then open VNC client at `localhost:5900` and start the robot. 
+2. Start the UR Simulator. In a new terminal, run
+```bash
+docker compose up ursim
+```
+Open VNC client at `localhost:5900`. 
+Turn on and start the robot. 
+Go to the `Move` tab and click the `Home` button. 
+Press and hold the `Move robot to: New position` button to move the robot into position. Press `Continue`.
+Verify the joint position is `[0, -90, 0, -90, 0, 0]` degrees.
 
-```docker compose up -d urdriver```
+Note: setting initial position is requried for the `ur-example` to start, as specified in the `test_goal_publisher_config.yaml` file in the official Unviersal_Robots_ROS2_Driver repo.
 
-In the ursim start the reverse control program with play. 
+3. Start the ur-driver. In a new terminal, run
+```bash
+docker compose up urdriver
+```
+Now, go back to the VNC client. In the `Program` tab, start the program.
 
-```docker compose up -d urmoveit```
-
-Optionally start another VNC client at `localhost:5901` for RViz control.
-
-
-
+4. Run the ur-example. In a new terminal, run
+```bash
+docker compose up urexample
+```
+The in `Program/Graphics` tab, the robot should be moving between four poses every 6 seconds.
 
 ## Notes on VSCode Workspace
 VSCode ROS2 Workspace Template Borrowed from @althack. 
