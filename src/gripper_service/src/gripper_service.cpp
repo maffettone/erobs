@@ -54,7 +54,7 @@ void GripperService::gripper_controller(
       case Gripper_Command::PARTIAL:
         {
           //  Closes the gripper to the percentage set by request->grip
-          uint8_t val = request->grip * 2.55; //  convert the scales from 01-100 to 0-255
+          uint8_t val = request->grip * 2.55;  // convert the scales from 01-100 to 0-255
           gripper_.setGripperPosition(val);
           RCLCPP_INFO(this->get_logger(), "Gripper is Open");
         }
