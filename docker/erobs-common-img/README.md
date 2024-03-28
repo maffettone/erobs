@@ -1,5 +1,7 @@
 # This file contains commands to launch multiple containers of the same docker image.
-(TODO ChandimaFernando : Change the repo link to nsls-II repo.)
+First the image will need to be built. In this case a copy is currently stored at 
+[this content registry](ghcr.io/chandimafernando/erobs-common-img:latest).  
+(TODO ChandimaFernando : Change the repo link to nsls-II repo, and add CI/CD for build on version tag.)
 
 export ROBOT_IP=10.67.218.141
 export UR_TYPE="ur3e"
