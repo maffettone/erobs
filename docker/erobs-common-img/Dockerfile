@@ -25,9 +25,11 @@ WORKDIR /root/ws/src
 # TODO @ChandimaFernando. Revert back after tests. RUN git clone https://github.com/maffettone/erobs.git -b humble
 RUN git clone https://github.com/ChandimaFernando/erobs.git -b humble_hande_control
 
-WORKDIR /root/ws/src/erobs
-RUN /bin/bash -c ". /root/ws/src/erobs/setup.sh"
-RUN /bin/bash -c ". /root/ws/src/erobs/build.sh"
+# WORKDIR /root/ws/src/erobs
+RUN /bin/bash -c "ls ./erobs"
+
+RUN /bin/bash -c ". ./erobs/setup.sh"
+RUN /bin/bash -c ". ./erobs/build.sh"
 
 WORKDIR /root/ws/
 

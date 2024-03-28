@@ -10,7 +10,7 @@ export CONFIG_PKG="ur3e_hande_moveit_config"
 export CONFIG_FILE="ur.srdf"
 export ROS_DISTRO=humble
 
-# Enables the connection between the UR robot and the VM
+# Enable the connection between the UR robot and the VM
 podman run -it --network host --ipc=host --pid=host \
     --env ROBOT_IP=$ROBOT_IP \
     --env UR_TYPE=$UR_TYPE \
@@ -18,13 +18,13 @@ podman run -it --network host --ipc=host --pid=host \
     ghcr.io/chandimafernando/erobs-common-img:latest \
     /bin/sh -c "printenv && . /opt/ros/${ROS_DISTRO}/setup.sh && . /root/ws/install/setup.sh && ros2 launch ur_robot_driver ur_control.launch.py ur_type:=${UR_TYPE} robot_ip:=${ROBOT_IP} launch_rviz:=false tool_voltage:=24"
 
-# Runs gripper service to enable the gripper 
+# Run gripper service to enable the gripper 
 podman run -it --network host --ipc=host --pid=host \
     ghcr.io/chandimafernando/erobs-common-img:latest \
     /bin/bash -c ". /root/ws/install/setup.sh && \
-ros2 run gripper_service gripper_service"
+    ros2 run gripper_service gripper_service"
 
-# Launches move_group
+# Launch move_group
 podman run -it --network host --ipc=host --pid=host \
     --env ROBOT_IP=$ROBOT_IP \
     --env UR_TYPE=$UR_TYPE \
