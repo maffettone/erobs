@@ -18,19 +18,18 @@ RUN apt-get autoremove -y \
 RUN pip3 install rosdep && \
         rosdep update
 
-RUN mkdir /root/ws/src -p
+RUN mkdir /root/ws -p
 
-WORKDIR /root/ws/src
+WORKDIR /root/ws
 
 # TODO @ChandimaFernando. Revert back after tests. RUN git clone https://github.com/maffettone/erobs.git -b humble
 RUN git clone https://github.com/ChandimaFernando/erobs.git -b humble_hande_control
 
-WORKDIR /root/ws/
-
-RUN /bin/bash -c ". ./src/erobs/setup.sh"
-RUN /bin/bash -c ". ./src/erobs/build.sh"
+WORKDIR /root/ws/erobs/
+RUN /bin/bash -c ". ./setup.sh"
 
 WORKDIR /root/ws/
+RUN /bin/bash -c ". ./erobs/build.sh"
 
 ENV ROBOT_IP=192.168.56.101
 ENV REVERSE_IP=192.168.56.102

@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-vcs import < /root/ws/src/erobs/src/ros2.repos /root/ws/src/erobs/src
+vcs import < src/ros2.repos src
 sudo apt-get update
 rosdep update
-rosdep install --from-paths /root/ws/src --ignore-src -y
+rosdep install --from-paths src --ignore-src -y
