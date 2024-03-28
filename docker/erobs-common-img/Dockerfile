@@ -24,21 +24,29 @@ WORKDIR /root/ws/src
 
 # TODO @ChandimaFernando. Revert back after tests. RUN git clone https://github.com/maffettone/erobs.git -b humble
 RUN git clone https://github.com/ChandimaFernando/erobs.git -b humble_hande_control
-RUN git clone https://github.com/PickNikRobotics/serial-release.git -b release/humble/serial
-RUN git clone https://github.com/PickNikRobotics/ros2_robotiq_gripper.git -b cmake-external-project-serial
 
-WORKDIR /root/ws/
+WORKDIR /root/ws/src/erobs
+RUN /bin/bash -c ". /root/ws/src/erobs/setup.sh"
 
-RUN /bin/bash -c "source /opt/ros/${ROS_DISTRO}/setup.bash && \
-        colcon build --symlink-install --packages-select ur3e_hande_robot_description && \
-        colcon build --symlink-install --packages-select ur3e_hande_moveit_config"
+# WORKDIR /root/ws/src/
+WORKDIR /root/ws/src/erobs/
 
-RUN /bin/bash -c "source /opt/ros/${ROS_DISTRO}/setup.bash && \
-        colcon build --symlink-install --packages-select pdf_beamtime_interfaces serial robotiq_driver pdf_beamtime"
+RUN /bin/bash -c "ls /root/ws/src/erobs/"
+RUN /bin/bash -c "ls /root/ws/src/erobs/src"
 
-RUN /bin/bash -c "source /opt/ros/${ROS_DISTRO}/setup.bash && \
-        source /root/ws/install/setup.bash && \  
-        colcon build --symlink-install --packages-select gripper_service"
+RUN /bin/bash -c "cat /root/ws/src/erobs/build.sh"
+RUN /bin/bash -c ". /root/ws/src/erobs/build.sh"
+
+# RUN /bin/bash -c "source /opt/ros/${ROS_DISTRO}/setup.bash && \
+#         colcon build --symlink-install --packages-select ur3e_hande_robot_description && \
+#         colcon build --symlink-install --packages-select ur3e_hande_moveit_config"
+
+# RUN /bin/bash -c "source /opt/ros/${ROS_DISTRO}/setup.bash && \
+#         colcon build --symlink-install --packages-select pdf_beamtime_interfaces serial robotiq_driver pdf_beamtime"
+
+# RUN /bin/bash -c "source /opt/ros/${ROS_DISTRO}/setup.bash && \
+#         source /root/ws/install/setup.bash && \  
+#         colcon build --symlink-install --packages-select gripper_service"
 
 WORKDIR /root/ws/
 
