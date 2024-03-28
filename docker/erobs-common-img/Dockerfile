@@ -20,6 +20,7 @@ RUN pip3 install rosdep && \
 
 RUN mkdir /root/ws/src -p
 
+WORKDIR /root/ws
 WORKDIR /root/ws/src
 
 # TODO @ChandimaFernando. Revert back after tests. RUN git clone https://github.com/maffettone/erobs.git -b humble
@@ -28,6 +29,7 @@ RUN git clone https://github.com/ChandimaFernando/erobs.git -b humble_hande_cont
 # WORKDIR /root/ws/src/erobs
 RUN /bin/bash -c "ls ./erobs"
 
+RUN /bin/bash -c "cat ./erobs/setup.sh"
 RUN /bin/bash -c ". ./erobs/setup.sh"
 RUN /bin/bash -c ". ./erobs/build.sh"
 
