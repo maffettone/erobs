@@ -20,7 +20,6 @@ RUN pip3 install rosdep && \
 
 RUN mkdir /root/ws/src -p
 
-WORKDIR /root
 WORKDIR /root/ws/src
 
 # TODO @ChandimaFernando. Revert back after tests. RUN git clone https://github.com/maffettone/erobs.git -b humble
@@ -28,25 +27,7 @@ RUN git clone https://github.com/ChandimaFernando/erobs.git -b humble_hande_cont
 
 WORKDIR /root/ws/src/erobs
 RUN /bin/bash -c ". /root/ws/src/erobs/setup.sh"
-
-WORKDIR /root/ws/src/erobs/
-
-# RUN /bin/bash -c "ls /root/ws/src/erobs/"
-RUN /bin/bash -c "ls /root/ws/src/erobs/src"
-
-RUN /bin/bash -c "cat /root/ws/src/erobs/build.sh"
 RUN /bin/bash -c ". /root/ws/src/erobs/build.sh"
-
-# RUN /bin/bash -c "source /opt/ros/${ROS_DISTRO}/setup.bash && \
-#         colcon build --symlink-install --packages-select ur3e_hande_robot_description && \
-#         colcon build --symlink-install --packages-select ur3e_hande_moveit_config"
-
-# RUN /bin/bash -c "source /opt/ros/${ROS_DISTRO}/setup.bash && \
-#         colcon build --symlink-install --packages-select pdf_beamtime_interfaces serial robotiq_driver pdf_beamtime"
-
-# RUN /bin/bash -c "source /opt/ros/${ROS_DISTRO}/setup.bash && \
-#         source /root/ws/install/setup.bash && \  
-#         colcon build --symlink-install --packages-select gripper_service"
 
 WORKDIR /root/ws/
 
