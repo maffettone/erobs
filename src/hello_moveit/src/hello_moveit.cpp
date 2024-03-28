@@ -55,7 +55,7 @@ int main(int argc, char * argv[])
   // Create the MoveIt MoveGroup Interface
   RCLCPP_INFO(logger, "assembling move_group_interface");
   using moveit::planning_interface::MoveGroupInterface;
-  auto move_group_interface = MoveGroupInterface(node, "ur_manipulator");
+  auto move_group_interface = MoveGroupInterface(node, "ur_arm");
 
   // Set a target Pose
   auto const target_pose = [] {

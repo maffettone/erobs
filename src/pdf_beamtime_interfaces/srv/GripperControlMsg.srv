@@ -1,0 +1,4 @@
+string command
+int32 grip # 0-100, percentage of open/close of the gripper 
+---
+int32 results

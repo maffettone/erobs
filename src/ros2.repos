@@ -4,7 +4,11 @@
 # Example:
 ############
 repositories:
-  examples:
+  gripper:
     type: git
-    url: https://github.com/ros2/examples.git
-    version: humble
+    url: https://github.com/PickNikRobotics/ros2_robotiq_gripper.git
+    version: cmake-external-project-serial
+  serial:
+    type: git
+    url: https://github.com/PickNikRobotics/serial-release.git
+    version: release/humble/serial
