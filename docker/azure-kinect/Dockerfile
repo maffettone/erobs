@@ -8,12 +8,16 @@ RUN apt-get update \
         python3-pip \
         build-essential \
         cmake \
+        usbutils \
         libgtk2.0-dev \
         libusb-1.0\
         ffmpeg \
         mlocate \
         wget \
         curl \
+        ros-${ROS_DISTRO}-joint-state-publisher \
+        build-essential \
+        python3-colcon-common-extensions \
         software-properties-common
 
 # For vnc viewer
@@ -42,13 +46,21 @@ RUN wget mirrors.kernel.org/ubuntu/pool/universe/libs/libsoundio/libsoundio1_1.1
 RUN sudo dpkg -i libsoundio1_1.1.0-1_amd64.deb
 RUN sudo apt install -y k4a-tools
 
-# RUN sudo k4arecorder
+# Copy the rules
+COPY 99-k4a.rules /etc/udev/rules.d/99-k4a.rules
+
+RUN pip3 install xacro 
+
+RUN mkdir /root/ws/src -p
+WORKDIR /root/ws/src
+RUN git clone https://github.com/microsoft/Azure_Kinect_ROS_Driver.git -b humble
+WORKDIR /root/ws/
+RUN /bin/bash -c ". /opt/ros/humble/setup.bash && colcon build"
 
 # VNC viewer
 EXPOSE 5905
 
-CMD ["/bin/bash"]
-# # Copy entrypoint script
-# COPY entrypoint.sh /entrypoint.sh
-# RUN chmod +x /entrypoint.sh
-# ENTRYPOINT [ "/bin/bash", "/entrypoint.sh" ]
+# Copy entrypoint script
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+ENTRYPOINT [ "/bin/bash", "/entrypoint.sh"]
