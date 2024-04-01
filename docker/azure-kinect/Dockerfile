@@ -51,6 +51,7 @@ COPY 99-k4a.rules /etc/udev/rules.d/99-k4a.rules
 
 RUN pip3 install xacro 
 
+# TODO (@ChandimaFernando) move this gi clone to repo when integrating into erobs-common-img
 RUN mkdir /root/ws/src -p
 WORKDIR /root/ws/src
 RUN git clone https://github.com/microsoft/Azure_Kinect_ROS_Driver.git -b humble
