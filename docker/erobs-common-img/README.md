@@ -11,18 +11,19 @@ export DESCRIPTION_FILE="ur_with_hande.xacro"
 export CONFIG_PKG="ur3e_hande_moveit_config"
 export CONFIG_FILE="ur.srdf"
 export ROS_DISTRO=humble
+export GHCR_POINTER=ghcr.io/chandimafernando/erobs-common-img:latest
 
 # Enable the connection between the UR robot and the VM
 podman run -it --network host --ipc=host --pid=host \
     --env ROBOT_IP=$ROBOT_IP \
     --env UR_TYPE=$UR_TYPE \
     --env ROS_DISTRO=$ROS_DISTRO \
-    ghcr.io/chandimafernando/erobs-common-img:latest \
+    ${GHCR_POINTER} \
     /bin/sh -c "printenv && . /opt/ros/${ROS_DISTRO}/setup.sh && . /root/ws/install/setup.sh && ros2 launch ur_robot_driver ur_control.launch.py ur_type:=${UR_TYPE} robot_ip:=${ROBOT_IP} launch_rviz:=false tool_voltage:=24"
 
 # Run gripper service to enable the gripper 
 podman run -it --network host --ipc=host --pid=host \
-    ghcr.io/chandimafernando/erobs-common-img:latest \
+    ${GHCR_POINTER} \
     /bin/bash -c ". /root/ws/install/setup.sh && \
     ros2 run gripper_service gripper_service"
 
@@ -35,23 +36,23 @@ podman run -it --network host --ipc=host --pid=host \
     --env DESCRIPTION_FILE=$DESCRIPTION_FILE \
     --env CONFIG_PKG=$CONFIG_PKG \
     --env CONFIG_FILE=$CONFIG_FILE \
-    ghcr.io/chandimafernando/erobs-common-img:latest \
+    ${GHCR_POINTER} \
     /bin/sh -c "printenv && . /opt/ros/${ROS_DISTRO}/setup.sh && . /root/ws/install/setup.sh && ros2 launch ur_moveit_config ur_moveit.launch.py ur_type:=${UR_TYPE} launch_rviz:=${LAUNCH_RVIZ} description_package:=${DESCRIPTION_PKG}  launch_servo:=false description_file:=${DESCRIPTION_FILE} moveit_config_package:=${CONFIG_PKG} moveit_config_file:=${CONFIG_FILE}"
 
 # Launch the pdf_beamtime_server
 podman run -it --network host --ipc=host --pid=host \
     --env ROS_DISTRO=$ROS_DISTRO \
-    ghcr.io/chandimafernando/erobs-common-img:latest \
+    ${GHCR_POINTER} \
     /bin/sh -c "printenv && . /opt/ros/${ROS_DISTRO}/setup.sh && . /root/ws/install/setup.sh && ros2 launch pdf_beamtime pdf_beamtime.launch.py"
 
 # Test base rotation for Emergency stop
 podman run -it --network host --ipc=host --pid=host \
     --env ROS_DISTRO=$ROS_DISTRO \
-    ghcr.io/chandimafernando/erobs-common-img:latest \
+    ${GHCR_POINTER} \
     /bin/sh -c "printenv && . /opt/ros/${ROS_DISTRO}/setup.sh && . /root/ws/install/setup.sh && ros2 action send_goal pdf_beamtime_action_server pdf_beamtime_interfaces/action/PickPlaceControlMsg '{pickup_approach: [1.571, -1.571, 0.0, -1.571, 0.0, 0.0]}'"
 
 # Cancel the base rotation test without the emergency stop
 podman run -it --network host --ipc=host --pid=host \
     --env ROS_DISTRO=$ROS_DISTRO \
-    ghcr.io/chandimafernando/erobs-common-img:latest \
+    ${GHCR_POINTER} \
     /bin/sh -c "printenv && . /opt/ros/${ROS_DISTRO}/setup.sh && . /root/ws/install/setup.sh && ros2 action send_goal pdf_beamtime_action_server pdf_beamtime_interfaces/action/PickPlaceControlMsg {pickup_approach: [1.571, -1.571, 0.0, -1.571, 0.0, 0.0,]} --cancel"
