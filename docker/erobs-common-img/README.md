@@ -37,3 +37,21 @@ podman run -it --network host --ipc=host --pid=host \
     --env CONFIG_FILE=$CONFIG_FILE \
     ghcr.io/chandimafernando/erobs-common-img:latest \
     /bin/sh -c "printenv && . /opt/ros/${ROS_DISTRO}/setup.sh && . /root/ws/install/setup.sh && ros2 launch ur_moveit_config ur_moveit.launch.py ur_type:=${UR_TYPE} launch_rviz:=${LAUNCH_RVIZ} description_package:=${DESCRIPTION_PKG}  launch_servo:=false description_file:=${DESCRIPTION_FILE} moveit_config_package:=${CONFIG_PKG} moveit_config_file:=${CONFIG_FILE}"
+
+# Launch the pdf_beamtime_server
+podman run -it --network host --ipc=host --pid=host \
+    --env ROS_DISTRO=$ROS_DISTRO \
+    ghcr.io/chandimafernando/erobs-common-img:latest \
+    /bin/sh -c "printenv && . /opt/ros/${ROS_DISTRO}/setup.sh && . /root/ws/install/setup.sh && ros2 launch pdf_beamtime pdf_beamtime.launch.py"
+
+# Test base rotation for Emergency stop
+podman run -it --network host --ipc=host --pid=host \
+    --env ROS_DISTRO=$ROS_DISTRO \
+    ghcr.io/chandimafernando/erobs-common-img:latest \
+    /bin/sh -c "printenv && . /opt/ros/${ROS_DISTRO}/setup.sh && . /root/ws/install/setup.sh && ros2 action send_goal pdf_beamtime_action_server pdf_beamtime_interfaces/action/PickPlaceControlMsg '{pickup_approach: [1.571, -1.571, 0.0, -1.571, 0.0, 0.0]}'"
+
+# Cancel the base rotation test without the emergency stop
+podman run -it --network host --ipc=host --pid=host \
+    --env ROS_DISTRO=$ROS_DISTRO \
+    ghcr.io/chandimafernando/erobs-common-img:latest \
+    /bin/sh -c "printenv && . /opt/ros/${ROS_DISTRO}/setup.sh && . /root/ws/install/setup.sh && ros2 action send_goal pdf_beamtime_action_server pdf_beamtime_interfaces/action/PickPlaceControlMsg {pickup_approach: [1.571, -1.571, 0.0, -1.571, 0.0, 0.0,]} --cancel"
