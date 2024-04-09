@@ -36,7 +36,7 @@ RUN curl -sSL https://packages.microsoft.com/keys/microsoft.asc | sudo apt-key a
 # || true forces through the errors without breaking the apt-get update
 RUN sudo apt-get update || true 
 
-# End user license agreement (EULA) parameter is necessary. -y won't trigger an  EULA answer
+# End user license agreement (EULA) parameter is necessary. -y won't trigger an EULA answer
 RUN ACCEPT_EULA=Y apt-get install -y libk4a1.4 libk4a1.4-dev
 
 RUN wget mirrors.kernel.org/ubuntu/pool/universe/libs/libsoundio/libsoundio1_1.1.0-1_amd64.deb
