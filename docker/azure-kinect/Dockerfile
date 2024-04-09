@@ -1,7 +1,4 @@
-FROM osrf/ros:humble-desktop-full
-
-# Set display
-ENV DISPLAY :1
+FROM osrf/ros:humble-desktop
 
 RUN apt-get update \
         && apt-get -y install \
@@ -39,7 +36,7 @@ RUN curl -sSL https://packages.microsoft.com/keys/microsoft.asc | sudo apt-key a
 # || true forces through the errors without breaking the apt-get update
 RUN sudo apt-get update || true 
 
-# End user license agreement (EULA) parameter is necessary. -y won't trigger a EULA answer
+# End user license agreement (EULA) parameter is necessary. -y won't trigger an  EULA answer
 RUN ACCEPT_EULA=Y apt-get install -y libk4a1.4 libk4a1.4-dev
 
 RUN wget mirrors.kernel.org/ubuntu/pool/universe/libs/libsoundio/libsoundio1_1.1.0-1_amd64.deb
@@ -51,17 +48,15 @@ COPY 99-k4a.rules /etc/udev/rules.d/99-k4a.rules
 
 RUN pip3 install xacro 
 
-# TODO (@ChandimaFernando) move this gi clone to repo when integrating into erobs-common-img
 RUN mkdir /root/ws/src -p
 WORKDIR /root/ws/src
 RUN git clone https://github.com/microsoft/Azure_Kinect_ROS_Driver.git -b humble
 WORKDIR /root/ws/
 RUN /bin/bash -c ". /opt/ros/humble/setup.bash && colcon build"
 
+# Set display
+ENV DISPLAY :1
+
 # VNC viewer
 EXPOSE 5905
 
-# Copy entrypoint script
-COPY entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
-ENTRYPOINT [ "/bin/bash", "/entrypoint.sh"]
