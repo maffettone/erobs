@@ -56,7 +56,3 @@ RUN /bin/bash -c ". /opt/ros/humble/setup.bash && colcon build"
 
 # Set display
 ENV DISPLAY :1
-
-# VNC viewer
-EXPOSE 5905
-
