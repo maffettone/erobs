@@ -8,7 +8,7 @@ services:
       - 5900:5900
       - 6080:6080
     environment:
-      - ROBOT_MODEL=UR3e
+      - ROBOT_MODEL=UR3
     networks:
       ursim_net:
         ipv4_address: 192.168.56.101
