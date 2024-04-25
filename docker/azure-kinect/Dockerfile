@@ -53,7 +53,7 @@ RUN mkdir /root/ws/src -p
 
 WORKDIR /root/temp_code/
 RUN git clone https://github.com/ChandimaFernando/erobs.git -b azure-kinect
-RUN mv erobs/src/kinect_recorder /root/ws/src/
+RUN mv /root/temp_code/erobs/src/kinect_recorder /root/ws/src/
 
 WORKDIR /root/ws/src
 RUN git clone https://github.com/microsoft/Azure_Kinect_ROS_Driver.git -b humble
