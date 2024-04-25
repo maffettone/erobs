@@ -48,9 +48,16 @@ COPY 99-k4a.rules /etc/udev/rules.d/99-k4a.rules
 
 RUN pip3 install xacro 
 
+RUN mkdir /root/temp_code/
 RUN mkdir /root/ws/src -p
+
+WORKDIR /root/temp_code/
+RUN git clone https://github.com/ChandimaFernando/erobs.git -b azure-kinect
+
+
 WORKDIR /root/ws/src
 RUN git clone https://github.com/microsoft/Azure_Kinect_ROS_Driver.git -b humble
+
 WORKDIR /root/ws/
 RUN /bin/bash -c ". /opt/ros/humble/setup.bash && colcon build"
 

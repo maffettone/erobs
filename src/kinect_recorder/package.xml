@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>kinect_recorder</name>
+  <version>0.0.0</version>
+  <description>Copies and saves images from Azure Kinect SDK</description>
+  <maintainer email="wfernando1@bnl.gov">wfernando1</maintainer>
+  <license>TODO: License declaration</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  <buildtool_depend>rclcpp</buildtool_depend>
+  <buildtool_depend>sensor_msgs</buildtool_depend>
+  <buildtool_depend>image_transport</buildtool_depend>
+  <buildtool_depend>cv_bridge</buildtool_depend>
+  <buildtool_depend>OpenCV</buildtool_depend>
+  <buildtool_depend>message_filters</buildtool_depend>
+
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>
