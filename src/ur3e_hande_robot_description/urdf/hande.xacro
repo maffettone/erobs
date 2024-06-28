@@ -114,7 +114,7 @@
     </link>
 
     <!-- hande installation -->
-    <joint name="${tf_prefix}joint_finger" type="prismatic">
+    <joint name="${tf_prefix}joint_finger" type="fixed">
       <origin rpy="0 0 0" xyz="0 0 0.099"/>
       <parent link="${tf_prefix}robotiq_hande_base_link"/>
       <child link="${tf_prefix}left_finger"/>
@@ -122,7 +122,7 @@
       <limit effort="130" lower="0" upper="0.025" velocity="0.15"/>
     </joint>
 
-    <joint name="robotiq_hande_base_to_${tf_prefix}right_finger" type="prismatic">
+    <joint name="robotiq_hande_base_to_${tf_prefix}right_finger" type="fixed">
       <origin rpy="0 0 0" xyz="0 0 0.099"/>
       <parent link="${tf_prefix}robotiq_hande_base_link"/>
       <child link="${tf_prefix}right_finger"/>
