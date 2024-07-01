@@ -138,10 +138,10 @@
     </joint>
 
     <joint name="${tf_prefix}grasping_point" type="fixed">
-      <origin rpy="0 0 0" xyz="0.1 0.2 0.099"/>
+      <origin rpy="0 0 0" xyz="0.0 0.0 0.134"/>
       <parent link="${tf_prefix}robotiq_hande_base_link"/>
       <child link="grasping_point_link"/>
-      <axis xyz="-1 0 0"/>
+      <axis xyz="0 0 0"/>
     </joint>
 
 </xacro:macro>

@@ -27,8 +27,10 @@ podman run -it --network host --ipc=host --pid=host \
     --env ROBOT_IP=$ROBOT_IP \
     --env UR_TYPE=$UR_TYPE \
     --env ROS_DISTRO=$ROS_DISTRO \
+    --env DESCRIPTION_PKG=$DESCRIPTION_PKG \
+    --env DESCRIPTION_FILE=$DESCRIPTION_FILE \
     ${GHCR_POINTER} \
-    /bin/sh -c "printenv && . /opt/ros/${ROS_DISTRO}/setup.sh && . /root/ws/install/setup.sh && ros2 launch ur_robot_driver ur_control.launch.py ur_type:=${UR_TYPE} robot_ip:=${ROBOT_IP} launch_rviz:=false tool_voltage:=24"
+    /bin/sh -c "printenv && . /opt/ros/${ROS_DISTRO}/setup.sh && . /root/ws/install/setup.sh && ros2 launch ur_robot_driver ur_control.launch.py ur_type:=${UR_TYPE} robot_ip:=${ROBOT_IP} description_package:=${DESCRIPTION_PKG} description_file:=${DESCRIPTION_FILE} launch_rviz:=false tool_voltage:=24"
 ```
 
 # Run gripper service to enable the gripper 
