@@ -113,8 +113,14 @@
       </xacro:cylinder_inertial>
     </link>
 
+    <link name="grasping_point_link">
+      <visual>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+       </visual>
+    </link>
+
     <!-- hande installation -->
-    <joint name="${tf_prefix}joint_finger" type="prismatic">
+    <joint name="${tf_prefix}joint_finger" type="fixed">
       <origin rpy="0 0 0" xyz="0 0 0.099"/>
       <parent link="${tf_prefix}robotiq_hande_base_link"/>
       <child link="${tf_prefix}left_finger"/>
@@ -122,13 +128,20 @@
       <limit effort="130" lower="0" upper="0.025" velocity="0.15"/>
     </joint>
 
-    <joint name="robotiq_hande_base_to_${tf_prefix}right_finger" type="prismatic">
+    <joint name="robotiq_hande_base_to_${tf_prefix}right_finger" type="fixed">
       <origin rpy="0 0 0" xyz="0 0 0.099"/>
       <parent link="${tf_prefix}robotiq_hande_base_link"/>
       <child link="${tf_prefix}right_finger"/>
       <axis xyz="1 0 0"/>
       <limit effort="130" lower="0" upper="0.025" velocity="0.15"/>
       <mimic joint="${tf_prefix}joint_finger" multiplier="1" offset="0"/>
+    </joint>
+
+    <joint name="${tf_prefix}grasping_point" type="fixed">
+      <origin rpy="0 0 0" xyz="0.0 0.0 0.134"/>
+      <parent link="${tf_prefix}robotiq_hande_base_link"/>
+      <child link="grasping_point_link"/>
+      <axis xyz="0 0 0"/>
     </joint>
 
 </xacro:macro>
