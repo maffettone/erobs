@@ -1,0 +1,17 @@
+pose_service:
+  ros__parameters:
+    test: 6
+    intrinsics: # Uses to construct K matrix
+      fx: 974.724
+      fy: 974.456
+      cx: 1024.82
+      cy: 773.291
+    dist_coeffs: # Distrotion coefficients
+      k1: 0.602113
+      k2: 2.92716
+      k3: 1.63343
+      k4: 0.468872
+      k5: -2.72304
+      k6: 1.54828
+      p1: 0.000402061
+      p2: -0.000392198

@@ -1,0 +1,5 @@
+pose_service:
+  ros__parameters:
+    physical_marker_size: 0.021
+    camera_rotation: 90.0 # This is the angle of the camera w.r.t XXX axis of the robot
+    camera_to_robot_x: 0.549 # robot location w.r.t to camera in 
