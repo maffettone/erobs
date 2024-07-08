@@ -3,6 +3,7 @@ BSD 3 Clause License. See LICENSE.txt for details.*/
 #include <pose_service/pose_service.hpp>
 
 using std::placeholders::_1;
+using std::placeholders::_2;
 
 PoseService::PoseService(const rclcpp::NodeOptions options)
 : Node("pose_service", options),
@@ -61,7 +62,7 @@ PoseService::PoseService(const rclcpp::NodeOptions options)
   geometry_msgs::msg::TransformStamped transformStamped;
   transformStamped.header.stamp = this->now();
   transformStamped.header.frame_id = "world";
-  transformStamped.child_frame_id = this->get_parameter("camera_base").as_string();
+  transformStamped.child_frame_id = this->get_parameter("camera_tf_frame").as_string();
   transformStamped.transform.translation.x = this->get_parameter("cam_translation.x").as_double();  //0.516;
   transformStamped.transform.translation.y = this->get_parameter("cam_translation.y").as_double();
   transformStamped.transform.translation.z = this->get_parameter("cam_translation.z").as_double();
@@ -83,20 +84,23 @@ void PoseService::image_raw_callback(
   const sensor_msgs::msg::Image::ConstSharedPtr & rgb_msg)
 {
 
+  std::cout << "###### CP 1" << std::endl;
   // Convert ROS image message to cv::Mat
   cv_bridge::CvImagePtr cv_ptr_rgb =
     cv_bridge::toCvCopy(rgb_msg, sensor_msgs::image_encodings::BGR8);
+  std::cout << "###### CP 1.2" << std::endl;
 
   // Detect the markers from the incoming image
   cv::aruco::detectMarkers(
-    cv_ptr_rgb->image, dictionary_,
-    markerCorners_, markerIds_, parameters_,
+    cv_ptr_rgb->image, dictionary_, markerCorners_, markerIds_, parameters_,
     rejectedCandidates_);
+  std::cout << "###### CP 1.3" << std::endl;
 
   // Exclude instances where no markers are detected
   try {
 
     if (!markerIds_.empty()) {
+      std::cout << "###### CP 2" << std::endl;
 
       // rvecs: rotational vector
       // tvecs: translation vector
@@ -124,6 +128,7 @@ void PoseService::image_raw_callback(
       yaw = std::atan2(r21, r11);
 
       auto tranlsation = tvecs[0];
+      std::cout << "###### CP3" << std::endl;
 
       // Construct the raw rpy_xyz of the marker
       std::vector<double> raw_rpyxyz =
@@ -136,7 +141,7 @@ void PoseService::image_raw_callback(
       geometry_msgs::msg::TransformStamped transformStamped_tag;
 
       transformStamped_tag.header.stamp = this->now();
-      transformStamped_tag.header.frame_id = this->get_parameter("camera_base").as_string();
+      transformStamped_tag.header.frame_id = this->get_parameter("camera_tf_frame").as_string();
       transformStamped_tag.child_frame_id = this->get_parameter("sample_name").as_string();
 
       transformStamped_tag.transform.translation.x = median_filtered_rpyxyz[3] +
@@ -144,6 +149,7 @@ void PoseService::image_raw_callback(
       transformStamped_tag.transform.translation.y = median_filtered_rpyxyz[4];
       transformStamped_tag.transform.translation.z = median_filtered_rpyxyz[5];
       transformStamped_tag.transform.rotation = toQuaternion(roll, pitch, yaw);
+      std::cout << "###### CP 4" << std::endl;
 
       // Add a pre-pickup tf
       geometry_msgs::msg::TransformStamped transformStamped_pre_pickup;
@@ -163,14 +169,14 @@ void PoseService::image_raw_callback(
       static_broadcaster_.sendTransform(transformStamped_pre_pickup);
       static_broadcaster_.sendTransform(transformStamped_tag);
 
-      // RCLCPP_INFO(
-      //   this->get_logger(), "Camera RPY XYZ: %f %f %f  \t %f %f %f ",
-      //   median_filtered_rpyxyz[0] * (180.0 / 3.141592653589793238463),
-      //   median_filtered_rpyxyz[1] * (180.0 / 3.141592653589793238463),
-      //   median_filtered_rpyxyz[2] * (180.0 / 3.141592653589793238463),
-      //   median_filtered_rpyxyz[3],
-      //   median_filtered_rpyxyz[4],
-      //   median_filtered_rpyxyz[5]);
+      RCLCPP_INFO(
+        this->get_logger(), "Camera RPY XYZ: %f %f %f  \t %f %f %f ",
+        median_filtered_rpyxyz[0] * (180.0 / 3.141592653589793238463),
+        median_filtered_rpyxyz[1] * (180.0 / 3.141592653589793238463),
+        median_filtered_rpyxyz[2] * (180.0 / 3.141592653589793238463),
+        median_filtered_rpyxyz[3],
+        median_filtered_rpyxyz[4],
+        median_filtered_rpyxyz[5]);
     }
 
     // Inner try-catch

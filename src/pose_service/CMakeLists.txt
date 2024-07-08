@@ -12,6 +12,7 @@ find_package(rclcpp_components REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(image_transport REQUIRED)
 find_package(cv_bridge REQUIRED)
+find_package(message_filters REQUIRED)
 find_package(OpenCV REQUIRED)
 find_package(eigen3_cmake_module REQUIRED)
 find_package(Eigen3 REQUIRED)
@@ -25,6 +26,7 @@ set(dependencies
   rclcpp_components
   sensor_msgs
   image_transport
+  message_filters
   cv_bridge
   OpenCV
   eigen3_cmake_module

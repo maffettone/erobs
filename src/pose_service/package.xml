@@ -15,13 +15,13 @@
   <depend>image_transport</depend>
   <depend>cv_bridge</depend>
   <depend>OpenCV</depend>
+  <buildtool_depend>message_filters</buildtool_depend>
   <depend>eigen3_cmake_module</depend>
   <depend>Eigen3</depend>
   <depend>filters</depend>
   <depend>tf2_ros</depend>
   <depend>tf2</depend>
   <depend>geometry_msgs</depend>
-  <depend>pdf_beamtime_interfaces</depend>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
