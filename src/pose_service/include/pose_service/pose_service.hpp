@@ -36,8 +36,10 @@ private:
 
   rclcpp::Logger LOGGER;
 
-  // void image_raw_callback(
-  //   const sensor_msgs::msg::Image::ConstSharedPtr & rgb_msg);
+  /// @brief Callback function to
+  /// @param rgb_msg
+  void image_raw_callback(
+    const sensor_msgs::msg::Image::ConstSharedPtr & rgb_msg);
 
   // // In OpenCV, the distortion coefficients are usually represented as a 1x8 matrix:
   // // distCoeffs_= [k1, k2, p1, p2, k3, k4, k5, k6] where
@@ -50,12 +52,14 @@ private:
   //   (cv::Mat_<double>(3, 3) << 974.724, 0.0, 1024.82, 0.0, 974.456, 773.291, 0, 0, 1.0, 2.87826,
   //   2.23121, 0.364764 );
   cv::Mat cameraMatrix_;
-
   // cv::Mat distCoeffs_ =
   //   (cv::Mat_<double>(8, 1) << 0.602113, -2.92716, 0.000402061, -0.000392198, 1.63343, 0.468872,
   //   -2.72304, 1.54828);
   cv::Mat distCoeffs_;
 
+  tf2::Quaternion camera_quaternion_;
+
+  // Parameters for Aruco maker detection
   std::vector<int> markerIds_;
   std::vector<std::vector<cv::Point2f>> markerCorners_, rejectedCandidates_;
   cv::Ptr<cv::aruco::DetectorParameters> parameters_;  // Params for ArUco detetcion
@@ -64,19 +68,14 @@ private:
   // This is the actual length/width of the printed tag
   double physical_marker_size_;   // height/width in meters
 
-  // // Median filter related vars
-  // std::shared_ptr<filters::MultiChannelFilterBase<double>> median_filter_ =
-  //   std::make_shared<filters::MultiChannelMedianFilter<double>>();
-  // int moving_window_median_ = 10;
-  // std::vector<double> median_filtered_rpy;
-  // std::vector<double> object_pose_in_world;
+  // Median filter related vars
+  std::shared_ptr<filters::MultiChannelFilterBase<double>> median_filter_ =
+    std::make_shared<filters::MultiChannelMedianFilter<double>>();
+  int moving_window_median_ = 10;
+  std::vector<double> median_filtered_rpyxyz;
 
-  // // Returns the estimated pose
-  // void get_pose(
-  //   const std::shared_ptr<pdf_beamtime_interfaces::srv::EstimatedPoseMsg::Request> request,
-  //   std::shared_ptr<pdf_beamtime_interfaces::srv::EstimatedPoseMsg::Response> response);
-
-  // geometry_msgs::msg::Quaternion toQuaternion(double roll, double pitch, double yaw);
+  /// @brief converts a rpy to a quaternion
+  geometry_msgs::msg::Quaternion toQuaternion(double roll, double pitch, double yaw);
 
 public:
   PoseService(const rclcpp::NodeOptions options);
