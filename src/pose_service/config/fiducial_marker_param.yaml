@@ -1,6 +1,5 @@
 pose_service:
   ros__parameters:
-    physical_marker_size: 0.021
     camera_rotation: 90.0 # This is the angle of the camera w.r.t XXX axis of the robot
     cam_translation:
       x: 0.549 # robot location w.r.t to camera in 4
@@ -17,5 +16,8 @@ pose_service:
       name: 'pre_pickup'
       x_adj: 0.0
       y_adj: 0.0
-      z:adj: 0.08
+      z_adj: 0.08
     offset_on_marker_x:  0.005
+    fiducial_marker_family: 'DICT_APRILTAG_36h11'
+    physical_marker_size: 0.021
+    number_of_observations: 10 # size of the moving window for the median filter

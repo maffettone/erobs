@@ -77,31 +77,52 @@ PoseService::PoseService(const rclcpp::NodeOptions options)
     "/rgb/image_raw", 5,
     std::bind(&PoseService::image_raw_callback, this, std::placeholders::_1));
 
+  // Assign parameters for ArUco tag detection
+  parameters_ = cv::aruco::DetectorParameters::create();
+  parameters_->cornerRefinementMethod = cv::aruco::CORNER_REFINE_APRILTAG;
+
+  auto it = dictionary_map_.find(this->get_parameter("fiducial_marker_family").as_string());
+  if (it != dictionary_map_.end()) {
+    dictionary_ = cv::aruco::getPredefinedDictionary(it->second);
+  } else {
+    RCLCPP_ERROR(
+      LOGGER, "Invalid dictionary name: %s", this->get_parameter(
+        "fiducial_marker_family").as_string().c_str());
+    throw std::runtime_error("Invalid dictionary name");
+  }
+
+  // // This sets the moving window size for the mean filter
+  // this->declare_parameter<int>("number_of_observations", moving_window_median_);
+
+  // Initial estimates
+  median_filtered_rpyxyz = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+
+  // Configure the median filter. 6 refers to the number of channels in the multi-channel filter
+  median_filter_->configure(
+    6, "", "number_of_observations",
+    this->get_node_logging_interface(), this->get_node_parameters_interface());
+
+  RCLCPP_INFO(LOGGER, "Pose estimator node started!");
+
 }
 
 
 void PoseService::image_raw_callback(
   const sensor_msgs::msg::Image::ConstSharedPtr & rgb_msg)
 {
-
-  std::cout << "###### CP 1" << std::endl;
   // Convert ROS image message to cv::Mat
   cv_bridge::CvImagePtr cv_ptr_rgb =
     cv_bridge::toCvCopy(rgb_msg, sensor_msgs::image_encodings::BGR8);
-  std::cout << "###### CP 1.2" << std::endl;
 
   // Detect the markers from the incoming image
   cv::aruco::detectMarkers(
     cv_ptr_rgb->image, dictionary_, markerCorners_, markerIds_, parameters_,
     rejectedCandidates_);
-  std::cout << "###### CP 1.3" << std::endl;
 
   // Exclude instances where no markers are detected
   try {
 
     if (!markerIds_.empty()) {
-      std::cout << "###### CP 2" << std::endl;
-
       // rvecs: rotational vector
       // tvecs: translation vector
       std::vector<cv::Vec3d> rvecs, tvecs;
@@ -128,7 +149,6 @@ void PoseService::image_raw_callback(
       yaw = std::atan2(r21, r11);
 
       auto tranlsation = tvecs[0];
-      std::cout << "###### CP3" << std::endl;
 
       // Construct the raw rpy_xyz of the marker
       std::vector<double> raw_rpyxyz =
@@ -149,7 +169,6 @@ void PoseService::image_raw_callback(
       transformStamped_tag.transform.translation.y = median_filtered_rpyxyz[4];
       transformStamped_tag.transform.translation.z = median_filtered_rpyxyz[5];
       transformStamped_tag.transform.rotation = toQuaternion(roll, pitch, yaw);
-      std::cout << "###### CP 4" << std::endl;
 
       // Add a pre-pickup tf
       geometry_msgs::msg::TransformStamped transformStamped_pre_pickup;
@@ -165,7 +184,6 @@ void PoseService::image_raw_callback(
       transformStamped_pre_pickup.transform.translation.z = this->get_parameter(
         "pre_pickup_location.z_adj").as_double();
       transformStamped_pre_pickup.transform.rotation = toQuaternion(0, 0, 0);
-
       static_broadcaster_.sendTransform(transformStamped_pre_pickup);
       static_broadcaster_.sendTransform(transformStamped_tag);
 
