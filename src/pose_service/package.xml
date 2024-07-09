@@ -14,7 +14,7 @@
   <depend>sensor_msgs</depend>
   <depend>image_transport</depend>
   <depend>cv_bridge</depend>
-  <depend>opencv</depend>
+  <depend>opencv4</depend>
   <buildtool_depend>message_filters</buildtool_depend>
   <depend>eigen3_cmake_module</depend>
   <depend>filters</depend>
