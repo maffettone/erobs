@@ -60,16 +60,11 @@ ament_target_dependencies( pose_subscriber ${dependencies})
 add_executable(parameter_demo src/parameter_demo.cpp)
 ament_target_dependencies(parameter_demo ${dependencies})
 
-add_executable(move_to_pose src/move_to_pose.cpp)
-ament_target_dependencies(move_to_pose ${dependencies})
-
-
 install(TARGETS
   hello_moveit
   parameter_demo
   pose_subscriber
   pick_place_repeat_action_server
-  move_to_pose
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION lib/${PROJECT_NAME}
