@@ -3,7 +3,6 @@ BSD 3 Clause License. See LICENSE.txt for details.*/
 #include <pose_service/pose_service.hpp>
 
 using std::placeholders::_1;
-using std::placeholders::_2;
 
 PoseService::PoseService(const rclcpp::NodeOptions options)
 : Node("pose_service", options),
@@ -11,6 +10,13 @@ PoseService::PoseService(const rclcpp::NodeOptions options)
   LOGGER(this->get_logger())
 {
   // Construct the camera K matrix and the distortion matrix
+  // // In OpenCV, the distortion coefficients are usually represented as a 1x8 matrix:
+  // // distCoeffs_= [k1, k2, p1, p2, k3, k4, k5, k6] where
+  // // k1, k2, k3, k3, k4, k5, k6 = radial distortion coefficients
+  // // p1, p2 = tangential distortion coefficients
+  // // For Azure kinect, they can be found when running the ROS2 camera node and explained in the following:
+  // // https://microsoft.github.io/Azure-Kinect-Sensor-SDK/master/structk4a__calibration__intrinsic__parameters__t_1_1__param.html
+
   cameraMatrix_ =
     (cv::Mat_<double>(3, 3) << this->get_parameter("intrinsics.fx").as_double(), 0.0,
     this->get_parameter("intrinsics.cx").as_double(), 0.0,
@@ -29,32 +35,17 @@ PoseService::PoseService(const rclcpp::NodeOptions options)
 
   physical_marker_size_ = this->get_parameter("physical_marker_size").as_double();
 
-  // Construct the rotation matrix
-  auto rotations_from_params = this->get_parameter("camera_rotation_matrix").as_double_array();
-  tf2::Matrix3x3 rotation_matrix_(
-    rotations_from_params[0], rotations_from_params[1], rotations_from_params[2],
-    rotations_from_params[3], rotations_from_params[4], rotations_from_params[5],
-    rotations_from_params[6], rotations_from_params[7], rotations_from_params[8]);
-
   double alpha = this->get_parameter("cam_rotation.alpha").as_double() / 180 * M_PI;
   double beta = this->get_parameter("cam_rotation.beta").as_double() / 180 * M_PI;
   double gamma = this->get_parameter("cam_rotation.gamma").as_double() / 180 * M_PI;
 
-  // tf2::Matrix3x3 rotation_matrix_(
-  //   cos(beta) * cos(gamma), sin(alpha) * sin(beta) * cos(gamma) - cos(alpha) * sin(gamma), cos(
-  //     alpha) * sin(beta) * cos(gamma) + sin(alpha) * sin(gamma),
-  //   cos(beta) * sin(gamma), sin(alpha) * sin(beta) * sin(gamma) + cos(alpha) * cos(gamma), cos(
-  //     alpha) * sin(beta) * sin(gamma) - sin(alpha) * cos(gamma),
-  //   -1 * sin(beta), sin(alpha) * cos(beta), cos(alpha) * cos(beta) );
-
-  // tf2::Matrix3x3 rotation_gen_(0, 0, -1, 1, 0, 0, 0, -1, 0);
-
-  for (int i = 0; i < 3; ++i) {
-    for (int j = 0; j < 3; ++j) {
-      std::cout << rotation_matrix_[i][j] << " ";
-    }
-    std::cout << std::endl;
-  }
+  // RPY rotational matrix:
+  tf2::Matrix3x3 rotation_matrix_(
+    cos(alpha) * cos(beta), cos(alpha) * sin(beta) * sin(gamma) - sin(alpha) * cos(gamma), cos(
+      alpha) * sin(beta) * cos(gamma) + sin(alpha) * sin(gamma),
+    sin(alpha) * cos(beta), sin(alpha) * sin(beta) * sin(gamma) + cos(alpha) * cos(gamma), sin(
+      alpha) * sin(beta) * cos(gamma) - cos(alpha) * sin(gamma),
+    -1 * sin(beta), cos(beta) * sin(gamma), cos(beta) * cos(gamma) );
 
   // Add the camera to tf server
   rotation_matrix_.getRotation(this->camera_quaternion_);
@@ -91,21 +82,17 @@ PoseService::PoseService(const rclcpp::NodeOptions options)
     throw std::runtime_error("Invalid dictionary name");
   }
 
-  // // This sets the moving window size for the mean filter
-  // this->declare_parameter<int>("number_of_observations", moving_window_median_);
-
   // Initial estimates
   median_filtered_rpyxyz = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
 
   // Configure the median filter. 6 refers to the number of channels in the multi-channel filter
+  // Note: it is necessary to have/declare a parameter named 'number_of_observations' in the parameter server.
   median_filter_->configure(
     6, "", "number_of_observations",
     this->get_node_logging_interface(), this->get_node_parameters_interface());
 
   RCLCPP_INFO(LOGGER, "Pose estimator node started!");
-
 }
-
 
 void PoseService::image_raw_callback(
   const sensor_msgs::msg::Image::ConstSharedPtr & rgb_msg)
@@ -184,17 +171,9 @@ void PoseService::image_raw_callback(
       transformStamped_pre_pickup.transform.translation.z = this->get_parameter(
         "pre_pickup_location.z_adj").as_double();
       transformStamped_pre_pickup.transform.rotation = toQuaternion(0, 0, 0);
+
       static_broadcaster_.sendTransform(transformStamped_pre_pickup);
       static_broadcaster_.sendTransform(transformStamped_tag);
-
-      RCLCPP_INFO(
-        this->get_logger(), "Camera RPY XYZ: %f %f %f  \t %f %f %f ",
-        median_filtered_rpyxyz[0] * (180.0 / 3.141592653589793238463),
-        median_filtered_rpyxyz[1] * (180.0 / 3.141592653589793238463),
-        median_filtered_rpyxyz[2] * (180.0 / 3.141592653589793238463),
-        median_filtered_rpyxyz[3],
-        median_filtered_rpyxyz[4],
-        median_filtered_rpyxyz[5]);
     }
 
     // Inner try-catch
@@ -217,7 +196,6 @@ geometry_msgs::msg::Quaternion PoseService::toQuaternion(double roll, double pit
 
   return msg_quat;
 }
-
 
 int main(int argc, char ** argv)
 {

@@ -11,7 +11,6 @@ BSD 3 Clause License. See LICENSE.txt for details.*/
 #include <fstream>
 
 #include <rclcpp/rclcpp.hpp>
-
 #include <cv_bridge/cv_bridge.h>
 #include <opencv2/opencv.hpp>
 #include <opencv2/aruco.hpp>
@@ -41,20 +40,7 @@ private:
   void image_raw_callback(
     const sensor_msgs::msg::Image::ConstSharedPtr & rgb_msg);
 
-  // // In OpenCV, the distortion coefficients are usually represented as a 1x8 matrix:
-  // // distCoeffs_= [k1, k2, p1, p2, k3, k4, k5, k6] where
-  // // k1, k2, k3, k3, k4, k5, k6 = radial distortion coefficients
-  // // p1, p2 = tangential distortion coefficients
-  // // For Azure kinect, they can be found when running the ROS2 camera node and explained in the following:
-  // // https://microsoft.github.io/Azure-Kinect-Sensor-SDK/master/structk4a__calibration__intrinsic__parameters__t_1_1__param.html
-
-  // cv::Mat cameraMatrix_ =
-  //   (cv::Mat_<double>(3, 3) << 974.724, 0.0, 1024.82, 0.0, 974.456, 773.291, 0, 0, 1.0, 2.87826,
-  //   2.23121, 0.364764 );
   cv::Mat cameraMatrix_;
-  // cv::Mat distCoeffs_ =
-  //   (cv::Mat_<double>(8, 1) << 0.602113, -2.92716, 0.000402061, -0.000392198, 1.63343, 0.468872,
-  //   -2.72304, 1.54828);
   cv::Mat distCoeffs_;
 
   tf2::Quaternion camera_quaternion_;

@@ -1,16 +1,14 @@
 pose_service:
   ros__parameters:
-    camera_rotation: 90.0 # This is the angle of the camera w.r.t XXX axis of the robot
     cam_translation:
       x: 0.549 # robot location w.r.t to camera in 4
       y: -0.392 
       z: 0.08 
-    camera_rotation_matrix: [0.0, 0.0, -1.0, 1.0, 0.0, 0.0, 0.0, -1.0, 0.0]
-    camera_tf_frame: 'camera_base'
     cam_rotation: # These are expressed in RPY angles
       alpha: 00.0
       beta: 90.0
       gamma: 180.0
+    camera_tf_frame: 'camera_base'
     sample_name: 'sample_1'
     pre_pickup_location: 
       name: 'pre_pickup'
