@@ -14,7 +14,8 @@ PoseService::PoseService(const rclcpp::NodeOptions options)
   // // distCoeffs_= [k1, k2, p1, p2, k3, k4, k5, k6] where
   // // k1, k2, k3, k3, k4, k5, k6 = radial distortion coefficients
   // // p1, p2 = tangential distortion coefficients
-  // // For Azure kinect, they can be found when running the ROS2 camera node and explained in the following:
+  // // For Azure kinect, they can be found when running the ROS2 camera node and
+  // // explained in the following:
   // // https://microsoft.github.io/Azure-Kinect-Sensor-SDK/master/structk4a__calibration__intrinsic__parameters__t_1_1__param.html
 
   cameraMatrix_ =
@@ -54,7 +55,7 @@ PoseService::PoseService(const rclcpp::NodeOptions options)
   transformStamped.header.stamp = this->now();
   transformStamped.header.frame_id = "world";
   transformStamped.child_frame_id = this->get_parameter("camera_tf_frame").as_string();
-  transformStamped.transform.translation.x = this->get_parameter("cam_translation.x").as_double();  //0.516;
+  transformStamped.transform.translation.x = this->get_parameter("cam_translation.x").as_double();
   transformStamped.transform.translation.y = this->get_parameter("cam_translation.y").as_double();
   transformStamped.transform.translation.z = this->get_parameter("cam_translation.z").as_double();
   transformStamped.transform.rotation.x = this->camera_quaternion_.x();
@@ -86,7 +87,8 @@ PoseService::PoseService(const rclcpp::NodeOptions options)
   median_filtered_rpyxyz = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
 
   // Configure the median filter. 6 refers to the number of channels in the multi-channel filter
-  // Note: it is necessary to have/declare a parameter named 'number_of_observations' in the parameter server.
+  // Note: it is necessary to have/declare a parameter named 'number_of_observations'
+  // in the parameter server.
   median_filter_->configure(
     6, "", "number_of_observations",
     this->get_node_logging_interface(), this->get_node_parameters_interface());
@@ -108,7 +110,6 @@ void PoseService::image_raw_callback(
 
   // Exclude instances where no markers are detected
   try {
-
     if (!markerIds_.empty()) {
       // rvecs: rotational vector
       // tvecs: translation vector

@@ -2,6 +2,12 @@
 BSD 3 Clause License. See LICENSE.txt for details.*/
 #pragma once
 
+#include <cv_bridge/cv_bridge.h>
+#include <tf2_ros/static_transform_broadcaster.h>
+#include <tf2_ros/transform_broadcaster.h>
+#include <tf2/LinearMath/Quaternion.h>
+#include <tf2/LinearMath/Matrix3x3.h>
+
 #include <iostream>
 #include <thread>
 #include <memory>
@@ -9,19 +15,15 @@ BSD 3 Clause License. See LICENSE.txt for details.*/
 #include <map>
 #include <cmath>
 #include <fstream>
+#include <vector>
 
 #include <rclcpp/rclcpp.hpp>
-#include <cv_bridge/cv_bridge.h>
 #include <opencv2/opencv.hpp>
 #include <opencv2/aruco.hpp>
 
 #include <image_transport/image_transport.hpp>
 #include <sensor_msgs/msg/image.hpp>
 #include <filters/median.hpp>
-#include <tf2_ros/static_transform_broadcaster.h>
-#include <tf2_ros/transform_broadcaster.h>
-#include <tf2/LinearMath/Quaternion.h>
-#include <tf2/LinearMath/Matrix3x3.h>
 #include <geometry_msgs/msg/transform_stamped.hpp>
 #include <geometry_msgs/msg/quaternion.hpp>
 
@@ -89,5 +91,5 @@ private:
   };
 
 public:
-  PoseService(const rclcpp::NodeOptions options);
+  explicit PoseService(const rclcpp::NodeOptions options);
 };

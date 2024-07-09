@@ -17,7 +17,6 @@
   <depend>OpenCV</depend>
   <buildtool_depend>message_filters</buildtool_depend>
   <depend>eigen3_cmake_module</depend>
-  <depend>Eigen3</depend>
   <depend>filters</depend>
   <depend>tf2_ros</depend>
   <depend>tf2</depend>
