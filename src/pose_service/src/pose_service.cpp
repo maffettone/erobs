@@ -37,21 +37,21 @@ PoseService::PoseService(const rclcpp::NodeOptions options)
     rotations_from_params[6], rotations_from_params[7], rotations_from_params[8]);
 
   double alpha = this->get_parameter("cam_rotation.alpha").as_double() / 180 * M_PI;
-  double gamma = this->get_parameter("cam_rotation.beta").as_double() / 180 * M_PI;
-  double beta = this->get_parameter("cam_rotation.gamma").as_double() / 180 * M_PI;
+  double beta = this->get_parameter("cam_rotation.beta").as_double() / 180 * M_PI;
+  double gamma = this->get_parameter("cam_rotation.gamma").as_double() / 180 * M_PI;
 
-  tf2::Matrix3x3 rotation_gen_(
-    cos(beta) * cos(gamma), sin(alpha) * sin(beta) * cos(gamma) - cos(alpha) * sin(gamma), cos(
-      alpha) * sin(beta) * cos(gamma) + sin(alpha) * sin(gamma),
-    cos(beta) * sin(gamma), sin(alpha) * sin(beta) * sin(gamma) + cos(alpha) * cos(gamma), cos(
-      alpha) * sin(beta) * sin(gamma) - sin(alpha) * cos(gamma),
-    -1 * sin(beta), sin(alpha) * cos(beta), cos(alpha) * cos(beta) );
+  // tf2::Matrix3x3 rotation_matrix_(
+  //   cos(beta) * cos(gamma), sin(alpha) * sin(beta) * cos(gamma) - cos(alpha) * sin(gamma), cos(
+  //     alpha) * sin(beta) * cos(gamma) + sin(alpha) * sin(gamma),
+  //   cos(beta) * sin(gamma), sin(alpha) * sin(beta) * sin(gamma) + cos(alpha) * cos(gamma), cos(
+  //     alpha) * sin(beta) * sin(gamma) - sin(alpha) * cos(gamma),
+  //   -1 * sin(beta), sin(alpha) * cos(beta), cos(alpha) * cos(beta) );
 
   // tf2::Matrix3x3 rotation_gen_(0, 0, -1, 1, 0, 0, 0, -1, 0);
 
   for (int i = 0; i < 3; ++i) {
     for (int j = 0; j < 3; ++j) {
-      std::cout << rotation_gen_[i][j] << " ";
+      std::cout << rotation_matrix_[i][j] << " ";
     }
     std::cout << std::endl;
   }
