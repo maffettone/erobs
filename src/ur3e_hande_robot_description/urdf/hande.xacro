@@ -118,7 +118,7 @@
     <link name="grasping_point_link">
       <visual>
         <origin rpy="0 0 0" xyz="0 0 0"/>
-      </visual>
+       </visual>
     </link>
 
     <!-- hande installation -->
@@ -140,7 +140,7 @@
     </joint>
 
     <joint name="${tf_prefix}grasping_point" type="fixed">
-      <origin rpy="0 0 0" xyz="0.0 0.0 0.135"/>
+      <origin rpy="0 0 0" xyz="0.0 0.0 0.15"/>
       <parent link="${tf_prefix}robotiq_hande_base_link"/>
       <child link="grasping_point_link"/>
       <axis xyz="0 0 0"/>
