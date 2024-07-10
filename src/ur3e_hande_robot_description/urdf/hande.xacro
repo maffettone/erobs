@@ -50,7 +50,6 @@
   <xacro:property name="finger_radius" value="${sec_inertia_parameters['finger_radius']}" scope="parent"/>
 
     <!-- customizations to include hande -->
-    <!-- TODO Add the coupling between the wrist_3_link and robotiq_hande_base_link -->
     <link name="${tf_prefix}robotiq_hande_base_link">
       <visual>
         <origin xyz="0 0 0" rpy="0 0 0" />
