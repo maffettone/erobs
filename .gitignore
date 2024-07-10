@@ -88,3 +88,7 @@ target/
 #Ipython Notebook
 .ipynb_checkpoints
 *.code-workspace
+
+# Data folder
+/data/*
+docker/image-mask-sam/sam_vit_h_4b8939.pth
