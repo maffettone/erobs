@@ -5,7 +5,6 @@ BSD 3 Clause License. See LICENSE.txt for details.*/
 
 #include <moveit_msgs/msg/constraints.hpp>
 #include <moveit_msgs/msg/joint_constraint.hpp>
-#include <pdf_beamtime_interfaces/srv/estimated_pose_msg.hpp>
 #include <geometry_msgs/msg/transform_stamped.hpp>
 #include <tf2_ros/buffer.h>
 #include <tf2_ros/transform_listener.h>
