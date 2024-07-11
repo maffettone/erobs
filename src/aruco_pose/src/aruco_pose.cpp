@@ -49,7 +49,7 @@ ArucoPose::ArucoPose(const rclcpp::NodeOptions options)
   //   -1 * sin(beta), cos(beta) * sin(gamma), cos(beta) * cos(gamma) );
 
   // Rotation matrix to quaternion conversion
-  tf2::Matrix3x3 rotation_matrix(
+  tf2::Matrix3x3 rotation_matrix_(
     0, 0, -1,
     1, 0, 0,
     0, -1, 0
