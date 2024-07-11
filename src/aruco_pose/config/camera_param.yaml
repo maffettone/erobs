@@ -1,6 +1,5 @@
 aruco_pose:
   ros__parameters:
-    test: 6
     intrinsics: # Uses to construct K matrix
       fx: 974.724
       fy: 974.456

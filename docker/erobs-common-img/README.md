@@ -30,7 +30,7 @@ podman run -it --network host --ipc=host --pid=host \
     --env DESCRIPTION_PKG=$DESCRIPTION_PKG \
     --env DESCRIPTION_FILE=$DESCRIPTION_FILE \
     ${GHCR_POINTER} \
-    /bin/sh -c "printenv && . /opt/ros/${ROS_DISTRO}/setup.sh && . /root/ws/install/setup.sh && ros2 launch ur_robot_driver ur_control.launch.py ur_type:=${UR_TYPE} robot_ip:=${ROBOT_IP} description_package:=${DESCRIPTION_PKG} description_file:=${DESCRIPTION_FILE} launch_rviz:=false tool_voltage:=24"
+    /bin/sh -c "printenv && . /opt/ros/${ROS_DISTRO}/setup.sh && . /root/ws/install/setup.sh && ros2 launch ur_robot_driver ur_control.launch.py ur_type:=${UR_TYPE} robot_ip:=${ROBOT_IP} description_package:=${DESCRIPTION_PKG} description_file:=${DESCRIPTION_FILE} launch_rviz:=${LAUNCH_RVIZ} tool_voltage:=24"
 ```
 
 # Run gripper service to enable the gripper 
@@ -53,6 +53,13 @@ podman run -it --network host --ipc=host --pid=host \
     --env CONFIG_FILE=$CONFIG_FILE \
     ${GHCR_POINTER} \
     /bin/sh -c "printenv && . /opt/ros/${ROS_DISTRO}/setup.sh && . /root/ws/install/setup.sh && ros2 launch ur_moveit_config ur_moveit.launch.py ur_type:=${UR_TYPE} launch_rviz:=${LAUNCH_RVIZ} description_package:=${DESCRIPTION_PKG}  launch_servo:=false description_file:=${DESCRIPTION_FILE} moveit_config_package:=${CONFIG_PKG} moveit_config_file:=${CONFIG_FILE}"
+```
+# Launch aruco_pose 
+```bash
+podman run -it --network host --ipc=host --pid=host \
+    --env ROS_DISTRO=$ROS_DISTRO \
+    ${GHCR_POINTER} \
+    /bin/sh -c "printenv && . /opt/ros/${ROS_DISTRO}/setup.sh && . /root/ws/install/setup.sh && ros2 launch aruco_pose aruco_pose.launch.py"
 ```
 
 # Launch the pdf_beamtime_server
