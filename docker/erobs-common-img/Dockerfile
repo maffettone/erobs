@@ -24,9 +24,6 @@ WORKDIR /root/ws
 
 # RUN git clone https://github.com/maffettone/erobs.git -b humble
 RUN git clone https://github.com/ChandimaFernando/erobs.git -b humble_fiducial_pose
-# RUN git clone https://github.com/ChandimaFernando/erobs.git -b fix_hande_urdf \ 
-# && cd erobs \
-# && git checkout a31fe9852ca8803aec94615fa80d6a402869a210
 
 WORKDIR /root/ws/erobs/
 RUN /bin/bash -c ". ./setup.sh"

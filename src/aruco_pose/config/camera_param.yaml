@@ -1,4 +1,4 @@
-pose_service:
+aruco_pose:
   ros__parameters:
     test: 6
     intrinsics: # Uses to construct K matrix

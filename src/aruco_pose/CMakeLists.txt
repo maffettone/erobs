@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.8)
-project(pose_service)
+project(aruco_pose)
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
@@ -37,11 +37,11 @@ set(dependencies
 
 include_directories(include)  # This makes sure the libraries are visible
 
-add_executable(pose_service src/pose_service.cpp)
-ament_target_dependencies(pose_service ${dependencies})
+add_executable(aruco_pose src/aruco_pose.cpp)
+ament_target_dependencies(aruco_pose ${dependencies})
 
 install(TARGETS
-  pose_service
+aruco_pose
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION lib/${PROJECT_NAME}

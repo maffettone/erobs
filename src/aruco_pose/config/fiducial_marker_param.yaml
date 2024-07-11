@@ -1,4 +1,4 @@
-pose_service:
+aruco_pose:
   ros__parameters:
     cam_translation:
       x: 0.549 # robot location w.r.t to camera in 4
@@ -19,3 +19,4 @@ pose_service:
     fiducial_marker_family: 'DICT_APRILTAG_36h11'
     physical_marker_size: 0.021
     number_of_observations: 10 # size of the moving window for the median filter
+    

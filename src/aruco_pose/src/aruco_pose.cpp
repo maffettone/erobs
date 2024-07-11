@@ -1,11 +1,11 @@
 /*Copyright 2023 Brookhaven National Laboratory
 BSD 3 Clause License. See LICENSE.txt for details.*/
-#include <pose_service/pose_service.hpp>
+#include <aruco_pose/aruco_pose.hpp>
 
 using std::placeholders::_1;
 
-PoseService::PoseService(const rclcpp::NodeOptions options)
-: Node("pose_service", options),
+ArucoPose::ArucoPose(const rclcpp::NodeOptions options)
+: Node("aruco_pose", options),
   static_broadcaster_(this), tf_broadcaster_(this),
   LOGGER(this->get_logger())
 {
@@ -67,7 +67,7 @@ PoseService::PoseService(const rclcpp::NodeOptions options)
 
   camera_subscription_ = this->create_subscription<sensor_msgs::msg::Image>(
     "/rgb/image_raw", 5,
-    std::bind(&PoseService::image_raw_callback, this, std::placeholders::_1));
+    std::bind(&ArucoPose::image_raw_callback, this, std::placeholders::_1));
 
   // Assign parameters for ArUco tag detection
   parameters_ = cv::aruco::DetectorParameters::create();
@@ -96,7 +96,7 @@ PoseService::PoseService(const rclcpp::NodeOptions options)
   RCLCPP_INFO(LOGGER, "Pose estimator node started!");
 }
 
-void PoseService::image_raw_callback(
+void ArucoPose::image_raw_callback(
   const sensor_msgs::msg::Image::ConstSharedPtr & rgb_msg)
 {
   // Convert ROS image message to cv::Mat
@@ -184,7 +184,7 @@ void PoseService::image_raw_callback(
   }
 }
 
-geometry_msgs::msg::Quaternion PoseService::toQuaternion(double roll, double pitch, double yaw)
+geometry_msgs::msg::Quaternion ArucoPose::toQuaternion(double roll, double pitch, double yaw)
 {
   tf2::Quaternion quaternion;
   quaternion.setRPY(roll, pitch, yaw);
@@ -208,9 +208,9 @@ int main(int argc, char ** argv)
     .allow_undeclared_parameters(true)
     .automatically_declare_parameters_from_overrides(true)
   );
-  auto pose_service_node = std::make_shared<PoseService>(options);
+  auto aruco_pose_node = std::make_shared<ArucoPose>(options);
 
-  rclcpp::spin(pose_service_node);
+  rclcpp::spin(aruco_pose_node);
   rclcpp::shutdown();
 
   return 0;

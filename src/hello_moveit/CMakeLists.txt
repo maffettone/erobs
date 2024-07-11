@@ -15,11 +15,6 @@ find_package(hello_moveit_interfaces REQUIRED)
 find_package(rclcpp_action REQUIRED)
 find_package(rclcpp_components REQUIRED)
 find_package(yaml-cpp REQUIRED)
-find_package(pdf_beamtime_interfaces REQUIRED)
-find_package(geometry_msgs REQUIRED)
-find_package(tf2_ros REQUIRED)
-find_package(tf2 REQUIRED)
-find_package(tf2_geometry_msgs REQUIRED)
 
 set(dependencies
   moveit_core
@@ -29,11 +24,6 @@ set(dependencies
   rclcpp_action
   rclcpp_components
   yaml-cpp
-  pdf_beamtime_interfaces
-  geometry_msgs
-  tf2_geometry_msgs
-  tf2_ros
-  tf2
 )
 
 # Comment out the Plugin components and revert to spinning the node in main.

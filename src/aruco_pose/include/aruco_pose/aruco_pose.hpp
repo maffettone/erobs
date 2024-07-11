@@ -1,4 +1,4 @@
-/*Copyright 2023 Brookhaven National Laboratory
+/*Copyright 2024 Brookhaven National Laboratory
 BSD 3 Clause License. See LICENSE.txt for details.*/
 #pragma once
 
@@ -27,7 +27,7 @@ BSD 3 Clause License. See LICENSE.txt for details.*/
 #include <geometry_msgs/msg/transform_stamped.hpp>
 #include <geometry_msgs/msg/quaternion.hpp>
 
-class PoseService : public rclcpp::Node
+class ArucoPose : public rclcpp::Node
 {
 private:
   rclcpp::Subscription<sensor_msgs::msg::Image>::SharedPtr camera_subscription_;
@@ -91,5 +91,5 @@ private:
   };
 
 public:
-  explicit PoseService(const rclcpp::NodeOptions options);
+  explicit ArucoPose(const rclcpp::NodeOptions options);
 };
