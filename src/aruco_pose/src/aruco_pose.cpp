@@ -40,13 +40,20 @@ ArucoPose::ArucoPose(const rclcpp::NodeOptions options)
   double beta = this->get_parameter("cam_rotation.beta").as_double() / 180 * M_PI;
   double gamma = this->get_parameter("cam_rotation.gamma").as_double() / 180 * M_PI;
 
-  // RPY rotational matrix:
-  tf2::Matrix3x3 rotation_matrix_(
-    cos(alpha) * cos(beta), cos(alpha) * sin(beta) * sin(gamma) - sin(alpha) * cos(gamma), cos(
-      alpha) * sin(beta) * cos(gamma) + sin(alpha) * sin(gamma),
-    sin(alpha) * cos(beta), sin(alpha) * sin(beta) * sin(gamma) + cos(alpha) * cos(gamma), sin(
-      alpha) * sin(beta) * cos(gamma) - cos(alpha) * sin(gamma),
-    -1 * sin(beta), cos(beta) * sin(gamma), cos(beta) * cos(gamma) );
+  // // RPY rotational matrix:
+  // tf2::Matrix3x3 rotation_matrix_(
+  //   cos(alpha) * cos(beta), cos(alpha) * sin(beta) * sin(gamma) - sin(alpha) * cos(gamma), cos(
+  //     alpha) * sin(beta) * cos(gamma) + sin(alpha) * sin(gamma),
+  //   sin(alpha) * cos(beta), sin(alpha) * sin(beta) * sin(gamma) + cos(alpha) * cos(gamma), sin(
+  //     alpha) * sin(beta) * cos(gamma) - cos(alpha) * sin(gamma),
+  //   -1 * sin(beta), cos(beta) * sin(gamma), cos(beta) * cos(gamma) );
+
+  // Rotation matrix to quaternion conversion
+  tf2::Matrix3x3 rotation_matrix(
+    0, 0, -1,
+    1, 0, 0,
+    0, -1, 0
+  );
 
   // Add the camera to tf server
   rotation_matrix_.getRotation(this->camera_quaternion_);
