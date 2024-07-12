@@ -18,12 +18,20 @@ GripperService::GripperService()
 
   RCLCPP_INFO(this->get_logger(), "Activation is successful");
 
-  rclcpp::Service<pdf_beamtime_interfaces::srv::GripperControlMsg>::SharedPtr service =
+  service =
     this->create_service<pdf_beamtime_interfaces::srv::GripperControlMsg>(
     "gripper_service",
     std::bind(
       &GripperService::gripper_controller, this, _1, _2));
-  RCLCPP_INFO(this->get_logger(), "Ready to receive gripper commands.");
+
+  // Check if the service was created successfully
+  if (service == nullptr) {
+    RCLCPP_ERROR(this->get_logger(), "Failed to create service");
+    rclcpp::shutdown();
+  } else {
+    RCLCPP_INFO(this->get_logger(), "Service %s created successfully", service->get_service_name());
+    RCLCPP_INFO(this->get_logger(), "Ready to receive gripper commands.");
+  }
 }
 
 void GripperService::gripper_controller(

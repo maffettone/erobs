@@ -23,7 +23,7 @@ export GHCR_POINTER=ghcr.io/chandimafernando/erobs-common-img:latest
 
 # Enable the connection between the UR robot and the VM
 ```bash
-podman run -it --network host --ipc=host --pid=host \
+podman run -it --rm --network host --ipc=host --pid=host \
     --env ROBOT_IP=$ROBOT_IP \
     --env UR_TYPE=$UR_TYPE \
     --env ROS_DISTRO=$ROS_DISTRO \
@@ -35,15 +35,23 @@ podman run -it --network host --ipc=host --pid=host \
 
 # Run gripper service to enable the gripper 
 ```bash
-podman run -it --network host --ipc=host --pid=host \
+podman run -it --rm --network host --ipc=host --pid=host \
+    --env ROBOT_IP=$ROBOT_IP \
+    --env ROS_DISTRO=$ROS_DISTRO  \
     ${GHCR_POINTER} \
     /bin/bash -c ". /root/ws/install/setup.sh && \
+    . /opt/ros/${ROS_DISTRO}/setup.sh && \
+    ros2 run ur_robot_driver tool_communication.py --ros-args -p robot_ip:=${ROBOT_IP} & \
+    sleep 5 && \
+    . /root/ws/install/setup.sh && \
     ros2 run gripper_service gripper_service"
 ```
 
+Note: gripper_service has two nodes, gripper_open and gripper_close to utilize if needed.
+
 # Launch move_group
 ```bash
-podman run -it --network host --ipc=host --pid=host \
+podman run -it --rm --network host --ipc=host --pid=host \
     --env ROBOT_IP=$ROBOT_IP \
     --env UR_TYPE=$UR_TYPE \
     --env ROS_DISTRO=$ROS_DISTRO \

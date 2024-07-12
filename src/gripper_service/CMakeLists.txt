@@ -27,8 +27,16 @@ include_directories(include)  # This makes sure the libraries are visible
 add_executable(gripper_service src/gripper_service.cpp)
 ament_target_dependencies(gripper_service ${dependencies})
 
+add_executable(gripper_close src/gripper_close.cpp)
+ament_target_dependencies(gripper_close ${dependencies})
+
+add_executable(gripper_open src/gripper_open.cpp)
+ament_target_dependencies(gripper_open ${dependencies})
+
 install(TARGETS
   gripper_service
+  gripper_close
+  gripper_open
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION lib/${PROJECT_NAME}
