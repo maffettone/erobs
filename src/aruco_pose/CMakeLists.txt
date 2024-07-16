@@ -54,6 +54,10 @@ install(
   DESTINATION include
 )
 
+install(
+  DIRECTORY config/
+  DESTINATION config
+)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
