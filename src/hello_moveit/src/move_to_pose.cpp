@@ -136,7 +136,7 @@ int main(int argc, char * argv[])
 
   moveit_msgs::msg::CollisionObject collision_object;
   collision_object.header.frame_id = "world";
-  collision_object.id = "box1";
+  collision_object.id = "table";
 
   // Define the shape and size of the box
   shape_msgs::msg::SolidPrimitive primitive;
@@ -165,14 +165,12 @@ int main(int argc, char * argv[])
 
   // ####################### REST
   // while (true) {
-  std::vector<double> joint_goal_degrees = {111.87, -122.57, -120.38, -118.77, 20.99, 180.0};
-  // std::vector<double> joint_goal_degrees = {238.14, -57.98, 99.71, -43.41, 148.03, 180.0};
-  // std::vector<double> joint_goal_degrees = {235.14, -77.05, 119.62, -43.57, 148.03, 180.0};
+  // std::vector<double> joint_goal_degrees = {111.87, -122.57, -120.38, -118.77, 20.99, 180.0};
+  std::vector<double> joint_goal_degrees = {235.14, -77.05, 119.62, -43.57, 148.03, 180.0};
 
 
   doJointMovement(joint_goal_degrees, move_group_interface, logger);
 
-  rclcpp::shutdown();           // Stop the node if planning fails
   std::this_thread::sleep_for(std::chrono::seconds(2));
 
   // ####################### PRE PICK UP HEAD TURN
@@ -246,7 +244,7 @@ int main(int argc, char * argv[])
     (adj) * 180 / M_PI);
   // RCLCPP_ERROR(logger, "joint_group_positions[5]: %f", joint_group_positions[5] * 180 / M_PI);
 
-  joint_goal_degrees[4] = (joint_group_positions[4] + wrist_2_yaw - sample_yaw) * 180 / M_PI;
+  joint_goal_degrees[4] = (joint_group_positions[4] + wrist_2_yaw - sample_yaw ) * 180 / M_PI;
   // joint_goal_degrees[5] = joint_group_positions[5] + wrist_2_pitch - sample_pitch;
   doJointMovement(joint_goal_degrees, move_group_interface, logger);
 
@@ -376,6 +374,8 @@ int main(int argc, char * argv[])
 
   doJointMovement(joint_goal_degrees, move_group_interface, logger);
   // Shutdown ROS
+  planning_scene_interface_->removeCollisionObjects({"table"});
+
   rclcpp::shutdown();
   return 0;
 }
