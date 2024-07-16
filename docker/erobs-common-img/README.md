@@ -46,7 +46,7 @@ podman run -it --rm --network host --ipc=host --pid=host \
     . /root/ws/install/setup.sh && \
     ros2 run gripper_service gripper_service"
 ```
-
+Note: tool_communication.py should not be called when ur_control.launch.py is called, but separately when the gripper is initiated. 5s delay allows socat creation before running the gripper service.
 Note: gripper_service has two nodes, gripper_open and gripper_close to utilize if needed.
 
 # Launch move_group
@@ -67,7 +67,10 @@ podman run -it --rm --network host --ipc=host --pid=host \
 podman run -it --network host --ipc=host --pid=host \
     --env ROS_DISTRO=$ROS_DISTRO \
     ${GHCR_POINTER} \
-    /bin/sh -c "printenv && . /opt/ros/${ROS_DISTRO}/setup.sh && . /root/ws/install/setup.sh && ros2 launch aruco_pose aruco_pose.launch.py"
+    /bin/sh -c "printenv && \
+    . /root/ws/install/setup.sh && \
+    . /opt/ros/${ROS_DISTRO}/setup.sh && \
+    ros2 launch aruco_pose aruco_pose.launch.py"
 ```
 
 # Launch the pdf_beamtime_server

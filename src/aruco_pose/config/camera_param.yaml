@@ -7,7 +7,7 @@ aruco_pose:
       cy: 773.291
     dist_coeffs: # Distrotion coefficients
       k1: 0.602113
-      k2: 2.92716
+      k2: -2.92716
       k3: 1.63343
       k4: 0.468872
       k5: -2.72304

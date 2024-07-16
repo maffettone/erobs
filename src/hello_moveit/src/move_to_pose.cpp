@@ -33,6 +33,53 @@ double degreesToRadians(double degrees)
   return degrees * M_PI / 180.0;
 }
 
+void doCartesianMovement(
+  std::vector<geometry_msgs::msg::Pose> waypoints,
+  moveit::planning_interface::MoveGroupInterface & move_group_interface, rclcpp::Logger logger)
+{
+  // Plan the Cartesian path
+  moveit::planning_interface::MoveGroupInterface::Plan cartesian_plan;
+  double fraction = move_group_interface.computeCartesianPath(
+    waypoints, 0.001, 0.0,
+    cartesian_plan.trajectory_);
+
+  if (fraction > 0.95) {
+    RCLCPP_INFO(
+      logger, "Cartesian path (%.2f%% acheived), moving the arm", fraction * 100.0);
+    move_group_interface.execute(cartesian_plan);
+  } else {
+    RCLCPP_WARN(logger, "Cartesian path planning failed with %.2f%%", fraction * 100.0);
+    rclcpp::shutdown();
+  }
+}
+
+void doJointMovement(
+  std::vector<double> joint_goal_degrees,
+  moveit::planning_interface::MoveGroupInterface & move_group_interface, rclcpp::Logger logger)
+{
+  // Vector to hold the converted angles in radians
+  std::vector<double> joint_goal_radians(joint_goal_degrees.size());
+
+  // Convert each element from degrees to radians using std::transform
+  std::transform(
+    joint_goal_degrees.begin(), joint_goal_degrees.end(),
+    joint_goal_radians.begin(), degreesToRadians);
+
+  move_group_interface.setJointValueTarget(joint_goal_radians);
+  // Create a plan to that target pose
+  auto const [planing_success, plan] = [&move_group_interface] {
+      moveit::planning_interface::MoveGroupInterface::Plan msg;
+      auto const ok = static_cast<bool>(move_group_interface.plan(msg));
+      return std::make_pair(ok, msg);
+    }();
+  if (planing_success) {
+
+    move_group_interface.execute(plan);
+  } else {
+    RCLCPP_ERROR(logger, "Planning failed!");
+    rclcpp::shutdown();         // Stop the node if planning fails
+  }
+}
 
 int main(int argc, char * argv[])
 {
@@ -104,7 +151,7 @@ int main(int argc, char * argv[])
   box_pose.orientation.w = 1.0;
   box_pose.position.x = 0.0;
   box_pose.position.y = 0.0;
-  box_pose.position.z = -0.02;
+  box_pose.position.z = -0.01;
 
   // Add the primitive and pose to the collision object
   collision_object.primitives.push_back(primitive);
@@ -113,53 +160,20 @@ int main(int argc, char * argv[])
   // Add the collision object to the planning scene
   all_obstacles.push_back(collision_object);
 
-  moveit_msgs::msg::CollisionObject sample;
-  sample.header.frame_id = "world";
-  sample.id = "sample";
-
-  // Define the shape and size of the box
-  shape_msgs::msg::SolidPrimitive primitive_sample;
-
-  primitive_sample.type = primitive.BOX;
-  primitive_sample.dimensions.resize(3);
-  primitive_sample.dimensions[0] = 0.01;    // x
-  primitive_sample.dimensions[1] = 0.02;    // y
-  primitive_sample.dimensions[2] = 0.1;    // z
-
-  // Add the primitive and pose to the collision object
-  sample.primitives.push_back(primitive_sample);
-  // sample.primitive_poses.push_back(box_pose_sample);
-
-  all_obstacles.push_back(sample);
-
   // Add the collision object to the planning scene
   planning_scene_interface_->applyCollisionObjects(all_obstacles);
 
   // ####################### REST
   // while (true) {
-  std::vector<double> joint_goal_degrees = {167.38, -91.34, -87.46, -179.41, -24.11, 359.7};
+  std::vector<double> joint_goal_degrees = {111.87, -122.57, -120.38, -118.77, 20.99, 180.0};
+  // std::vector<double> joint_goal_degrees = {238.14, -57.98, 99.71, -43.41, 148.03, 180.0};
+  // std::vector<double> joint_goal_degrees = {235.14, -77.05, 119.62, -43.57, 148.03, 180.0};
 
-  // Vector to hold the converted angles in radians
-  std::vector<double> joint_goal_radians(joint_goal_degrees.size());
 
-  // Convert each element from degrees to radians using std::transform
-  std::transform(
-    joint_goal_degrees.begin(), joint_goal_degrees.end(),
-    joint_goal_radians.begin(), degreesToRadians);
+  doJointMovement(joint_goal_degrees, move_group_interface, logger);
 
-  move_group_interface.setJointValueTarget(joint_goal_radians);
-  // Create a plan to that target pose
-  auto const [planing_success, plan] = [&move_group_interface] {
-      moveit::planning_interface::MoveGroupInterface::Plan msg;
-      auto const ok = static_cast<bool>(move_group_interface.plan(msg));
-      return std::make_pair(ok, msg);
-    }();
-  if (planing_success) {
-
-    move_group_interface.execute(plan);
-  }
-
-  std::this_thread::sleep_for(std::chrono::seconds(5));
+  rclcpp::shutdown();           // Stop the node if planning fails
+  std::this_thread::sleep_for(std::chrono::seconds(2));
 
   // ####################### PRE PICK UP HEAD TURN
 
@@ -216,21 +230,25 @@ int main(int argc, char * argv[])
     joint_group_positions
   );
 
-  joint_group_positions[4] = joint_group_positions[4] + wrist_2_yaw - sample_yaw;
-  joint_group_positions[5] = joint_group_positions[5] + wrist_2_pitch - sample_pitch;
+  // RCLCPP_ERROR(logger, "joint_group_positions[1]: %f", joint_group_positions[1] * 180 / M_PI);
+  // RCLCPP_ERROR(logger, "joint_group_positions[2]: %f", joint_group_positions[2] * 180 / M_PI);
+  // RCLCPP_ERROR(logger, "joint_group_positions[3]: %f", joint_group_positions[3] * 180 / M_PI);
+  RCLCPP_ERROR(logger, "joint_group_positions[4]: %f", joint_group_positions[4] * 180 / M_PI);
+  RCLCPP_ERROR(logger, "wrist_2_yaw: %f", (wrist_2_yaw) * 180 / M_PI);
+  RCLCPP_ERROR(logger, "wrist_2_roll: %f", (wrist_2_roll) * 180 / M_PI);
+  RCLCPP_ERROR(logger, "wrist_2_pitch: %f", (wrist_2_pitch) * 180 / M_PI);
 
-  move_group_interface.setJointValueTarget(joint_group_positions);
-  // Create a plan to that target pose
-  auto const [planing_success3, plan3] = [&move_group_interface] {
-      moveit::planning_interface::MoveGroupInterface::Plan msg;
-      auto const ok = static_cast<bool>(move_group_interface.plan(msg));
-      return std::make_pair(ok, msg);
-    }();
-  if (planing_success3) {
-    move_group_interface.execute(plan3);
-  }
+  RCLCPP_ERROR(logger, "sample_yaw: %f", (sample_yaw) * 180 / M_PI);
 
-  // ####################### PICK UP APPROACH
+  double adj = joint_group_positions[4] + wrist_2_yaw - sample_yaw;
+  RCLCPP_ERROR(
+    logger, "new joint_goal_degrees[4]: %f",
+    (adj) * 180 / M_PI);
+  // RCLCPP_ERROR(logger, "joint_group_positions[5]: %f", joint_group_positions[5] * 180 / M_PI);
+
+  joint_goal_degrees[4] = (joint_group_positions[4] + wrist_2_yaw - sample_yaw) * 180 / M_PI;
+  // joint_goal_degrees[5] = joint_group_positions[5] + wrist_2_pitch - sample_pitch;
+  doJointMovement(joint_goal_degrees, move_group_interface, logger);
 
   while (rclcpp::ok()) {
     try {
@@ -296,29 +314,13 @@ int main(int argc, char * argv[])
 
   geometry_msgs::msg::Pose target_pose = current_pose_after_direction.pose;
 
-  // Move 10 cm up in the z direction
+  // Move 2 cm down in the z direction
   target_pose.position.z += z_dist_to_pickup_approach;
-  target_pose.position.z += -0.02;
-
+  target_pose.position.z += -0.025;
 
   waypoints.push_back(target_pose);
-
-  // Plan the Cartesian path
-  moveit::planning_interface::MoveGroupInterface::Plan cartesian_plan;
-  double fraction = move_group_interface.computeCartesianPath(
-    waypoints, 0.01, 0.0,
-    cartesian_plan.trajectory_);
-
-  if (fraction > 0.95) {
-    RCLCPP_INFO(
-      logger, "Cartesian path (%.2f%% acheived), moving the arm", fraction * 100.0);
-    move_group_interface.execute(cartesian_plan);
-  } else {
-    RCLCPP_WARN(logger, "Cartesian path planning failed with %.2f%%", fraction * 100.0);
-  }
-
-  target_pose.position.x += x_dist_to_pickup_approach;
-  target_pose.position.y += y_dist_to_pickup_approach;
+  doCartesianMovement(waypoints, move_group_interface, logger);
+  waypoints.clear();
 
   RCLCPP_WARN(
     logger,
@@ -327,53 +329,52 @@ int main(int argc, char * argv[])
     y_dist_to_pickup_approach,
     z_dist_to_pickup_approach);
 
-  waypoints.clear();
-  waypoints.push_back(target_pose);
+  // Get current pose
 
-  // Plan the Cartesian path
-  fraction = move_group_interface.computeCartesianPath(
-    waypoints, 0.01, 0.0,
-    cartesian_plan.trajectory_);
+  target_pose = move_group_interface.getCurrentPose().pose;
+  // Move to pre-pickup lineup.
 
-  if (fraction > 0.50) {
-    RCLCPP_INFO(
-      logger, "Cartesian path (%.2f%% acheived), moving the arm", fraction * 100.0);
-    move_group_interface.execute(cartesian_plan);
-  } else {
-    RCLCPP_WARN(logger, "Cartesian path planning failed with %.2f%%", fraction * 100.0);
+  int N = 10;
+  // Calculate incremental distances
+  double x_increment = x_dist_to_pickup_approach / N;
+  double y_increment = y_dist_to_pickup_approach / N;
+
+  // Loop to move in segments
+  for (int i = 0; i < N; ++i) {
+    target_pose.position.x += x_increment;
+    target_pose.position.y += y_increment;
+
+    // Set the new target pose
+    waypoints.push_back(target_pose);
   }
-  std::this_thread::sleep_for(std::chrono::seconds(2));
 
+  doCartesianMovement(waypoints, move_group_interface, logger);
+  waypoints.clear();
   // ####################### PICK UP
 
-  current_pose_after_direction = move_group_interface.getCurrentPose();
-  target_pose = current_pose_after_direction.pose;
+  target_pose = move_group_interface.getCurrentPose().pose;
 
   target_pose.position.x += x_dist_to_sample;
   target_pose.position.y += y_dist_to_sample;
-
-  RCLCPP_WARN(
-    logger, "x_dist_to_sample: %f   y_dist_to_sample: %f ", x_dist_to_sample,
-    y_dist_to_sample);
-
-  waypoints.clear();
   waypoints.push_back(target_pose);
+  doCartesianMovement(waypoints, move_group_interface, logger);
 
-  // Plan the Cartesian path
-  fraction = move_group_interface.computeCartesianPath(
-    waypoints, 0.01, 0.0,
-    cartesian_plan.trajectory_);
+  std::this_thread::sleep_for(std::chrono::seconds(10));
 
-  if (fraction > 0.50) {
-    RCLCPP_INFO(
-      logger, "Cartesian path (%.2f%% acheived), moving the arm", fraction * 100.0);
-    move_group_interface.execute(cartesian_plan);
-  } else {
-    RCLCPP_WARN(logger, "Cartesian path planning failed with %.2f%%", fraction * 100.0);
-  }
-  std::this_thread::sleep_for(std::chrono::seconds(2));
+  // ####################### Move Back
 
-  // }
+
+  target_pose = move_group_interface.getCurrentPose().pose;
+
+  target_pose.position.x -= x_dist_to_sample;
+  target_pose.position.y -= y_dist_to_sample;
+  waypoints.push_back(target_pose);
+  doCartesianMovement(waypoints, move_group_interface, logger);
+
+  // Go home
+  joint_goal_degrees = {235.14, -77.05, 119.62, -43.57, 148.03, 180.0};
+
+  doJointMovement(joint_goal_degrees, move_group_interface, logger);
   // Shutdown ROS
   rclcpp::shutdown();
   return 0;

@@ -161,7 +161,8 @@ void ArucoPose::image_raw_callback(
 
       transformStamped_tag.transform.translation.x = median_filtered_rpyxyz[3] +
         this->get_parameter("offset_on_marker_x").as_double();
-      transformStamped_tag.transform.translation.y = median_filtered_rpyxyz[4];
+      transformStamped_tag.transform.translation.y = median_filtered_rpyxyz[4] +
+        this->get_parameter("offset_on_marker_y").as_double();
       transformStamped_tag.transform.translation.z = median_filtered_rpyxyz[5];
       transformStamped_tag.transform.rotation = toQuaternion(roll, pitch, yaw);
 

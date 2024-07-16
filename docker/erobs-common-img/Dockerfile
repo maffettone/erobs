@@ -21,7 +21,6 @@ RUN pip3 install rosdep && \
 
 RUN mkdir /root/ws -p
 
-WORKDIR /root/
 WORKDIR /root/ws
 
 # RUN git clone https://github.com/maffettone/erobs.git -b humble

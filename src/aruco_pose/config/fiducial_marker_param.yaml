@@ -15,8 +15,9 @@ aruco_pose:
       x_adj: 0.0
       y_adj: 0.0
       z_adj: 0.08
-    offset_on_marker_x:  0.00
+    offset_on_marker_x: -0.005
+    offset_on_marker_y: 0.0
     fiducial_marker_family: 'DICT_APRILTAG_36h11'
-    physical_marker_size: 0.021
+    physical_marker_size: 0.02665 # 0.032 #  #
     number_of_observations: 10 # size of the moving window for the median filter
     
