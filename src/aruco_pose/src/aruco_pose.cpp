@@ -21,8 +21,8 @@ ArucoPose::ArucoPose(const rclcpp::NodeOptions options)
   this->declare_parameter<double>("intrinsics.fx", 0.001);
   this->declare_parameter<double>("intrinsics.cx", 0.002);
 
-  RCLCPP_INFO(LOGGER, "intrinsic fx: %d", this->get_parameter("intrinsics.fx").as_double());
-  RCLCPP_INFO(LOGGER, "intrinsic cx: %d", this->get_parameter("intrinsics.cx").as_double());
+  RCLCPP_INFO(LOGGER, "intrinsic fx: %f", this->get_parameter("intrinsics.fx").as_double());
+  RCLCPP_INFO(LOGGER, "intrinsic cx: %f", this->get_parameter("intrinsics.cx").as_double());
 
   cameraMatrix_ =
     (cv::Mat_<double>(3, 3) << this->get_parameter("intrinsics.fx").as_double(), 0.0,
