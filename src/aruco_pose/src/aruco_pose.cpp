@@ -18,11 +18,11 @@ ArucoPose::ArucoPose(const rclcpp::NodeOptions options)
   // // explained in the following:
   // // https://microsoft.github.io/Azure-Kinect-Sensor-SDK/master/structk4a__calibration__intrinsic__parameters__t_1_1__param.html
 
-  this->declare_parameter<double>("intrinsics.cx", 0.001);
-  this->declare_parameter<double>("intrinsics.cy", 0.002);
+  this->declare_parameter<double>("intrinsics.fx", 0.001);
+  this->declare_parameter<double>("intrinsics.cx", 0.002);
 
-  RCLCPP_INFO(LOGGER, "intrinsic x: %d", this->get_parameter("intrinsics.fx").as_double());
-  RCLCPP_INFO(LOGGER, "intrinsic y: %d", this->get_parameter("intrinsics.fy").as_double());
+  RCLCPP_INFO(LOGGER, "intrinsic fx: %d", this->get_parameter("intrinsics.fx").as_double());
+  RCLCPP_INFO(LOGGER, "intrinsic cx: %d", this->get_parameter("intrinsics.cx").as_double());
 
   cameraMatrix_ =
     (cv::Mat_<double>(3, 3) << this->get_parameter("intrinsics.fx").as_double(), 0.0,
