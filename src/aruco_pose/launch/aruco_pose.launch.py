@@ -2,7 +2,7 @@ from launch import LaunchDescription
 from launch.substitutions import PathJoinSubstitution
 from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
-
+import pdb
 
 def generate_launch_description():
     """Launch the node aruco_pose with parameter files."""
@@ -19,4 +19,7 @@ def generate_launch_description():
     ld = LaunchDescription()
     ld.add_action(action_cmd)
 
+    cam_par = PathJoinSubstitution([FindPackageShare("aruco_pose"), "config", "camera_param.yaml"])
+    
+    pdb.set_trace()
     return ld
