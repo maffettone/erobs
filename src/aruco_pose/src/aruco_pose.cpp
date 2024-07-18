@@ -18,11 +18,29 @@ ArucoPose::ArucoPose(const rclcpp::NodeOptions options)
   // // explained in the following:
   // // https://microsoft.github.io/Azure-Kinect-Sensor-SDK/master/structk4a__calibration__intrinsic__parameters__t_1_1__param.html
 
-  this->declare_parameter<double>("intrinsics.fx", 0.001);
-  this->declare_parameter<double>("intrinsics.cx", 0.002);
+  std::vector<std::string> double_params = {
+    "intrinsics.fx", "intrinsics.fy", "intrinsics.cx", "intrinsics.cy",
+    "dist_coeffs.k1", "dist_coeffs.k2", "dist_coeffs.k3", "dist_coeffs.k4",
+    "dist_coeffs.k5", "dist_coeffs.k6", "dist_coeffs.p1", "dist_coeffs.p2",
+    "cam_translation.x", "cam_translation.y", "cam_translation.z",
+    "cam_rotation.alpha", "cam_rotation.beta", "cam_rotation.gamma",
+    "pre_pickup_location.x_adj", "pre_pickup_location.y_adj", "pre_pickup_location.z_adj",
+    "offset_on_marker_x", "offset_on_marker_y", "physical_marker_size"
+  };
 
-  RCLCPP_INFO(LOGGER, "intrinsic fx: %f", this->get_parameter("intrinsics.fx").as_double());
-  RCLCPP_INFO(LOGGER, "intrinsic cx: %f", this->get_parameter("intrinsics.cx").as_double());
+  for (const auto & param : double_params) {
+    this->declare_parameter<double>(param, 0.0);
+  }
+
+  std::vector<std::string> string_params = {
+    "camera_tf_frame", "sample_name", "pre_pickup_location.name", "fiducial_marker_family"
+  };
+
+  for (const auto & param : string_params) {
+    this->declare_parameter<std::string>(param, "");
+  }
+
+  this->declare_parameter<int>("number_of_observations", 10);
 
   cameraMatrix_ =
     (cv::Mat_<double>(3, 3) << this->get_parameter("intrinsics.fx").as_double(), 0.0,
