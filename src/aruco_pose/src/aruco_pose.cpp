@@ -219,7 +219,7 @@ int main(int argc, char ** argv)
   // Setting allow_undeclared_parameters(true) makes you not re-declare params
   const rclcpp::NodeOptions & options = (
     rclcpp::NodeOptions()
-    .allow_undeclared_parameters(true)
+    .allow_undeclared_parameters(false)
     .automatically_declare_parameters_from_overrides(true)
   );
   auto aruco_pose_node = std::make_shared<ArucoPose>(options);
