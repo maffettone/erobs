@@ -19,7 +19,7 @@ ArucoPose::ArucoPose(const rclcpp::NodeOptions options)
   // // https://microsoft.github.io/Azure-Kinect-Sensor-SDK/master/structk4a__calibration__intrinsic__parameters__t_1_1__param.html
 
   this->declare_parameter<double>("intrinsics.cx", 0.001);
-  this->declare_parameter<double>("intrinsics.cx", 0.002);
+  this->declare_parameter<double>("intrinsics.cy", 0.002);
 
   RCLCPP_INFO(LOGGER, "intrinsic x: %d", this->get_parameter("intrinsics.fx").as_double());
   RCLCPP_INFO(LOGGER, "intrinsic y: %d", this->get_parameter("intrinsics.fy").as_double());
@@ -219,7 +219,7 @@ int main(int argc, char ** argv)
   // Setting allow_undeclared_parameters(true) makes you not re-declare params
   const rclcpp::NodeOptions & options = (
     rclcpp::NodeOptions()
-    .allow_undeclared_parameters(false)
+    .allow_undeclared_parameters(true)
     .automatically_declare_parameters_from_overrides(true)
   );
   auto aruco_pose_node = std::make_shared<ArucoPose>(options);
