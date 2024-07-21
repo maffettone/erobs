@@ -59,7 +59,7 @@ private:
   // Median filter related vars
   std::shared_ptr<filters::MultiChannelFilterBase<double>> median_filter_ =
     std::make_shared<filters::MultiChannelMedianFilter<double>>();
-  // int moving_window_median_ = 10;
+
   std::vector<double> median_filtered_rpyxyz;
 
   /// @brief converts a rpy to a quaternion
@@ -91,5 +91,5 @@ private:
   };
 
 public:
-  explicit ArucoPose(const rclcpp::NodeOptions options);
+  explicit ArucoPose();
 };

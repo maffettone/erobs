@@ -4,8 +4,8 @@ BSD 3 Clause License. See LICENSE.txt for details.*/
 
 using std::placeholders::_1;
 
-ArucoPose::ArucoPose(const rclcpp::NodeOptions options)
-: Node("aruco_pose", options),
+ArucoPose::ArucoPose()
+: Node("aruco_pose"),
   static_broadcaster_(this), tf_broadcaster_(this),
   LOGGER(this->get_logger())
 {
@@ -17,6 +17,9 @@ ArucoPose::ArucoPose(const rclcpp::NodeOptions options)
   // // For Azure kinect, they can be found when running the ROS2 camera node and
   // // explained in the following:
   // // https://microsoft.github.io/Azure-Kinect-Sensor-SDK/master/structk4a__calibration__intrinsic__parameters__t_1_1__param.html
+  // // These matrices are already available in the topic '/rgb/camera_info',
+  // // But it doesn't make sense to have two subscribers running to get static parameters.
+  // // Plus this avoids a situation of a different topic name being used by another vendor
 
   std::vector<std::string> double_params = {
     "intrinsics.fx", "intrinsics.fy", "intrinsics.cx", "intrinsics.cy",
@@ -234,13 +237,7 @@ int main(int argc, char ** argv)
 {
   rclcpp::init(argc, argv);
 
-  // Setting allow_undeclared_parameters(true) makes you not re-declare params
-  const rclcpp::NodeOptions & options = (
-    rclcpp::NodeOptions()
-    .allow_undeclared_parameters(true)
-    .automatically_declare_parameters_from_overrides(true)
-  );
-  auto aruco_pose_node = std::make_shared<ArucoPose>(options);
+  auto aruco_pose_node = std::make_shared<ArucoPose>();
 
   rclcpp::spin(aruco_pose_node);
   rclcpp::shutdown();

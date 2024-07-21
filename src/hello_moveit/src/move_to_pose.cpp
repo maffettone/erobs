@@ -165,8 +165,8 @@ int main(int argc, char * argv[])
 
   // ####################### REST
   // while (true) {
-  // std::vector<double> joint_goal_degrees = {111.87, -122.57, -120.38, -118.77, 20.99, 180.0};
-  std::vector<double> joint_goal_degrees = {235.14, -77.05, 119.62, -43.57, 148.03, 180.0};
+  std::vector<double> joint_goal_degrees = {293.24, -77.05, 119.62, -43.57, 199.87, 180.0};
+  // std::vector<double> joint_goal_degrees = {235.14, -77.05, 119.62, -43.57, 148.03, 180.0};
 
 
   doJointMovement(joint_goal_degrees, move_group_interface, logger);
@@ -370,7 +370,7 @@ int main(int argc, char * argv[])
   doCartesianMovement(waypoints, move_group_interface, logger);
 
   // Go home
-  joint_goal_degrees = {235.14, -77.05, 119.62, -43.57, 148.03, 180.0};
+  joint_goal_degrees = {293.24, -77.05, 119.62, -43.57, 199.87, 180.0};
 
   doJointMovement(joint_goal_degrees, move_group_interface, logger);
   // Shutdown ROS

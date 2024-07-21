@@ -10,7 +10,7 @@ Several containers need to be running for our application. Once running, clients
 **TODO (ChandimaFernando)**: Change the repo link to nsls-II repo, and add CI/CD for build on version tag.
 
 ```bash
-export ROBOT_IP=10.67.218.141
+export ROBOT_IP=192.168.0.100
 export UR_TYPE="ur3e"
 export LAUNCH_RVIZ="false"
 export DESCRIPTION_PKG="ur3e_hande_robot_description"
