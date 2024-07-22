@@ -1,26 +1,25 @@
-/*Copyright 2023 Brookhaven National Laboratory
+/*Copyright 2024 Brookhaven National Laboratory
 BSD 3 Clause License. See LICENSE.txt for details.*/
-#include <moveit/move_group_interface/move_group_interface.h>
-#include <moveit/planning_scene_interface/planning_scene_interface.h>
 
-#include <moveit_msgs/msg/constraints.hpp>
-#include <moveit_msgs/msg/joint_constraint.hpp>
-#include <geometry_msgs/msg/transform_stamped.hpp>
 #include <tf2_ros/buffer.h>
 #include <tf2_ros/transform_listener.h>
 #include <tf2/LinearMath/Quaternion.h>
 #include <tf2/LinearMath/Matrix3x3.h>
-#include <shape_msgs/msg/solid_primitive.hpp>
-#include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
+#include <moveit/move_group_interface/move_group_interface.h>
+#include <moveit/planning_scene_interface/planning_scene_interface.h>
 
 #include <memory>
-#include <chrono>
 #include <string>
 #include <vector>
 #include <chrono>
 #include <cmath>
 
 #include <rclcpp/rclcpp.hpp>
+#include <moveit_msgs/msg/constraints.hpp>
+#include <moveit_msgs/msg/joint_constraint.hpp>
+#include <geometry_msgs/msg/transform_stamped.hpp>
+#include <shape_msgs/msg/solid_primitive.hpp>
+#include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 
 using namespace std::chrono_literals;
 /*
@@ -73,7 +72,6 @@ void doJointMovement(
       return std::make_pair(ok, msg);
     }();
   if (planing_success) {
-
     move_group_interface.execute(plan);
   } else {
     RCLCPP_ERROR(logger, "Planning failed!");
@@ -166,8 +164,6 @@ int main(int argc, char * argv[])
   // ####################### REST
   // while (true) {
   std::vector<double> joint_goal_degrees = {293.24, -77.05, 119.62, -43.57, 199.87, 180.0};
-  // std::vector<double> joint_goal_degrees = {235.14, -77.05, 119.62, -43.57, 148.03, 180.0};
-
 
   doJointMovement(joint_goal_degrees, move_group_interface, logger);
 
@@ -194,8 +190,8 @@ int main(int argc, char * argv[])
   tf2::Quaternion tf2_wrist_2_quaternion;
   tf2::Quaternion tf2_sample_quaternion;
 
-  double x_dist_to_sample, y_dist_to_sample, z_dist_to_sample;
-  double x_dist_to_pickup_approach, y_dist_to_pickup_approach, z_dist_to_pickup_approach;
+  double x_dist_to_sample, y_dist_to_sample, z_dist_to_sample = 0.0;
+  double x_dist_to_pickup_approach, y_dist_to_pickup_approach, z_dist_to_pickup_approach = 0.0;
   double wrist_2_roll, wrist_2_pitch, wrist_2_yaw;
   double sample_roll, sample_pitch, sample_yaw;
 
@@ -215,9 +211,6 @@ int main(int argc, char * argv[])
 
       break;
     } catch (tf2::TransformException & ex) {
-      // RCLCPP_ERROR(
-      //   logger, "Could not transform %s to %s: %s", to_wrist.c_str(),
-      //   to_sample.c_str(), ex.what());
     }
   }
 
@@ -228,24 +221,8 @@ int main(int argc, char * argv[])
     joint_group_positions
   );
 
-  // RCLCPP_ERROR(logger, "joint_group_positions[1]: %f", joint_group_positions[1] * 180 / M_PI);
-  // RCLCPP_ERROR(logger, "joint_group_positions[2]: %f", joint_group_positions[2] * 180 / M_PI);
-  // RCLCPP_ERROR(logger, "joint_group_positions[3]: %f", joint_group_positions[3] * 180 / M_PI);
-  RCLCPP_ERROR(logger, "joint_group_positions[4]: %f", joint_group_positions[4] * 180 / M_PI);
-  RCLCPP_ERROR(logger, "wrist_2_yaw: %f", (wrist_2_yaw) * 180 / M_PI);
-  RCLCPP_ERROR(logger, "wrist_2_roll: %f", (wrist_2_roll) * 180 / M_PI);
-  RCLCPP_ERROR(logger, "wrist_2_pitch: %f", (wrist_2_pitch) * 180 / M_PI);
-
-  RCLCPP_ERROR(logger, "sample_yaw: %f", (sample_yaw) * 180 / M_PI);
-
-  double adj = joint_group_positions[4] + wrist_2_yaw - sample_yaw;
-  RCLCPP_ERROR(
-    logger, "new joint_goal_degrees[4]: %f",
-    (adj) * 180 / M_PI);
-  // RCLCPP_ERROR(logger, "joint_group_positions[5]: %f", joint_group_positions[5] * 180 / M_PI);
-
   joint_goal_degrees[4] = (joint_group_positions[4] + wrist_2_yaw - sample_yaw ) * 180 / M_PI;
-  // joint_goal_degrees[5] = joint_group_positions[5] + wrist_2_pitch - sample_pitch;
+
   doJointMovement(joint_goal_degrees, move_group_interface, logger);
 
   while (rclcpp::ok()) {
@@ -273,21 +250,7 @@ int main(int argc, char * argv[])
         transform_world_to_grasping_point.transform.translation.y;
       z_dist_to_pickup_approach =
         transform_world_to_pickup_approach_point.transform.translation.z -
-        (transform_world_to_grasping_point.transform.translation.z);   // 0.1 is an offset to grab low
-
-      RCLCPP_WARN(
-        logger,
-        "transform_world_to_pickup_approach_point.transform.translation.x: %f   transform_world_to_pickup_approach_point.transform.translation.y: %f  transform_world_to_pickup_approach_point.transform.translation.z: %f",
-        transform_world_to_pickup_approach_point.transform.translation.x,
-        transform_world_to_pickup_approach_point.transform.translation.y,
-        transform_world_to_pickup_approach_point.transform.translation.z);
-
-      RCLCPP_WARN(
-        logger,
-        "transform_world_to_grasping_point.transform.translation.x: %f   transform_world_to_grasping_point.transform.translation.y: %f  transform_world_to_grasping_point.transform.translation.z: %f",
-        transform_world_to_grasping_point.transform.translation.x,
-        transform_world_to_grasping_point.transform.translation.y,
-        transform_world_to_grasping_point.transform.translation.z);
+        (transform_world_to_grasping_point.transform.translation.z);
 
       x_dist_to_sample = transform_world_to_sample.transform.translation.x -
         transform_world_to_pickup_approach_point.transform.translation.x;
@@ -322,7 +285,7 @@ int main(int argc, char * argv[])
 
   RCLCPP_WARN(
     logger,
-    "x_dist_to_pickup_approach: %f   y_dist_to_pickup_approach: %f  z_dist_to_pickup_approach: %f",
+    "x_pickup_approach: %f   y_pickup_approach: %f  z_pickup_approach: %f",
     x_dist_to_pickup_approach,
     y_dist_to_pickup_approach,
     z_dist_to_pickup_approach);
@@ -360,7 +323,6 @@ int main(int argc, char * argv[])
   std::this_thread::sleep_for(std::chrono::seconds(10));
 
   // ####################### Move Back
-
 
   target_pose = move_group_interface.getCurrentPose().pose;
 

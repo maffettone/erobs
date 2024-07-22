@@ -91,5 +91,5 @@ private:
   };
 
 public:
-  explicit ArucoPose();
+  ArucoPose();
 };

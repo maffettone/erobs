@@ -1,9 +1,11 @@
-#include "rclcpp/rclcpp.hpp"
-#include "pdf_beamtime_interfaces/srv/gripper_control_msg.hpp"
-
+/*Copyright 2024 Brookhaven National Laboratory
+BSD 3 Clause License. See LICENSE.txt for details.*/
 #include <chrono>
 #include <cstdlib>
 #include <memory>
+
+#include "rclcpp/rclcpp.hpp"
+#include "pdf_beamtime_interfaces/srv/gripper_control_msg.hpp"
 
 using namespace std::chrono_literals;
 
