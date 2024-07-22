@@ -190,7 +190,7 @@ int main(int argc, char * argv[])
   tf2::Quaternion tf2_wrist_2_quaternion;
   tf2::Quaternion tf2_sample_quaternion;
 
-  double x_dist_to_sample, y_dist_to_sample, z_dist_to_sample = 0.0;
+  double x_dist_to_sample = 0.0, y_dist_to_sample = 0.0, z_dist_to_sample = 0.0;
   double x_dist_to_pickup_approach, y_dist_to_pickup_approach, z_dist_to_pickup_approach = 0.0;
   double wrist_2_roll, wrist_2_pitch, wrist_2_yaw;
   double sample_roll, sample_pitch, sample_yaw;
