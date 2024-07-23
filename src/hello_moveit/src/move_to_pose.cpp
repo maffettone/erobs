@@ -168,7 +168,6 @@ int main(int argc, char * argv[])
   // Add the collision object to the planning scene
   planning_scene_interface_->applyCollisionObjects(all_obstacles);
 
-  rclcpp::shutdown();
   // ####################### REST
   // while (true) {
   std::vector<double> joint_goal_degrees = {293.24, -77.05, 119.62, -43.57, 199.87, 180.0};
