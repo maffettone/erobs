@@ -20,4 +20,3 @@ aruco_pose:
     fiducial_marker_family: 'DICT_APRILTAG_36h11'
     physical_marker_size: 0.02665 # 0.032 #  #
     number_of_observations: 10 # size of the moving window for the median filter
-    

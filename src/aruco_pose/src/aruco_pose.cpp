@@ -148,10 +148,6 @@ void ArucoPose::image_raw_callback(
       std::vector<double> raw_rpyxyz =
       {roll, pitch, yaw, tranlsation[0], tranlsation[1], tranlsation[2]};
 
-      // RCLCPP_INFO(this->get_logger(), "roll: %f", roll * 108 / M_PI);
-      // RCLCPP_INFO(this->get_logger(), "pitch: %f", pitch * 108 / M_PI);
-      // RCLCPP_INFO(this->get_logger(), "yaw: %f", yaw * 108 / M_PI);
-
       // Median filter gets applied
       median_filter_->update(raw_rpyxyz, median_filtered_rpyxyz);
 
