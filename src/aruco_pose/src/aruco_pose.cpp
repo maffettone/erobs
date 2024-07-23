@@ -1,4 +1,4 @@
-/*Copyright 2023 Brookhaven National Laboratory
+/*Copyright 2024 Brookhaven National Laboratory
 BSD 3 Clause License. See LICENSE.txt for details.*/
 #include <aruco_pose/aruco_pose.hpp>
 
