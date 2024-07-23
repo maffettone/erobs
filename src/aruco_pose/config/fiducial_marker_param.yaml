@@ -5,9 +5,9 @@ aruco_pose:
       y: -0.392 
       z: 0.08 
     cam_rotation: # These are expressed in RPY angles
-      alpha: 00.0
-      beta: 90.0
-      gamma: 180.0
+      alpha: 270.0
+      beta: 0.0
+      gamma: 90.0
     camera_tf_frame: 'camera_base'
     sample_name: 'sample_1'
     pre_pickup_location: 

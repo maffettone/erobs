@@ -140,16 +140,23 @@ int main(int argc, char * argv[])
   shape_msgs::msg::SolidPrimitive primitive;
   primitive.type = primitive.BOX;
   primitive.dimensions.resize(3);
-  primitive.dimensions[0] = 2;    // x
-  primitive.dimensions[1] = 2;    // y
+  primitive.dimensions[0] = 1;    // x
+  primitive.dimensions[1] = 0.5;    // y
   primitive.dimensions[2] = 0.01;    // z
+
+  tf2::Quaternion quaternion;
+  quaternion.setRPY(0, 0, 0);
 
   // Define the pose of the box (relative to the frame_id)
   geometry_msgs::msg::Pose box_pose;
-  box_pose.orientation.w = 1.0;
+  box_pose.orientation.x = quaternion.getX();
+  box_pose.orientation.y = quaternion.getY();
+  box_pose.orientation.z = quaternion.getZ();
+  box_pose.orientation.w = quaternion.getW();
+
   box_pose.position.x = 0.0;
   box_pose.position.y = 0.0;
-  box_pose.position.z = -0.01;
+  box_pose.position.z = -0.5;
 
   // Add the primitive and pose to the collision object
   collision_object.primitives.push_back(primitive);
@@ -161,6 +168,7 @@ int main(int argc, char * argv[])
   // Add the collision object to the planning scene
   planning_scene_interface_->applyCollisionObjects(all_obstacles);
 
+  rclcpp::shutdown();
   // ####################### REST
   // while (true) {
   std::vector<double> joint_goal_degrees = {293.24, -77.05, 119.62, -43.57, 199.87, 180.0};

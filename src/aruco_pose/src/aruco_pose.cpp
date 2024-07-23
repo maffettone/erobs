@@ -21,25 +21,11 @@ ArucoPose::ArucoPose()
   // // But it doesn't make sense to have two subscribers running to get static parameters.
   // // Plus this avoids a situation of a different topic name being used by another vendor
 
-  std::vector<std::string> double_params = {
-    "intrinsics.fx", "intrinsics.fy", "intrinsics.cx", "intrinsics.cy",
-    "dist_coeffs.k1", "dist_coeffs.k2", "dist_coeffs.k3", "dist_coeffs.k4",
-    "dist_coeffs.k5", "dist_coeffs.k6", "dist_coeffs.p1", "dist_coeffs.p2",
-    "cam_translation.x", "cam_translation.y", "cam_translation.z",
-    "cam_rotation.alpha", "cam_rotation.beta", "cam_rotation.gamma",
-    "pre_pickup_location.x_adj", "pre_pickup_location.y_adj", "pre_pickup_location.z_adj",
-    "offset_on_marker_x", "offset_on_marker_y", "physical_marker_size"
-  };
-
-  for (const auto & param : double_params) {
+  // Declare parameters
+  for (const auto & param : double_params_) {
     this->declare_parameter<double>(param, 0.0);
   }
-
-  std::vector<std::string> string_params = {
-    "camera_tf_frame", "sample_name", "pre_pickup_location.name", "fiducial_marker_family"
-  };
-
-  for (const auto & param : string_params) {
+  for (const auto & param : string_params_) {
     this->declare_parameter<std::string>(param, "");
   }
 
@@ -67,23 +53,9 @@ ArucoPose::ArucoPose()
   double beta = this->get_parameter("cam_rotation.beta").as_double() / 180 * M_PI;
   double gamma = this->get_parameter("cam_rotation.gamma").as_double() / 180 * M_PI;
 
-  // // RPY rotational matrix:
-  // tf2::Matrix3x3 rotation_matrix_(
-  //   cos(alpha) * cos(beta), cos(alpha) * sin(beta) * sin(gamma) - sin(alpha) * cos(gamma), cos(
-  //     alpha) * sin(beta) * cos(gamma) + sin(alpha) * sin(gamma),
-  //   sin(alpha) * cos(beta), sin(alpha) * sin(beta) * sin(gamma) + cos(alpha) * cos(gamma), sin(
-  //     alpha) * sin(beta) * cos(gamma) - cos(alpha) * sin(gamma),
-  //   -1 * sin(beta), cos(beta) * sin(gamma), cos(beta) * cos(gamma) );
-
-  // Rotation matrix to quaternion conversion
-  tf2::Matrix3x3 rotation_matrix_(
-    0, 0, -1,
-    1, 0, 0,
-    0, -1, 0
-  );
-
   // Add the camera to tf server
-  rotation_matrix_.getRotation(this->camera_quaternion_);
+  camera_quaternion_.setRPY(alpha, beta, gamma);
+
   // Define the transform
   geometry_msgs::msg::TransformStamped transformStamped;
   transformStamped.header.stamp = this->now();
@@ -159,7 +131,7 @@ void ArucoPose::image_raw_callback(
         cv::Rodrigues(rvecs[i], R);
       }
 
-      // Access each elements of the R matrix for easy rpy calculations
+      // Access each element of the R matrix for easy rpy calculations
       double r11 = R.at<double>(0, 0), r21 = R.at<double>(1, 0), r31 = R.at<double>(2, 0),
         r32 = R.at<double>(2, 1), r33 = R.at<double>(2, 2);
 
@@ -167,7 +139,7 @@ void ArucoPose::image_raw_callback(
 
       // rpy calculation
       roll = std::atan2(r32, r33);
-      pitch = std::asin(-1 * r31);
+      pitch = std::asin(-r31);
       yaw = std::atan2(r21, r11);
 
       auto tranlsation = tvecs[0];
@@ -175,6 +147,10 @@ void ArucoPose::image_raw_callback(
       // Construct the raw rpy_xyz of the marker
       std::vector<double> raw_rpyxyz =
       {roll, pitch, yaw, tranlsation[0], tranlsation[1], tranlsation[2]};
+
+      // RCLCPP_INFO(this->get_logger(), "roll: %f", roll * 108 / M_PI);
+      // RCLCPP_INFO(this->get_logger(), "pitch: %f", pitch * 108 / M_PI);
+      // RCLCPP_INFO(this->get_logger(), "yaw: %f", yaw * 108 / M_PI);
 
       // Median filter gets applied
       median_filter_->update(raw_rpyxyz, median_filtered_rpyxyz);

@@ -65,6 +65,20 @@ private:
   /// @brief converts a rpy to a quaternion
   geometry_msgs::msg::Quaternion toQuaternion(double roll, double pitch, double yaw);
 
+  std::vector<std::string> double_params_ = {
+    "intrinsics.fx", "intrinsics.fy", "intrinsics.cx", "intrinsics.cy",
+    "dist_coeffs.k1", "dist_coeffs.k2", "dist_coeffs.k3", "dist_coeffs.k4",
+    "dist_coeffs.k5", "dist_coeffs.k6", "dist_coeffs.p1", "dist_coeffs.p2",
+    "cam_translation.x", "cam_translation.y", "cam_translation.z",
+    "cam_rotation.alpha", "cam_rotation.beta", "cam_rotation.gamma",
+    "pre_pickup_location.x_adj", "pre_pickup_location.y_adj", "pre_pickup_location.z_adj",
+    "offset_on_marker_x", "offset_on_marker_y", "physical_marker_size"
+  };
+
+  std::vector<std::string> string_params_ = {
+    "camera_tf_frame", "sample_name", "pre_pickup_location.name", "fiducial_marker_family"
+  };
+
   // Map string values to corresponding ArUco dictionary enums
   std::map<std::string, cv::aruco::PREDEFINED_DICTIONARY_NAME> dictionary_map_ = {
     {"DICT_4X4_50", cv::aruco::DICT_4X4_50},
