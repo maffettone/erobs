@@ -70,7 +70,7 @@ private:
     "dist_coeffs.k1", "dist_coeffs.k2", "dist_coeffs.k3", "dist_coeffs.k4",
     "dist_coeffs.k5", "dist_coeffs.k6", "dist_coeffs.p1", "dist_coeffs.p2",
     "cam_translation.x", "cam_translation.y", "cam_translation.z",
-    "cam_rotation.alpha", "cam_rotation.beta", "cam_rotation.gamma",
+    "cam_rotation.cam_alpha", "cam_rotation.cam_beta", "cam_rotation.cam_gamma",
     "pre_pickup_location.x_adj", "pre_pickup_location.y_adj", "pre_pickup_location.z_adj",
     "offset_on_marker_x", "offset_on_marker_y", "physical_marker_size"
   };

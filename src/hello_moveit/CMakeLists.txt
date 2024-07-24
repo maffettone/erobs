@@ -7,21 +7,32 @@ endif()
 
 # find dependencies
 find_package(ament_cmake REQUIRED)
+find_package(moveit_common REQUIRED)
+find_package(moveit_core REQUIRED)
 find_package(moveit_ros_planning_interface REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(hello_moveit_interfaces REQUIRED)
 find_package(rclcpp_action REQUIRED)
 find_package(rclcpp_components REQUIRED)
 find_package(yaml-cpp REQUIRED)
+find_package(geometry_msgs REQUIRED)
+find_package(tf2_ros REQUIRED)
+find_package(tf2 REQUIRED)
+find_package(tf2_geometry_msgs REQUIRED)
 
 
 set(dependencies
+  moveit_core
   moveit_ros_planning_interface
   hello_moveit_interfaces
   rclcpp
   rclcpp_action
   rclcpp_components
   yaml-cpp
+  geometry_msgs
+  tf2_geometry_msgs
+  tf2_ros
+  tf2
 )
 
 # Comment out the Plugin components and revert to spinning the node in main.
@@ -48,10 +59,14 @@ ament_target_dependencies( pose_subscriber ${dependencies})
 add_executable(parameter_demo src/parameter_demo.cpp)
 ament_target_dependencies(parameter_demo ${dependencies})
 
+add_executable(move_to_pose src/move_to_pose.cpp)
+ament_target_dependencies(move_to_pose ${dependencies})
+
 install(TARGETS
   hello_moveit
   parameter_demo
   pose_subscriber
+  move_to_pose
   pick_place_repeat_action_server
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
