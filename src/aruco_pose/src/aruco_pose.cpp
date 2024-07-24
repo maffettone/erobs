@@ -116,7 +116,7 @@ void ArucoPose::image_raw_callback(
 
   // Exclude instances where no markers are detected
   try {
-    if (!markerIds_.empty()) {
+    if (!markerIds_.empty() && markerIds_.size() == 1) {
       // rvecs: rotational vector
       // tvecs: translation vector
       std::vector<cv::Vec3d> rvecs, tvecs;
@@ -163,7 +163,10 @@ void ArucoPose::image_raw_callback(
       transformStamped_tag.transform.translation.y = median_filtered_rpyxyz[4] +
         this->get_parameter("offset_on_marker_y").as_double();
       transformStamped_tag.transform.translation.z = median_filtered_rpyxyz[5];
-      transformStamped_tag.transform.rotation = toQuaternion(roll, pitch, yaw);
+      transformStamped_tag.transform.rotation = toQuaternion(
+        median_filtered_rpyxyz[0],
+        median_filtered_rpyxyz[1],
+        median_filtered_rpyxyz[2]);
 
       // Add a pre-pickup tf
       geometry_msgs::msg::TransformStamped transformStamped_pre_pickup;
