@@ -10,7 +10,7 @@ aruco_pose:
       gamma: 90.0
     camera_tf_frame: 'camera_base'
     sample_name: 'sample_1'
-    pre_pickup_location: 
+    pre_pickup_location: # Define x, y, z adjustments with respect to tag's coordinate reference frame for pre-pickup
       name: 'pre_pickup'
       x_adj: 0.0
       y_adj: 0.0

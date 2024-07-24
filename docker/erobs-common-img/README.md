@@ -46,8 +46,12 @@ podman run -it --rm --network host --ipc=host --pid=host \
     . /root/ws/install/setup.sh && \
     ros2 run gripper_service gripper_service"
 ```
-Note: tool_communication.py should not be called when ur_control.launch.py is called, but separately when the gripper is initiated. 5s delay allows socat creation before running the gripper service.
-Note: gripper_service has two nodes, gripper_open and gripper_close to utilize if needed.
+
+**NOTE**
+
+`tool_communication.py` should not be called when `ur_control.launch.py` is called, but separately when the gripper is initiated.  The 5s delay allows socat creation before running the gripper service. 
+The gripper_service has two convenience scripts, `gripper_open.cpp` and `gripper_close.cpp` that will start up client nodes to send a request to the gripper service then promptly shutdown the client nodes.
+
 
 # Launch move_group
 ```bash
