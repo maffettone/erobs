@@ -88,6 +88,3 @@ target/
 #Ipython Notebook
 .ipynb_checkpoints
 *.code-workspace
-src/hello_moveit/CMakeLists.txt
-src/hello_moveit/package.xml
-src/aruco_pose/include/aruco_pose/aruco_pose.hpp
