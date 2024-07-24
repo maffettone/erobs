@@ -49,12 +49,12 @@ ArucoPose::ArucoPose()
 
   physical_marker_size_ = this->get_parameter("physical_marker_size").as_double();
 
-  double alpha = this->get_parameter("cam_rotation.alpha").as_double() / 180 * M_PI;
-  double beta = this->get_parameter("cam_rotation.beta").as_double() / 180 * M_PI;
-  double gamma = this->get_parameter("cam_rotation.gamma").as_double() / 180 * M_PI;
+  double cam_alpha = this->get_parameter("cam_rotation.cam_alpha").as_double() / 180 * M_PI;
+  double cam_beta = this->get_parameter("cam_rotation.cam_beta").as_double() / 180 * M_PI;
+  double cam_gamma = this->get_parameter("cam_rotation.cam_gamma").as_double() / 180 * M_PI;
 
   // Add the camera to tf server
-  camera_quaternion_.setRPY(alpha, beta, gamma);
+  camera_quaternion_.setRPY(cam_alpha, cam_beta, cam_gamma);
 
   // Define the transform
   geometry_msgs::msg::TransformStamped transformStamped;
@@ -72,7 +72,7 @@ ArucoPose::ArucoPose()
   static_broadcaster_.sendTransform(transformStamped);
 
   camera_subscription_ = this->create_subscription<sensor_msgs::msg::Image>(
-    "/rgb/image_raw", 5,
+    this->get_parameter("image_topic").as_string(), 5,
     std::bind(&ArucoPose::image_raw_callback, this, std::placeholders::_1));
 
   // Assign parameters for ArUco tag detection

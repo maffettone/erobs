@@ -13,3 +13,8 @@ For Azure kinect, they can be found when running the ROS2 camera node and explai
 ## ArUco markers
 
 Complete guide to ArUco markers are in [this link](https://docs.opencv.org/4.x/d5/dae/tutorial_aruco_detection.html).
+
+## Detection rate
+Detection rate is tied to the callback of the ros topic `image_topic` (topic is defined in the fiducial_marker_param.yam file).
+
+In the current implementation, this topic's publish rate is defined in the Azure_Kinect_ROS_Driver package. In Azure_Kinect_ROS_Driver package, where the topic 'rgb/image_raw' is published, message publish rate is same as the camera's fps rate. Default fps is 5.

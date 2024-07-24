@@ -76,7 +76,8 @@ private:
   };
 
   std::vector<std::string> string_params_ = {
-    "camera_tf_frame", "sample_name", "pre_pickup_location.name", "fiducial_marker_family"
+    "camera_tf_frame", "sample_name", "pre_pickup_location.name", "fiducial_marker_family",
+    "image_topic"
   };
 
   // Map string values to corresponding ArUco dictionary enums
