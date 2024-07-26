@@ -1,7 +1,6 @@
-FROM althack/ros2:humble-dev 
+FROM althack/ros2:humble-full
 
 # ** [Optional] Uncomment this section to install additional packages. **
-#
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update \
         && apt-get -y install --no-install-recommends \
@@ -12,7 +11,8 @@ RUN apt-get update \
         ros-${ROS_DISTRO}-moveit\
         build-essential \
         python3-colcon-common-extensions \
-        #
+        libopencv-dev \
+        python3-opencv \
         # Clean up
         && apt-get autoremove -y \
         && apt-get clean -y \

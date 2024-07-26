@@ -10,6 +10,7 @@ RUN apt-get update \
         ros-${ROS_DISTRO}-ur \
         build-essential \
         python3-colcon-common-extensions
+        
 RUN apt-get install -y x11vnc xvfb 
 # Clean up
 RUN apt-get autoremove -y \

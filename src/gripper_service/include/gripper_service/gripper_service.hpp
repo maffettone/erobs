@@ -21,6 +21,7 @@ private:
   const char * kComPort = "/tmp/ttyUR";
   const int kSlaveID = 0x09;
 
+  rclcpp::Service<pdf_beamtime_interfaces::srv::GripperControlMsg>::SharedPtr service;
   // rclcpp::Node::SharedPtr node_;
   RobotiqGripperInterface gripper_;
 

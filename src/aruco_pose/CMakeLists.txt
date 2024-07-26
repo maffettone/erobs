@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.8)
-project(gripper_service)
+project(aruco_pose)
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
@@ -9,44 +9,54 @@ endif()
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rclcpp_components REQUIRED)
-find_package(pdf_beamtime_interfaces REQUIRED)
-find_package(robotiq_driver REQUIRED)
-# uncomment the following section in order to fill in
-# further dependencies manually.
-# find_package(<dependency> REQUIRED)
+find_package(sensor_msgs REQUIRED)
+find_package(image_transport REQUIRED)
+find_package(cv_bridge REQUIRED)
+find_package(message_filters REQUIRED)
+find_package(OpenCV REQUIRED)
+find_package(eigen3_cmake_module REQUIRED)
+find_package(filters REQUIRED)
+find_package(tf2_ros REQUIRED)
+find_package(tf2 REQUIRED)
+find_package(geometry_msgs REQUIRED)
 
 set(dependencies
   rclcpp
   rclcpp_components
-  pdf_beamtime_interfaces
-  robotiq_driver
+  sensor_msgs
+  image_transport
+  message_filters
+  cv_bridge
+  OpenCV
+  eigen3_cmake_module
+  filters
+  tf2_ros
+  tf2
+  geometry_msgs
 )
 
 include_directories(include)  # This makes sure the libraries are visible
 
-add_executable(gripper_service src/gripper_service.cpp)
-ament_target_dependencies(gripper_service ${dependencies})
-
-add_executable(gripper_close src/gripper_close.cpp)
-ament_target_dependencies(gripper_close ${dependencies})
-
-add_executable(gripper_open src/gripper_open.cpp)
-ament_target_dependencies(gripper_open ${dependencies})
+add_executable(aruco_pose src/aruco_pose.cpp)
+ament_target_dependencies(aruco_pose ${dependencies})
 
 install(TARGETS
-  gripper_service
-  gripper_close
-  gripper_open
+aruco_pose
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION lib/${PROJECT_NAME}
 )
 
-install(DIRECTORY DESTINATION share/${PROJECT_NAME})
+install(DIRECTORY launch config DESTINATION share/${PROJECT_NAME})
 
 install(
   DIRECTORY include/
   DESTINATION include
+)
+
+install(
+  DIRECTORY config/
+  DESTINATION config
 )
 
 if(BUILD_TESTING)
