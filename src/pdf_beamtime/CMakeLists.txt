@@ -13,6 +13,7 @@ find_package(pdf_beamtime_interfaces REQUIRED)
 find_package(rclcpp_action REQUIRED)
 find_package(rclcpp_components REQUIRED)
 find_package(yaml-cpp REQUIRED)
+find_package(geometry_msgs)
 
 set(dependencies
   moveit_ros_planning_interface
@@ -21,11 +22,12 @@ set(dependencies
   rclcpp_action
   rclcpp_components
   yaml-cpp
+  geometry_msgs
 )
 
 include_directories(include)  # This makes sure the libraries are visible
 
-add_executable(pdf_beamtime_server src/pdf_beamtime_server.cpp src/inner_state_machine.cpp)
+add_executable(pdf_beamtime_server src/pdf_beamtime_server.cpp src/inner_state_machine.cpp src/tf_utilities.cpp)
 ament_target_dependencies(pdf_beamtime_server ${dependencies})
 
 install(TARGETS
