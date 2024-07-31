@@ -27,11 +27,15 @@ set(dependencies
 
 include_directories(include)  # This makes sure the libraries are visible
 
-add_executable(pdf_beamtime_server src/pdf_beamtime_server.cpp src/inner_state_machine.cpp src/tf_utilities.cpp)
+add_executable(pdf_beamtime_server src/beamtime_entrypoint.cpp src/pdf_beamtime_server.cpp src/inner_state_machine.cpp)
 ament_target_dependencies(pdf_beamtime_server ${dependencies})
+
+add_executable(pdf_beamtime_fidpose_server src/pdf_beamtime_fidpose_server.cpp src/pdf_beamtime_server.cpp src/inner_state_machine.cpp src/tf_utilities.cpp)
+ament_target_dependencies(pdf_beamtime_fidpose_server ${dependencies})
 
 install(TARGETS
   pdf_beamtime_server
+  pdf_beamtime_fidpose_server
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION lib/${PROJECT_NAME}

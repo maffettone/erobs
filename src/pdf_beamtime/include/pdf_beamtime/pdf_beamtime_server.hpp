@@ -44,8 +44,22 @@ public:
   rclcpp::node_interfaces::NodeBaseInterface::SharedPtr getNodeBaseInterface();
   rclcpp::node_interfaces::NodeBaseInterface::SharedPtr getInterruptNodeBaseInterface();
 
-private:
+protected:
   rclcpp::Node::SharedPtr node_;
+  /// @brief Pointer to the action server
+  rclcpp_action::Server<PickPlaceControlMsg>::SharedPtr action_server_;
+
+  virtual void handle_accepted(
+    const std::shared_ptr<rclcpp_action::ServerGoalHandle<PickPlaceControlMsg>> goal_handle);
+  // Action server related callbacks
+  virtual void execute(
+    const std::shared_ptr<rclcpp_action::ServerGoalHandle<PickPlaceControlMsg>> goal_handle);
+
+  /// @brief Performs the transitions for each State
+  virtual moveit::core::MoveItErrorCode run_fsm(
+    std::shared_ptr<const pdf_beamtime_interfaces::action::PickPlaceControlMsg_Goal> goal);
+
+private:
   rclcpp::Node::SharedPtr interrupt_node_;
 
   moveit::planning_interface::MoveGroupInterface move_group_interface_;
@@ -60,8 +74,6 @@ private:
   rclcpp::Service<DeleteObstacleMsg>::SharedPtr remove_obstacles_service_;
   rclcpp::Service<BlueskyInterruptMsg>::SharedPtr bluesky_interrupt_service_;
 
-  /// @brief Pointer to the action server
-  rclcpp_action::Server<PickPlaceControlMsg>::SharedPtr action_server_;
 
   /// @brief Pointer to the inner state machine object
   InnerStateMachine * inner_state_machine_;
@@ -99,20 +111,6 @@ private:
 /// @todo @ChandimaFernando Implement to see if gripper is attached
   bool gripper_present_ = false;
 
-  // Action server related callbacks
-  rclcpp_action::GoalResponse handle_goal(
-    const rclcpp_action::GoalUUID & uuid,
-    std::shared_ptr<const PickPlaceControlMsg::Goal> goal);
-
-  rclcpp_action::CancelResponse handle_cancel(
-    const std::shared_ptr<rclcpp_action::ServerGoalHandle<PickPlaceControlMsg>> goal_handle);
-
-  void handle_accepted(
-    const std::shared_ptr<rclcpp_action::ServerGoalHandle<PickPlaceControlMsg>> goal_handle);
-
-  void execute(
-    const std::shared_ptr<rclcpp_action::ServerGoalHandle<PickPlaceControlMsg>> goal_handle);
-
   /// @brief generates a vector of obstacles from a yaml file.
   /// @return a vector of CollisionObjects
   std::vector<moveit_msgs::msg::CollisionObject> create_env();
@@ -149,9 +147,15 @@ private:
   /// @brief Set the current state to the next state
   float get_action_completion_percentage();
 
-  /// @brief Performs the transitions for each State
-  moveit::core::MoveItErrorCode run_fsm(
-    std::shared_ptr<const pdf_beamtime_interfaces::action::PickPlaceControlMsg_Goal> goal);
+  rclcpp_action::GoalResponse handle_goal(
+    const rclcpp_action::GoalUUID & uuid,
+    std::shared_ptr<const PickPlaceControlMsg::Goal> goal);
+  rclcpp_action::CancelResponse handle_cancel(
+    const std::shared_ptr<rclcpp_action::ServerGoalHandle<PickPlaceControlMsg>> goal_handle);
+
+  // /// @brief Performs the transitions for each State
+  // moveit::core::MoveItErrorCode run_fsm(
+  //   std::shared_ptr<const pdf_beamtime_interfaces::action::PickPlaceControlMsg_Goal> goal);
 
   /// @brief Set the current state to HOME and move robot to home position
   bool reset_fsm();
