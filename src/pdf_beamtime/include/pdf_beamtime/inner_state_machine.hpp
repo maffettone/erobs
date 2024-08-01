@@ -4,12 +4,14 @@ BSD 3 Clause License. See LICENSE.txt for details.*/
 
 #include <moveit/move_group_interface/move_group_interface.h>
 
+#include <chrono>
 #include <future>
 #include <string>
 #include <map>
 #include <vector>
 #include <rclcpp/node.hpp>
 #include <pdf_beamtime/state_enum.hpp>
+#include <pdf_beamtime_interfaces/srv/gripper_control_msg.hpp>
 
 class InnerStateMachine
 {
@@ -26,6 +28,8 @@ private:
   std::vector<std::string> internal_state_names =
   {"RESTING", "MOVING", "PAUSED", "ABORT", "HALT", "STOP", "CLEANUP"};
 
+  rclcpp::Client<pdf_beamtime_interfaces::srv::GripperControlMsg>::SharedPtr gripper_client_;
+
 public:
   explicit InnerStateMachine(const rclcpp::Node::SharedPtr node);
 
@@ -35,6 +39,10 @@ public:
   moveit::core::MoveItErrorCode move_robot(
     moveit::planning_interface::MoveGroupInterface & mgi,
     std::vector<double> joint_goal);
+
+  moveit::core::MoveItErrorCode move_robot_cartesian(
+    moveit::planning_interface::MoveGroupInterface & mgi,
+    std::vector<geometry_msgs::msg::Pose> target_pose);
 
   /// @brief state change if paused command was issues
   void pause(moveit::planning_interface::MoveGroupInterface & mgi);
@@ -52,8 +60,7 @@ public:
   void set_internal_state(Internal_State state);
   Internal_State get_internal_state();
 
-  /// @brief  Gripper object is not set at the pdf_beamtime level
-  /// @todo ChandimaFernando
+  /// @brief send client requests to open and close the gripper
   /// @return Moveit error code
   moveit::core::MoveItErrorCode open_gripper();
   moveit::core::MoveItErrorCode close_gripper();

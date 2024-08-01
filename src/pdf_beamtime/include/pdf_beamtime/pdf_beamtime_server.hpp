@@ -59,7 +59,6 @@ protected:
   virtual moveit::core::MoveItErrorCode run_fsm(
     std::shared_ptr<const pdf_beamtime_interfaces::action::PickPlaceControlMsg_Goal> goal);
 
-private:
   rclcpp::Node::SharedPtr interrupt_node_;
 
   moveit::planning_interface::MoveGroupInterface move_group_interface_;

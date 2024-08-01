@@ -3,8 +3,7 @@ BSD 3 Clause License. See LICENSE.txt for details.*/
 #include <pdf_beamtime/tf_utilities.hpp>
 
 
-TFUtilities::TFUtilities(
-  const rclcpp::Node::SharedPtr node)
+TFUtilities::TFUtilities(const rclcpp::Node::SharedPtr node)
 : node_(node), tf_util_logger_(node_->get_logger().get_child("tf_util"))
 {
   tf_buffer_ = std::make_unique<tf2_ros::Buffer>(node_->get_clock());
