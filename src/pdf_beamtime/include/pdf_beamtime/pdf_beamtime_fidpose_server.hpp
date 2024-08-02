@@ -21,4 +21,8 @@ private:
   /// @brief Pointer to the inner state machine object
   TFUtilities * tf_utilities_;
   std::vector<double, std::allocator<double>> adjusted_pickup_;
+  std::vector<double, std::allocator<double>> adjusted_place_;
+
+  moveit::core::MoveItErrorCode return_sample();
+  void execute_cleanup();
 };

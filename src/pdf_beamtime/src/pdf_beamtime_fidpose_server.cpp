@@ -81,7 +81,7 @@ moveit::core::MoveItErrorCode PdfBeamtimeFidPoseServer::run_fsm(
       // Successfully grasped. Do pickup retreat
       motion_results = inner_state_machine_->move_robot(
         move_group_interface_,
-        goal->pickup_approach);
+        adjusted_pickup_);
 
       if (motion_results == moveit::core::MoveItErrorCode::SUCCESS) {
         set_current_state(State::PICKUP_RETREAT);
@@ -94,7 +94,7 @@ moveit::core::MoveItErrorCode PdfBeamtimeFidPoseServer::run_fsm(
       // Gripper did not close. failed. move to Pickup approach
       motion_results = inner_state_machine_->move_robot(
         move_group_interface_,
-        goal->pickup_approach);
+        adjusted_pickup_);
       if (motion_results == moveit::core::MoveItErrorCode::SUCCESS) {
         set_current_state(State::PICKUP_APPROACH);
         inner_state_machine_->set_internal_state(Internal_State::RESTING);
@@ -114,15 +114,31 @@ moveit::core::MoveItErrorCode PdfBeamtimeFidPoseServer::run_fsm(
       }
       break;
 
-    case State::PLACE_APPROACH:
-      // Move sample to place
-      motion_results = inner_state_machine_->move_robot(
-        move_group_interface_,
-        goal->place);
-      if (motion_results == moveit::core::MoveItErrorCode::SUCCESS) {
-        set_current_state(State::PLACE);
-        inner_state_machine_->set_internal_state(Internal_State::RESTING);
-        progress_ = progress_ + 1.0;
+    case State::PLACE_APPROACH: {
+        // Move sample to place
+        // 1. Adust the wrist 3 and wrist 2 positions to face the gripper towards the sample
+        std::pair<double, double> new_wrist_angles = tf_utilities_->get_wrist_elbow_alignment(
+          move_group_interface_);
+        adjusted_place_ = goal->place_approach;
+        adjusted_place_[4] = new_wrist_angles.first;
+        adjusted_place_[5] = new_wrist_angles.second;
+        motion_results = inner_state_machine_->move_robot(
+          move_group_interface_,
+          adjusted_place_);
+
+        // 2. Cartesian move the robot to pick up position
+        std::vector<geometry_msgs::msg::Pose> place_poses =
+          tf_utilities_->get_pickup_action_waypoints(
+          move_group_interface_);
+        motion_results = inner_state_machine_->move_robot_cartesian(
+          move_group_interface_,
+          place_poses);
+
+        if (motion_results == moveit::core::MoveItErrorCode::SUCCESS) {
+          set_current_state(State::PLACE);
+          inner_state_machine_->set_internal_state(Internal_State::RESTING);
+          progress_ = progress_ + 1.0;
+        }
       }
       break;
 
@@ -145,7 +161,7 @@ moveit::core::MoveItErrorCode PdfBeamtimeFidPoseServer::run_fsm(
       // Sample was successfully released.
       motion_results = inner_state_machine_->move_robot(
         move_group_interface_,
-        goal->place_approach);
+        adjusted_place_);
       if (motion_results == moveit::core::MoveItErrorCode::SUCCESS) {
         set_current_state(State::PLACE_RETREAT);
         inner_state_machine_->set_internal_state(Internal_State::RESTING);
@@ -171,129 +187,122 @@ moveit::core::MoveItErrorCode PdfBeamtimeFidPoseServer::run_fsm(
   return motion_results;
 }
 
-// bool PdfBeamtimeFidPoseServer::reset_fsm()
-// {
-//   bool reset_results = false;
-//   // This prevents the internal state reset while in clean up
-//   if (inner_state_machine_->get_internal_state() != Internal_State::CLEANUP) {
-//     inner_state_machine_->set_internal_state(Internal_State::RESTING);
-//   }
-//   auto motion_results = inner_state_machine_->move_robot(move_group_interface_, goal_home_);
-//   if (this->gripper_present_) {
-//     inner_state_machine_->open_gripper();
-//   }
-//   if (motion_results == moveit::core::MoveItErrorCode::SUCCESS) {
-//     set_current_state(State::HOME);
-//     reset_results = true;
-//     RCLCPP_INFO(node_->get_logger(), "State machine was RESET");
-//   } else {
-//     RCLCPP_INFO(node_->get_logger(), "State machine reset FAILED");
-//   }
-//   progress_ = 0.0;
 
-//   return reset_results;
-// }
+moveit::core::MoveItErrorCode PdfBeamtimeFidPoseServer::return_sample()
+{
+  moveit::core::MoveItErrorCode motion_results = moveit::core::MoveItErrorCode::FAILURE;
 
-// moveit::core::MoveItErrorCode PdfBeamtimeFidPoseServer::return_sample()
-// {
-//   moveit::core::MoveItErrorCode motion_results = moveit::core::MoveItErrorCode::FAILURE;
+  // Move to pickup approach
+  motion_results = inner_state_machine_->move_robot(
+    move_group_interface_,
+    goal->pickup_approach);
+  // Move to pick up
+  std::pair<double, double> new_wrist_angles = tf_utilities_->get_wrist_elbow_alignment(
+    move_group_interface_);
+  adjusted_pickup_ = goal->pickup_approach;
+  adjusted_pickup_[4] = new_wrist_angles.first;
+  adjusted_pickup_[5] = new_wrist_angles.second;
+  motion_results = inner_state_machine_->move_robot(
+    move_group_interface_,
+    adjusted_pickup_);
 
-//   // Move to pickup approach
-//   motion_results = inner_state_machine_->move_robot(
-//     move_group_interface_,
-//     goal->pickup_approach);
-//   // Move to pick up
-//   motion_results = inner_state_machine_->move_robot(
-//     move_group_interface_,
-//     goal->pickup);
-//   // Open the gripper
-//   inner_state_machine_->open_gripper();
-//   // Move back to pickup approach
-//   motion_results = inner_state_machine_->move_robot(
-//     move_group_interface_,
-//     goal->pickup_approach);
+  // Cartesian move the robot to pick up position
+  std::vector<geometry_msgs::msg::Pose> pickup_poses =
+    tf_utilities_->get_pickup_action_waypoints(
+    move_group_interface_);
+  motion_results = inner_state_machine_->move_robot_cartesian(
+    move_group_interface_,
+    pickup_poses);
+  // Open the gripper
+  inner_state_machine_->open_gripper();
 
-//   return motion_results;
-// }
+  // Move back to pickup approach
+  motion_results = inner_state_machine_->move_robot(
+    move_group_interface_,
+    adjusted_pickup_);
 
-// void PdfBeamtimeFidPoseServer::handle_pause()
-// {
-//   RCLCPP_INFO(node_->get_logger(), "PAUSED command received");
-//   inner_state_machine_->pause(move_group_interface_);
-// }
+  return motion_results;
+}
 
-// void PdfBeamtimeFidPoseServer::handle_stop()
-// {
-//   RCLCPP_INFO(node_->get_logger(), "STOP command received");
-//   execute_cleanup();
-// }
+void PdfBeamtimeFidPoseServer::execute_cleanup()
+{
+  inner_state_machine_->set_internal_state(Internal_State::CLEANUP);
+  RCLCPP_INFO(node_->get_logger(), "Cleanup is in progress");
 
-// void PdfBeamtimeFidPoseServer::execute_cleanup()
-// {
-//   inner_state_machine_->set_internal_state(Internal_State::CLEANUP);
-//   RCLCPP_INFO(node_->get_logger(), "Cleanup is in progress");
+  switch (current_state_) {
+    case State::GRASP_SUCCESS: {
+        // Move to pick up
+        std::pair<double, double> new_wrist_angles = tf_utilities_->get_wrist_elbow_alignment(
+          move_group_interface_);
+        adjusted_pickup_ = goal->pickup_approach;
+        adjusted_pickup_[4] = new_wrist_angles.first;
+        adjusted_pickup_[5] = new_wrist_angles.second;
+        inner_state_machine_->move_robot(
+          move_group_interface_,
+          adjusted_pickup_);
 
-//   switch (current_state_) {
-//     case State::GRASP_SUCCESS:
-//       inner_state_machine_->move_robot(move_group_interface_, goal->pickup);
-//       inner_state_machine_->open_gripper();
-//       inner_state_machine_->move_robot(move_group_interface_, goal->pickup_approach);
-//       break;
+        // Cartesian move the robot to pick up position
+        std::vector<geometry_msgs::msg::Pose> pickup_poses =
+          tf_utilities_->get_pickup_action_waypoints(
+          move_group_interface_);
+        inner_state_machine_->move_robot_cartesian(
+          move_group_interface_,
+          pickup_poses);
 
-//     case State::PICKUP_APPROACH:
-//       inner_state_machine_->move_robot(move_group_interface_, goal->pickup_approach);
-//       break;
+        inner_state_machine_->open_gripper();
 
-//     case State::PICKUP_RETREAT:
-//     case State::PLACE_APPROACH:
-//     case State::PLACE:
-//       return_sample();
-//       break;
+        // Move back to pickup approach
+        inner_state_machine_->move_robot(
+          move_group_interface_,
+          adjusted_pickup_);
+      }
+      break;
 
-//     case State::PICKUP:
-//     case State::GRASP_FAILURE:
-//       inner_state_machine_->move_robot(move_group_interface_, goal->pickup_approach);
-//       break;
+    case State::PICKUP_APPROACH:
+      inner_state_machine_->move_robot(move_group_interface_, goal->pickup_approach);
+      break;
 
-//     case State::RELEASE_FAILURE:
-//     case State::RELEASE_SUCCESS:
-//       inner_state_machine_->move_robot(move_group_interface_, goal->place_approach);
-//       break;
+    case State::PICKUP_RETREAT:
+    case State::PLACE_APPROACH:
+    case State::PLACE:
+      return_sample();
+      break;
 
-//     default:
-//       break;
-//   }
-//   reset_fsm();
-//   inner_state_machine_->set_internal_state(Internal_State::RESTING);
-//   RCLCPP_INFO(node_->get_logger(), "Cleanup is complete");
-// }
+    case State::PICKUP:
+    case State::GRASP_FAILURE: {
+        // Move back to pickup approach
+        std::pair<double, double> new_wrist_angles = tf_utilities_->get_wrist_elbow_alignment(
+          move_group_interface_);
+        adjusted_pickup_ = goal->pickup_approach;
+        adjusted_pickup_[4] = new_wrist_angles.first;
+        adjusted_pickup_[5] = new_wrist_angles.second;
+        inner_state_machine_->move_robot(
+          move_group_interface_,
+          adjusted_pickup_);
+      }
+      break;
 
-// void PdfBeamtimeFidPoseServer::handle_abort()
-// {
-//   RCLCPP_INFO(node_->get_logger(), "ABORT command received");
-//   execute_cleanup();
-// }
+    case State::RELEASE_FAILURE:
+    case State::RELEASE_SUCCESS: {
+        std::pair<double, double> new_wrist_angles = tf_utilities_->get_wrist_elbow_alignment(
+          move_group_interface_);
+        adjusted_place_ = goal->place_approach;
+        adjusted_place_[4] = new_wrist_angles.first;
+        adjusted_place_[5] = new_wrist_angles.second;
+        inner_state_machine_->move_robot(
+          move_group_interface_,
+          adjusted_place_);
+      }
+      break;
 
-// void PdfBeamtimeFidPoseServer::handle_halt()
-// {
-//   RCLCPP_INFO(node_->get_logger(), "HALT command received");
-//   inner_state_machine_->halt(move_group_interface_);
-// }
+    default:
+      break;
+  }
+  reset_fsm();
+  inner_state_machine_->set_internal_state(Internal_State::RESTING);
+  RCLCPP_INFO(node_->get_logger(), "Cleanup is complete");
+}
 
-// void PdfBeamtimeFidPoseServer::handle_resume()
-// {
-//   RCLCPP_INFO(node_->get_logger(), "RESUME command received");
-//   inner_state_machine_->set_internal_state(Internal_State::RESTING);
-// }
-
-// void PdfBeamtimeFidPoseServer::set_current_state(State state)
-// {
-//   RCLCPP_INFO(
-//     node_->get_logger(), "[%s] Current state changed to %s.",
-//     external_state_names_[static_cast<int>(current_state_)].c_str(),
-//     external_state_names_[static_cast<int>(state)].c_str());
-//   current_state_ = state;
-// }
 
 int main(int argc, char * argv[])
 {

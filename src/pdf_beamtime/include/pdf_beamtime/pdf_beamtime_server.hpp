@@ -160,13 +160,13 @@ protected:
   bool reset_fsm();
 
   /// @brief Put back the sample
-  moveit::core::MoveItErrorCode return_sample();
+  virtual moveit::core::MoveItErrorCode return_sample();
 
   /// @brief Handles bluesky interrupt to PAUSE, STOP, ABORT, and HALT
   void handle_pause();
   void handle_stop();
   /// @brief returns the sample to where it was picked and ready robot to receive a new goal
-  void execute_cleanup();
+  virtual void execute_cleanup();
   void handle_abort();
   void handle_halt();
 

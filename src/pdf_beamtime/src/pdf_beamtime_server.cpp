@@ -116,7 +116,6 @@ rclcpp_action::GoalResponse PdfBeamtimeServer::handle_goal(
   const rclcpp_action::GoalUUID & uuid,
   std::shared_ptr<const PickPlaceControlMsg::Goal> goal)
 {
-  RCLCPP_INFO(node_->get_logger(), "Inside base: handle goal");
   (void)uuid;
   return rclcpp_action::GoalResponse::ACCEPT_AND_EXECUTE;
 }
