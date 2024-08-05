@@ -24,6 +24,7 @@ BSD 3 Clause License. See LICENSE.txt for details.*/
 #include <pdf_beamtime_interfaces/srv/box_obstacle_msg.hpp>
 #include <pdf_beamtime_interfaces/srv/cylinder_obstacle_msg.hpp>
 #include <pdf_beamtime_interfaces/srv/bluesky_interrupt_msg.hpp>
+#include <pdf_beamtime_interfaces/srv/gripper_control_msg.hpp>
 #include <pdf_beamtime/inner_state_machine.hpp>
 #include <pdf_beamtime/state_enum.hpp>
 
@@ -60,6 +61,9 @@ protected:
     std::shared_ptr<const pdf_beamtime_interfaces::action::PickPlaceControlMsg_Goal> goal);
 
   rclcpp::Node::SharedPtr interrupt_node_;
+
+  // A separate node for the gripper
+  rclcpp::Node::SharedPtr gripper_node_;
 
   moveit::planning_interface::MoveGroupInterface move_group_interface_;
 

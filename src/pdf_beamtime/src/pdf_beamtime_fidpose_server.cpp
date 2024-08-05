@@ -2,6 +2,8 @@
 BSD 3 Clause License. See LICENSE.txt for details.*/
 #include <pdf_beamtime/pdf_beamtime_fidpose_server.hpp>
 
+using namespace std::placeholders;
+
 PdfBeamtimeFidPoseServer::PdfBeamtimeFidPoseServer(
   const std::string & move_group_name = "ur_manipulator",
   const rclcpp::NodeOptions & options = rclcpp::NodeOptions(),
@@ -9,7 +11,14 @@ PdfBeamtimeFidPoseServer::PdfBeamtimeFidPoseServer(
 : PdfBeamtimeServer(move_group_name, options, action_name)
 {
   tf_utilities_ = new TFUtilities(node_);
-  RCLCPP_INFO(node_->get_logger(), "Inside the derived constructor");
+
+  // Create the action server
+  action_server_ = rclcpp_action::create_server<PickPlaceControlMsg>(
+    this->node_,
+    action_name,
+    std::bind(&PdfBeamtimeFidPoseServer::handle_goal, this, _1, _2),
+    std::bind(&PdfBeamtimeFidPoseServer::handle_cancel, this, _1),
+    std::bind(&PdfBeamtimeFidPoseServer::handle_accepted, this, _1));
 }
 
 moveit::core::MoveItErrorCode PdfBeamtimeFidPoseServer::run_fsm(
@@ -40,10 +49,19 @@ moveit::core::MoveItErrorCode PdfBeamtimeFidPoseServer::run_fsm(
           move_group_interface_);
         adjusted_pickup_ = goal->pickup_approach;
         adjusted_pickup_[4] = new_wrist_angles.first;
-        adjusted_pickup_[5] = new_wrist_angles.second;
+        // adjusted_pickup_[5] = new_wrist_angles.second;
+        RCLCPP_INFO(node_->get_logger(), "new_wrist_angles.first: %f", new_wrist_angles.first);
+        RCLCPP_INFO(node_->get_logger(), "new_wrist_angles.second: %f", new_wrist_angles.second);
+
         motion_results = inner_state_machine_->move_robot(
           move_group_interface_,
           adjusted_pickup_);
+
+        if (motion_results == moveit::core::MoveItErrorCode::SUCCESS) {
+          inner_state_machine_->set_internal_state(Internal_State::RESTING);
+        } else {
+          break;
+        }
 
         // 2. Cartesian move the robot to pick up position
         std::vector<geometry_msgs::msg::Pose> pickup_poses =
@@ -54,7 +72,7 @@ moveit::core::MoveItErrorCode PdfBeamtimeFidPoseServer::run_fsm(
           pickup_poses);
 
         if (motion_results == moveit::core::MoveItErrorCode::SUCCESS) {
-          set_current_state(State::PICKUP_APPROACH);
+          set_current_state(State::PICKUP);
           inner_state_machine_->set_internal_state(Internal_State::RESTING);
           progress_ = progress_ + 1.0;
         }
@@ -78,6 +96,7 @@ moveit::core::MoveItErrorCode PdfBeamtimeFidPoseServer::run_fsm(
       break;
 
     case State::GRASP_SUCCESS:
+      break;
       // Successfully grasped. Do pickup retreat
       motion_results = inner_state_machine_->move_robot(
         move_group_interface_,

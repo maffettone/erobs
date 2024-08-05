@@ -75,11 +75,9 @@ std::pair<double, double> TFUtilities::get_wrist_elbow_alignment(
   );
 
   return std::make_pair(
-    sample_yaw * 180 / M_PI,
-    (joint_group_positions[4] + wrist_2_yaw - sample_yaw) * 180 / M_PI);
-
+    (joint_group_positions[4] + wrist_2_yaw - sample_yaw),
+    sample_yaw * 180 / M_PI);
 }
-
 
 std::vector<geometry_msgs::msg::Pose> TFUtilities::get_pickup_action_waypoints(
   moveit::planning_interface::MoveGroupInterface & mgi)

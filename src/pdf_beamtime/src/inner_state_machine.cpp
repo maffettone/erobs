@@ -5,13 +5,14 @@ BSD 3 Clause License. See LICENSE.txt for details.*/
 using namespace std::chrono_literals;
 
 InnerStateMachine::InnerStateMachine(
-  const rclcpp::Node::SharedPtr node)
-: node_(node)
+  const rclcpp::Node::SharedPtr node, const rclcpp::Node::SharedPtr gripper_node)
+: node_(node), gripper_node_(gripper_node)
 {
   internal_state_enum_ = Internal_State::RESTING;
 
+  // Create gripper client
   gripper_client_ =
-    node->create_client<pdf_beamtime_interfaces::srv::GripperControlMsg>("gripper_service");
+    gripper_node_->create_client<pdf_beamtime_interfaces::srv::GripperControlMsg>("gripper_service");
 
 }
 
@@ -117,7 +118,7 @@ moveit::core::MoveItErrorCode InnerStateMachine::close_gripper()
         } else {
           set_internal_state(Internal_State::MOVING);
           auto result = gripper_client_->async_send_request(request);
-          if (rclcpp::spin_until_future_complete(node_, result) ==
+          if (rclcpp::spin_until_future_complete(gripper_node_, result) ==
             rclcpp::FutureReturnCode::SUCCESS)
           {
             RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Gripper open: %d", result.get()->results);
@@ -160,8 +161,9 @@ moveit::core::MoveItErrorCode InnerStateMachine::open_gripper()
 
         } else {
           set_internal_state(Internal_State::MOVING);
+
           auto result = gripper_client_->async_send_request(request);
-          if (rclcpp::spin_until_future_complete(node_, result) ==
+          if (rclcpp::spin_until_future_complete(gripper_node_, result) ==
             rclcpp::FutureReturnCode::SUCCESS)
           {
             RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Gripper open: %d", result.get()->results);

@@ -17,9 +17,13 @@ class InnerStateMachine
 {
 private:
   rclcpp::Node::SharedPtr node_;
+  rclcpp::Node::SharedPtr gripper_node_;
+
   Internal_State internal_state_enum_;
   /// @brief Holds the passed joint target
   std::vector<double> joint_goal_;
+
+  rclcpp::Client<pdf_beamtime_interfaces::srv::GripperControlMsg>::SharedPtr gripper_client_;
 
   std::vector<std::string> external_state_names_ =
   {"HOME", "PICKUP_APPROACH", "PICKUP", "GRASP_SUCCESS", "GRASP_FAILURE", "PICKUP_RETREAT",
@@ -28,10 +32,10 @@ private:
   std::vector<std::string> internal_state_names =
   {"RESTING", "MOVING", "PAUSED", "ABORT", "HALT", "STOP", "CLEANUP"};
 
-  rclcpp::Client<pdf_beamtime_interfaces::srv::GripperControlMsg>::SharedPtr gripper_client_;
-
 public:
-  explicit InnerStateMachine(const rclcpp::Node::SharedPtr node);
+  explicit InnerStateMachine(
+    const rclcpp::Node::SharedPtr node,
+    const rclcpp::Node::SharedPtr gripper_node);
 
   /// @brief move the robot to the passed joint angles
   /// @param mgi move_group_interface_

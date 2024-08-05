@@ -11,6 +11,7 @@ PdfBeamtimeServer::PdfBeamtimeServer(
   std::string action_name = "pdf_beamtime_action_server")
 : node_(std::make_shared<rclcpp::Node>("pdf_beamtime_server", options)),
   interrupt_node_(std::make_shared<rclcpp::Node>("interrupt_server")),
+  gripper_node_(std::make_shared<rclcpp::Node>("gripper_node_client")),
   move_group_interface_(node_, move_group_name),
   planning_scene_interface_()
 {
@@ -51,12 +52,13 @@ PdfBeamtimeServer::PdfBeamtimeServer(
   // Initialize to home
   current_state_ = State::HOME;
   gripper_present_ = node_->get_parameter("gripper_present").as_bool();
-  inner_state_machine_ = new InnerStateMachine(node_);
+  inner_state_machine_ = new InnerStateMachine(node_, gripper_node_);
 
   bluesky_interrupt_service_ = interrupt_node_->create_service<BlueskyInterruptMsg>(
     "bluesky_interrupt",
     std::bind(
       &PdfBeamtimeServer::bluesky_interrupt_cb, this, _1, _2));
+
 }
 
 void PdfBeamtimeServer::bluesky_interrupt_cb(
