@@ -1,4 +1,4 @@
 pdf_beamtime_server:
   ros__parameters:
-    home_angles: [0.0, -1.783732, 0.0, -1.75492, 0.0, 3.14159] #For real robot
+    home_angles: [-0.11536, -1.783732, 0.38816, -1.75492, 0.11484, 3.14159] #For real robot
     gripper_present: true

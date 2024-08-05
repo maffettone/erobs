@@ -79,14 +79,13 @@ std::pair<double, double> TFUtilities::get_wrist_elbow_alignment(
     sample_yaw * 180 / M_PI);
 }
 
-std::vector<geometry_msgs::msg::Pose> TFUtilities::get_pickup_action_waypoints(
+std::vector<geometry_msgs::msg::Pose> TFUtilities::get_pickup_action_z_adj(
   moveit::planning_interface::MoveGroupInterface & mgi)
 {
 
   // Define waypoints for Cartesian path
   std::vector<geometry_msgs::msg::Pose> waypoints;
 
-  geometry_msgs::msg::TransformStamped transform_world_to_sample;
   geometry_msgs::msg::TransformStamped transform_world_to_grasping_point;
   geometry_msgs::msg::TransformStamped transform_world_to_pickup_approach_point;
 
@@ -95,9 +94,6 @@ std::vector<geometry_msgs::msg::Pose> TFUtilities::get_pickup_action_waypoints(
 
   while (rclcpp::ok()) {
     try {
-      transform_world_to_sample =
-        tf_buffer_->lookupTransform(world_frame, sample_frame, tf2::TimePointZero);
-
       transform_world_to_grasping_point = tf_buffer_->lookupTransform(
         world_frame,
         grasping_point_on_gripper_frame,
@@ -108,22 +104,9 @@ std::vector<geometry_msgs::msg::Pose> TFUtilities::get_pickup_action_waypoints(
         pre_pickup_approach_point_frame,
         tf2::TimePointZero);
 
-      x_dist_to_pickup_approach =
-        transform_world_to_pickup_approach_point.transform.translation.x -
-        transform_world_to_grasping_point.transform.translation.x;
-      y_dist_to_pickup_approach =
-        transform_world_to_pickup_approach_point.transform.translation.y -
-        transform_world_to_grasping_point.transform.translation.y;
       z_dist_to_pickup_approach =
         transform_world_to_pickup_approach_point.transform.translation.z -
         (transform_world_to_grasping_point.transform.translation.z);
-
-      x_dist_to_sample = transform_world_to_sample.transform.translation.x -
-        transform_world_to_pickup_approach_point.transform.translation.x;
-      y_dist_to_sample = transform_world_to_sample.transform.translation.y -
-        transform_world_to_pickup_approach_point.transform.translation.y;
-      z_dist_to_sample = transform_world_to_sample.transform.translation.z -
-        transform_world_to_pickup_approach_point.transform.translation.z;
 
       break;
     } catch (tf2::TransformException & ex) {
@@ -140,6 +123,110 @@ std::vector<geometry_msgs::msg::Pose> TFUtilities::get_pickup_action_waypoints(
   target_pose.position.z += -0.02;
 
   waypoints.push_back(target_pose);
+
+  return waypoints;
+
+}
+
+std::vector<geometry_msgs::msg::Pose> TFUtilities::get_pickup_action_pre_pickup(
+  moveit::planning_interface::MoveGroupInterface & mgi)
+{
+
+  // Define waypoints for Cartesian path
+  std::vector<geometry_msgs::msg::Pose> waypoints;
+
+  geometry_msgs::msg::TransformStamped transform_world_to_grasping_point;
+  geometry_msgs::msg::TransformStamped transform_world_to_pickup_approach_point;
+
+  double x_dist_to_pickup_approach, y_dist_to_pickup_approach, z_dist_to_pickup_approach = 0.0;
+  double x_dist_to_sample = 0.0, y_dist_to_sample = 0.0, z_dist_to_sample = 0.0;
+
+  while (rclcpp::ok()) {
+    try {
+      transform_world_to_grasping_point = tf_buffer_->lookupTransform(
+        world_frame,
+        grasping_point_on_gripper_frame,
+        tf2::TimePointZero);
+
+      transform_world_to_pickup_approach_point = tf_buffer_->lookupTransform(
+        world_frame,
+        pre_pickup_approach_point_frame,
+        tf2::TimePointZero);
+
+      x_dist_to_pickup_approach =
+        transform_world_to_pickup_approach_point.transform.translation.x -
+        transform_world_to_grasping_point.transform.translation.x;
+      y_dist_to_pickup_approach =
+        transform_world_to_pickup_approach_point.transform.translation.y -
+        transform_world_to_grasping_point.transform.translation.y;
+
+      break;
+    } catch (tf2::TransformException & ex) {
+      RCLCPP_ERROR(
+        tf_util_logger_, "Could not transform %s to %s: %s",
+        grasping_point_on_gripper_frame.c_str(),
+        sample_frame.c_str(), ex.what());
+    }
+  }
+
+  geometry_msgs::msg::Pose target_pose = mgi.getCurrentPose().pose;
+
+  int N = 10;
+  // Calculate incremental distances
+  double x_increment = x_dist_to_pickup_approach / N;
+  double y_increment = y_dist_to_pickup_approach / N;
+
+  // Loop to move in segments
+  for (int i = 0; i < N; ++i) {
+    target_pose.position.x += x_increment;
+    target_pose.position.y += y_increment;
+
+    // Set the new target pose
+    waypoints.push_back(target_pose);
+  }
+
+  return waypoints;
+}
+
+std::vector<geometry_msgs::msg::Pose> TFUtilities::get_pickup_action_pickup(
+  moveit::planning_interface::MoveGroupInterface & mgi)
+{
+
+  // Define waypoints for Cartesian path
+  std::vector<geometry_msgs::msg::Pose> waypoints;
+
+  geometry_msgs::msg::TransformStamped transform_world_to_sample;
+  geometry_msgs::msg::TransformStamped transform_world_to_pickup_approach_point;
+
+  double x_dist_to_pickup_approach, y_dist_to_pickup_approach, z_dist_to_pickup_approach = 0.0;
+  double x_dist_to_sample = 0.0, y_dist_to_sample = 0.0, z_dist_to_sample = 0.0;
+
+  while (rclcpp::ok()) {
+    try {
+
+      transform_world_to_sample =
+        tf_buffer_->lookupTransform(world_frame, sample_frame, tf2::TimePointZero);
+
+      transform_world_to_pickup_approach_point = tf_buffer_->lookupTransform(
+        world_frame,
+        pre_pickup_approach_point_frame,
+        tf2::TimePointZero);
+
+      x_dist_to_sample = transform_world_to_sample.transform.translation.x -
+        transform_world_to_pickup_approach_point.transform.translation.x;
+      y_dist_to_sample = transform_world_to_sample.transform.translation.y -
+        transform_world_to_pickup_approach_point.transform.translation.y;
+
+      break;
+    } catch (tf2::TransformException & ex) {
+      RCLCPP_ERROR(
+        tf_util_logger_, "Could not transform %s to %s: %s",
+        grasping_point_on_gripper_frame.c_str(),
+        sample_frame.c_str(), ex.what());
+    }
+  }
+
+  geometry_msgs::msg::Pose target_pose = mgi.getCurrentPose().pose;
 
   target_pose.position.x += x_dist_to_sample;
   target_pose.position.y += y_dist_to_sample;

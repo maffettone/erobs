@@ -122,6 +122,7 @@ moveit::core::MoveItErrorCode InnerStateMachine::close_gripper()
             rclcpp::FutureReturnCode::SUCCESS)
           {
             RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Gripper open: %d", result.get()->results);
+            std::this_thread::sleep_for(3s);
             return_error_code = moveit::core::MoveItErrorCode::SUCCESS;
           } else {
             RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Failed to call service");
@@ -167,6 +168,7 @@ moveit::core::MoveItErrorCode InnerStateMachine::open_gripper()
             rclcpp::FutureReturnCode::SUCCESS)
           {
             RCLCPP_INFO(rclcpp::get_logger("rclcpp"), "Gripper open: %d", result.get()->results);
+            std::this_thread::sleep_for(3s);
             return_error_code = moveit::core::MoveItErrorCode::SUCCESS;
           } else {
             RCLCPP_ERROR(rclcpp::get_logger("rclcpp"), "Failed to call service");

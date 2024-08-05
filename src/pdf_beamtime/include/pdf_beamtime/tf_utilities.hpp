@@ -38,6 +38,14 @@ public:
   std::pair<double, double> get_wrist_elbow_alignment(
     moveit::planning_interface::MoveGroupInterface & mgi);
 
-  std::vector<geometry_msgs::msg::Pose> get_pickup_action_waypoints(
+  std::vector<geometry_msgs::msg::Pose> get_pickup_action_z_adj(
     moveit::planning_interface::MoveGroupInterface & mgi);
+
+  std::vector<geometry_msgs::msg::Pose> get_pickup_action_pre_pickup(
+    moveit::planning_interface::MoveGroupInterface & mgi);
+
+  std::vector<geometry_msgs::msg::Pose> get_pickup_action_pickup(
+    moveit::planning_interface::MoveGroupInterface & mgi);
+
+
 };
