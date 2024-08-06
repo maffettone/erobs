@@ -26,8 +26,6 @@ TFUtilities::TFUtilities(const rclcpp::Node::SharedPtr node)
   world_frame = "world";
   grasping_point_on_gripper_frame = "grasping_point_link";
   wrist_2_frame = "wrist_2_link";
-
-
 }
 
 
@@ -125,7 +123,6 @@ std::vector<geometry_msgs::msg::Pose> TFUtilities::get_pickup_action_z_adj(
   waypoints.push_back(target_pose);
 
   return waypoints;
-
 }
 
 std::vector<geometry_msgs::msg::Pose> TFUtilities::get_pickup_action_pre_pickup(
@@ -233,5 +230,4 @@ std::vector<geometry_msgs::msg::Pose> TFUtilities::get_pickup_action_pickup(
   waypoints.push_back(target_pose);
 
   return waypoints;
-
 }

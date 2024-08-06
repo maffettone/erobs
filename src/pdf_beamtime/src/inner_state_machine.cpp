@@ -13,7 +13,6 @@ InnerStateMachine::InnerStateMachine(
   // Create gripper client
   gripper_client_ =
     gripper_node_->create_client<pdf_beamtime_interfaces::srv::GripperControlMsg>("gripper_service");
-
 }
 
 moveit::core::MoveItErrorCode InnerStateMachine::move_robot(
@@ -114,7 +113,6 @@ moveit::core::MoveItErrorCode InnerStateMachine::close_gripper()
         if (!gripper_client_->wait_for_service(10s)) {
           return_error_code = moveit::core::MoveItErrorCode::FAILURE;
           break;
-
         } else {
           set_internal_state(Internal_State::MOVING);
           auto result = gripper_client_->async_send_request(request);
@@ -129,7 +127,6 @@ moveit::core::MoveItErrorCode InnerStateMachine::close_gripper()
             return_error_code = moveit::core::MoveItErrorCode::FAILURE;
           }
         }
-
       }
       break;
 
@@ -140,13 +137,11 @@ moveit::core::MoveItErrorCode InnerStateMachine::close_gripper()
       return_error_code = moveit::core::MoveItErrorCode::FAILURE;
       break;
   }
-
   return return_error_code;
 }
 
 moveit::core::MoveItErrorCode InnerStateMachine::open_gripper()
 {
-
   moveit::core::MoveItErrorCode return_error_code = moveit::core::MoveItErrorCode::FAILURE;
 
   switch (internal_state_enum_) {
@@ -159,10 +154,8 @@ moveit::core::MoveItErrorCode InnerStateMachine::open_gripper()
         if (!gripper_client_->wait_for_service(10s)) {
           return_error_code = moveit::core::MoveItErrorCode::FAILURE;
           break;
-
         } else {
           set_internal_state(Internal_State::MOVING);
-
           auto result = gripper_client_->async_send_request(request);
           if (rclcpp::spin_until_future_complete(gripper_node_, result) ==
             rclcpp::FutureReturnCode::SUCCESS)
@@ -175,7 +168,6 @@ moveit::core::MoveItErrorCode InnerStateMachine::open_gripper()
             return_error_code = moveit::core::MoveItErrorCode::FAILURE;
           }
         }
-
       }
       break;
 
@@ -186,7 +178,6 @@ moveit::core::MoveItErrorCode InnerStateMachine::open_gripper()
       return_error_code = moveit::core::MoveItErrorCode::FAILURE;
       break;
   }
-
   return return_error_code;
 }
 

@@ -2,6 +2,10 @@
 BSD 3 Clause License. See LICENSE.txt for details.*/
 #pragma once
 
+#include <memory>
+#include <string>
+#include <vector>
+
 #include <pdf_beamtime/pdf_beamtime_server.hpp>
 #include <pdf_beamtime/tf_utilities.hpp>
 

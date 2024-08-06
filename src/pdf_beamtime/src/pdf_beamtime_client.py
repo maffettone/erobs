@@ -22,36 +22,21 @@ class SimpleClient(Node):
     def send_goal(self):
         """Send a working goal."""
         goal_msg = PickPlaceControlMsg.Goal()
-        goal_msg.pickup_approach = [1.466, -2.042, -2.1293, -2.164, -0.105, 0.0]
-        goal_msg.pickup = [1.099, -2.234, -1.728, -2.339, -0.489, -0.035]
-        goal_msg.place_approach = [2.618, -2.356, -1.763, -2.216, -2.215, 0.0]
-        goal_msg.place = [2.618, -2.356, -1.663, -2.416, -2.215, 0.0]
+
+        goal_msg.pickup_approach = [240.86, -63.96, 127.57, -61.50, 98.26, 180.0]
+        goal_msg.pickup_approach = [x / 180 * math.pi for x in goal_msg.pickup_approach]
+
+        goal_msg.pickup = [236.97, -54.79, 108.08, -51.21, 94.39, 180.0]
+        goal_msg.pickup = [x / 180 * math.pi for x in goal_msg.pickup]
+
+        goal_msg.place_approach = [54.55, -84.79, 120.92, -36.14, 51.53, 180.0]
+        goal_msg.place_approach = [x / 180 * math.pi for x in goal_msg.place_approach]
+
+        goal_msg.place = [62.16, -70.19, 100.56, -30.42, 59.15, 180.0]
+        goal_msg.place = [x / 180 * math.pi for x in goal_msg.place]
 
         self._action_client.wait_for_server()
         self._send_goal_future = self._action_client.send_goal_async(goal_msg, feedback_callback=self.feedback_callback)
-
-    def send_incompatible_goal(self):
-        """Send a goal that gets rejected by the move group."""
-        goal_msg = PickPlaceControlMsg.Goal()
-        goal_msg.pickup_approach = [1.466, -2.042, -2.1293, -2.164, -0.105, 0.0]
-        goal_msg.pickup = [1.099, -2.234, -1.728, -2.339, -0.489, -0.035]
-        goal_msg.place_approach = [2.618, -2.356, -1.763, -2.216, -2.215, 0.0]
-        goal_msg.place = [2.618, -2.566, -1.7453, -2.025, -2.217, 0.0]
-
-        self._action_client.wait_for_server()
-        self._send_goal_future = self._action_client.send_goal_async(goal_msg, feedback_callback=self.feedback_callback)
-
-    def send_self_cancelling_goal(self):
-        """Send a goal that gets cancelled after 15 seconds."""
-        goal_msg = PickPlaceControlMsg.Goal()
-        goal_msg.pickup_approach = [1.466, -2.042, -2.1293, -2.164, -0.105, 0.0]
-        goal_msg.pickup = [1.099, -2.234, -1.728, -2.339, -0.489, -0.035]
-        goal_msg.place_approach = [2.618, -2.356, -1.763, -2.216, -2.215, 0.0]
-        goal_msg.place = [2.618, -2.356, -1.663, -2.416, -2.215, 0.0]
-
-        self._action_client.wait_for_server()
-        self._send_goal_future = self._action_client.send_goal_async(goal_msg, feedback_callback=self.feedback_callback)
-        self._send_goal_future.add_done_callback(self.goal_response_callback)
 
     def feedback_callback(self, feedback_msg):
         """Display the feedback."""
@@ -72,8 +57,6 @@ def main(args=None):
 
     client = SimpleClient()
     client.send_goal()
-    # client.send_incompatible_goal()
-    # client.send_self_cancelling_goal()
 
     rclpy.spin(client)
 

@@ -8,7 +8,7 @@ def generate_launch_description():
     """Launch the node obstacle_builder with a parameter file."""
     action_cmd = Node(
         package="pdf_beamtime",
-        executable="pdf_beamtime_server",
+        executable="pdf_beamtime_fidpose_server",
         parameters=[
             PathJoinSubstitution([FindPackageShare("pdf_beamtime"), "config", "obstacles.yaml"]),
             PathJoinSubstitution([FindPackageShare("pdf_beamtime"), "config", "joint_poses.yaml"]),
