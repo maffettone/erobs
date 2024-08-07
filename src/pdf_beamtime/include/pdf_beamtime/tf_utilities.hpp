@@ -4,11 +4,14 @@ BSD 3 Clause License. See LICENSE.txt for details.*/
 
 #include <moveit/move_group_interface/move_group_interface.h>
 #include <moveit/planning_scene_interface/planning_scene_interface.h>
-
 #include <tf2_ros/buffer.h>
 #include <tf2_ros/transform_listener.h>
 #include <tf2/LinearMath/Quaternion.h>
 #include <tf2/LinearMath/Matrix3x3.h>
+
+#include <string>
+#include <memory>
+#include <vector>
 
 #include <geometry_msgs/msg/transform_stamped.hpp>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
@@ -46,6 +49,4 @@ public:
 
   std::vector<geometry_msgs::msg::Pose> get_pickup_action_pickup(
     moveit::planning_interface::MoveGroupInterface & mgi);
-
-
 };

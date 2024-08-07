@@ -58,7 +58,6 @@ PdfBeamtimeServer::PdfBeamtimeServer(
     "bluesky_interrupt",
     std::bind(
       &PdfBeamtimeServer::bluesky_interrupt_cb, this, _1, _2));
-
 }
 
 void PdfBeamtimeServer::bluesky_interrupt_cb(

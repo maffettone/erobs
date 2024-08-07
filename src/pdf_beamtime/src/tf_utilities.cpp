@@ -80,15 +80,12 @@ std::pair<double, double> TFUtilities::get_wrist_elbow_alignment(
 std::vector<geometry_msgs::msg::Pose> TFUtilities::get_pickup_action_z_adj(
   moveit::planning_interface::MoveGroupInterface & mgi)
 {
-
   // Define waypoints for Cartesian path
   std::vector<geometry_msgs::msg::Pose> waypoints;
-
   geometry_msgs::msg::TransformStamped transform_world_to_grasping_point;
   geometry_msgs::msg::TransformStamped transform_world_to_pickup_approach_point;
 
-  double x_dist_to_pickup_approach, y_dist_to_pickup_approach, z_dist_to_pickup_approach = 0.0;
-  double x_dist_to_sample = 0.0, y_dist_to_sample = 0.0, z_dist_to_sample = 0.0;
+  double z_dist_to_pickup_approach = 0.0;
 
   while (rclcpp::ok()) {
     try {
@@ -128,15 +125,12 @@ std::vector<geometry_msgs::msg::Pose> TFUtilities::get_pickup_action_z_adj(
 std::vector<geometry_msgs::msg::Pose> TFUtilities::get_pickup_action_pre_pickup(
   moveit::planning_interface::MoveGroupInterface & mgi)
 {
-
   // Define waypoints for Cartesian path
   std::vector<geometry_msgs::msg::Pose> waypoints;
-
   geometry_msgs::msg::TransformStamped transform_world_to_grasping_point;
   geometry_msgs::msg::TransformStamped transform_world_to_pickup_approach_point;
 
-  double x_dist_to_pickup_approach, y_dist_to_pickup_approach, z_dist_to_pickup_approach = 0.0;
-  double x_dist_to_sample = 0.0, y_dist_to_sample = 0.0, z_dist_to_sample = 0.0;
+  double x_dist_to_pickup_approach = 0.0, y_dist_to_pickup_approach = 0.0;
 
   while (rclcpp::ok()) {
     try {
@@ -191,19 +185,16 @@ std::vector<geometry_msgs::msg::Pose> TFUtilities::get_pickup_action_pickup(
 
   // Define waypoints for Cartesian path
   std::vector<geometry_msgs::msg::Pose> waypoints;
-
   geometry_msgs::msg::TransformStamped transform_world_to_sample;
   geometry_msgs::msg::TransformStamped transform_world_to_pickup_approach_point;
 
-  double x_dist_to_pickup_approach, y_dist_to_pickup_approach, z_dist_to_pickup_approach = 0.0;
-  double x_dist_to_sample = 0.0, y_dist_to_sample = 0.0, z_dist_to_sample = 0.0;
+  double x_dist_to_sample = 0.0, y_dist_to_sample = 0.0;
 
   while (rclcpp::ok()) {
     try {
 
       transform_world_to_sample =
         tf_buffer_->lookupTransform(world_frame, sample_frame, tf2::TimePointZero);
-
       transform_world_to_pickup_approach_point = tf_buffer_->lookupTransform(
         world_frame,
         pre_pickup_approach_point_frame,

@@ -7,7 +7,7 @@ import rclpy
 from rclpy.action import ActionClient
 from rclpy.node import Node
 
-from pdf_beamtime_interfaces.action import PickPlaceControlMsg
+from pdf_beamtime_interfaces.action import FidPoseControlMsg
 
 
 class SimpleClient(Node):
@@ -15,13 +15,13 @@ class SimpleClient(Node):
 
     def __init__(self):
         """Python init."""
-        super().__init__("pdf_beamtime_client")
-        self._action_client = ActionClient(self, PickPlaceControlMsg, "pdf_beamtime_action_server")
+        super().__init__("pdf_beamtime_fidpose_client")
+        self._action_client = ActionClient(self, FidPoseControlMsg, "pdf_beamtime_fidpose_action_server")
         self._goal_handle = None
 
-    def send_goal(self):
+    def send_pickup_goal(self):
         """Send a working goal."""
-        goal_msg = PickPlaceControlMsg.Goal()
+        goal_msg = FidPoseControlMsg.Goal()
         goal_msg.pickup_approach = [293.24, -77.05, 119.62, -43.57, 199.87, 180.0]
         goal_msg.pickup_approach = [x / 180 * math.pi for x in goal_msg.pickup_approach]
 
@@ -30,6 +30,26 @@ class SimpleClient(Node):
 
         goal_msg.place = [62.16, -70.19, 100.56, -30.42, 59.15, 180.0]
         goal_msg.place = [x / 180 * math.pi for x in goal_msg.place]
+
+        goal_msg.sample_return = False
+
+        self._action_client.wait_for_server()
+        self._send_goal_future = self._action_client.send_goal_async(goal_msg, feedback_callback=self.feedback_callback)
+
+    def send_retrun_sample_goal(self):
+        """Send a working goal."""
+        goal_msg = FidPoseControlMsg.Goal()
+
+        goal_msg.pickup_approach = [54.55, -84.79, 120.92, -36.14, 51.53, 180.0]
+        goal_msg.pickup_approach = [x / 180 * math.pi for x in goal_msg.pickup_approach]
+
+        goal_msg.pickup = [62.16, -70.19, 100.56, -30.42, 59.15, 180.0]
+        goal_msg.pickup = [x / 180 * math.pi for x in goal_msg.pickup]
+
+        goal_msg.place_approach = [293.24, -77.05, 119.62, -43.57, 199.87, 180.0]
+        goal_msg.place_approach = [x / 180 * math.pi for x in goal_msg.place_approach]
+
+        goal_msg.sample_return = True
 
         self._action_client.wait_for_server()
         self._send_goal_future = self._action_client.send_goal_async(goal_msg, feedback_callback=self.feedback_callback)
@@ -52,7 +72,8 @@ def main(args=None):
     rclpy.init(args=args)
 
     client = SimpleClient()
-    client.send_goal()
+    # client.send_pickup_goal()
+    client.send_retrun_sample_goal()
 
     rclpy.spin(client)
 
