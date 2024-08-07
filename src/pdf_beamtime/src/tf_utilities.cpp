@@ -182,7 +182,6 @@ std::vector<geometry_msgs::msg::Pose> TFUtilities::get_pickup_action_pre_pickup(
 std::vector<geometry_msgs::msg::Pose> TFUtilities::get_pickup_action_pickup(
   moveit::planning_interface::MoveGroupInterface & mgi)
 {
-
   // Define waypoints for Cartesian path
   std::vector<geometry_msgs::msg::Pose> waypoints;
   geometry_msgs::msg::TransformStamped transform_world_to_sample;
@@ -192,7 +191,6 @@ std::vector<geometry_msgs::msg::Pose> TFUtilities::get_pickup_action_pickup(
 
   while (rclcpp::ok()) {
     try {
-
       transform_world_to_sample =
         tf_buffer_->lookupTransform(world_frame, sample_frame, tf2::TimePointZero);
       transform_world_to_pickup_approach_point = tf_buffer_->lookupTransform(

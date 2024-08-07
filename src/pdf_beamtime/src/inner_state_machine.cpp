@@ -12,7 +12,8 @@ InnerStateMachine::InnerStateMachine(
 
   // Create gripper client
   gripper_client_ =
-    gripper_node_->create_client<pdf_beamtime_interfaces::srv::GripperControlMsg>("gripper_service");
+    gripper_node_->create_client<pdf_beamtime_interfaces::srv::GripperControlMsg>(
+    "gripper_service");
 }
 
 moveit::core::MoveItErrorCode InnerStateMachine::move_robot(
@@ -100,9 +101,7 @@ moveit::core::MoveItErrorCode InnerStateMachine::move_robot_cartesian(
 
 moveit::core::MoveItErrorCode InnerStateMachine::close_gripper()
 {
-
   moveit::core::MoveItErrorCode return_error_code = moveit::core::MoveItErrorCode::FAILURE;
-
   switch (internal_state_enum_) {
     case Internal_State::RESTING:
     case Internal_State::CLEANUP: {
