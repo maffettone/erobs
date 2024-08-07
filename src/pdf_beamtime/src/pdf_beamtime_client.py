@@ -23,16 +23,16 @@ class SimpleClient(Node):
         """Send a working goal."""
         goal_msg = PickPlaceControlMsg.Goal()
 
-        goal_msg.pickup_approach = [240.86, -63.96, 127.57, -61.50, 98.26, 180.0]
+        goal_msg.pickup_approach = [241.41, -59.73, 130.19, -68.36, 99.66, 180.0]
         goal_msg.pickup_approach = [x / 180 * math.pi for x in goal_msg.pickup_approach]
 
-        goal_msg.pickup = [236.54, -52.75, 106.64, -51.82, 93.97, 180.0]
+        goal_msg.pickup = [238.27, -50.99, 106.60, -53.53, 96.54, 180.0]
         goal_msg.pickup = [x / 180 * math.pi for x in goal_msg.pickup]
 
-        goal_msg.place_approach = [54.55, -84.79, 120.92, -36.14, 51.53, 180.0]
+        goal_msg.place_approach = [55.10, -51.78, 124.84, -73.16, 52.24, 180.0]
         goal_msg.place_approach = [x / 180 * math.pi for x in goal_msg.place_approach]
 
-        goal_msg.place = [62.15, -71.66, 98.75, -27.14, 59.13, 180.0]
+        goal_msg.place = [63.84, -43.13, 98.29, -55.25, 61.00, 180.0]
         goal_msg.place = [x / 180 * math.pi for x in goal_msg.place]
 
         self._action_client.wait_for_server()
@@ -54,16 +54,16 @@ class SimpleClient(Node):
         """Send a working goal."""
         goal_msg = PickPlaceControlMsg.Goal()
 
-        goal_msg.pickup_approach = [54.55, -84.79, 120.92, -36.14, 51.53, 180.0]
+        goal_msg.pickup_approach = [55.10, -51.78, 124.84, -73.16, 52.24, 180.0]
         goal_msg.pickup_approach = [x / 180 * math.pi for x in goal_msg.pickup_approach]
 
-        goal_msg.pickup = [62.15, -71.66, 98.75, -27.14, 59.13, 180.0]
+        goal_msg.pickup = [63.84, -43.13, 98.29, -55.25, 61.00, 180.0]
         goal_msg.pickup = [x / 180 * math.pi for x in goal_msg.pickup]
 
-        goal_msg.place_approach = [240.86, -63.96, 127.57, -61.50, 98.26, 180.0]
+        goal_msg.place_approach = [241.41, -59.73, 130.19, -68.36, 99.66, 180.0]
         goal_msg.place_approach = [x / 180 * math.pi for x in goal_msg.place_approach]
 
-        goal_msg.place = [236.54, -52.75, 106.64, -51.82, 93.97, 180.0]
+        goal_msg.place = [238.27, -50.99, 106.60, -53.53, 96.54, 180.0]
         goal_msg.place = [x / 180 * math.pi for x in goal_msg.place]
 
         self._action_client.wait_for_server()

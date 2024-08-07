@@ -25,10 +25,10 @@ class SimpleClient(Node):
         goal_msg.pickup_approach = [293.24, -77.05, 119.62, -43.57, 199.87, 180.0]
         goal_msg.pickup_approach = [x / 180 * math.pi for x in goal_msg.pickup_approach]
 
-        goal_msg.place_approach = [54.55, -84.79, 120.92, -36.14, 51.53, 180.0]
+        goal_msg.place_approach = [55.10, -51.78, 124.84, -73.16, 52.24, 180.0]
         goal_msg.place_approach = [x / 180 * math.pi for x in goal_msg.place_approach]
 
-        goal_msg.place = [62.16, -70.19, 100.56, -30.42, 59.15, 180.0]
+        goal_msg.place = [63.84, -43.13, 98.29, -55.25, 61.00, 180.0]
         goal_msg.place = [x / 180 * math.pi for x in goal_msg.place]
 
         goal_msg.sample_return = False
@@ -40,10 +40,10 @@ class SimpleClient(Node):
         """Send a working goal."""
         goal_msg = FidPoseControlMsg.Goal()
 
-        goal_msg.pickup_approach = [54.55, -84.79, 120.92, -36.14, 51.53, 180.0]
+        goal_msg.pickup_approach = [55.10, -51.78, 124.84, -73.16, 52.24, 180.0]
         goal_msg.pickup_approach = [x / 180 * math.pi for x in goal_msg.pickup_approach]
 
-        goal_msg.pickup = [62.16, -70.19, 100.56, -30.42, 59.15, 180.0]
+        goal_msg.pickup = [63.84, -43.13, 98.29, -55.25, 61.00, 180.0]
         goal_msg.pickup = [x / 180 * math.pi for x in goal_msg.pickup]
 
         goal_msg.place_approach = [293.24, -77.05, 119.62, -43.57, 199.87, 180.0]

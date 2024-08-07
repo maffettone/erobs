@@ -339,6 +339,14 @@ moveit::core::MoveItErrorCode PdfBeamtimeFidPoseServer::run_fsm(
         motion_results = inner_state_machine_->move_robot(
           move_group_interface_,
           pickup_approach_joints_);
+        if (motion_results == moveit::core::MoveItErrorCode::SUCCESS) {
+          inner_state_machine_->set_internal_state(Internal_State::RESTING);
+        } else {
+          break;
+        }
+        motion_results = inner_state_machine_->move_robot(
+          move_group_interface_,
+          goal->place_approach);
       }
       if (motion_results == moveit::core::MoveItErrorCode::SUCCESS) {
         set_current_state(State::PLACE_RETREAT);
