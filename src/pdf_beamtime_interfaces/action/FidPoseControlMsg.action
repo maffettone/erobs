@@ -1,7 +1,5 @@
-float64[] pickup_approach
-float64[] place_approach
-float64[] place
-float64[] pickup
+float64[] inbeam_approach
+float64[] inbeam
 bool sample_return
 ---
 bool success

@@ -22,14 +22,12 @@ class SimpleClient(Node):
     def send_pickup_goal(self):
         """Send a working goal."""
         goal_msg = FidPoseControlMsg.Goal()
-        goal_msg.pickup_approach = [293.24, -77.05, 119.62, -43.57, 199.87, 180.0]
-        goal_msg.pickup_approach = [x / 180 * math.pi for x in goal_msg.pickup_approach]
 
-        goal_msg.place_approach = [55.10, -51.78, 124.84, -73.16, 52.24, 180.0]
-        goal_msg.place_approach = [x / 180 * math.pi for x in goal_msg.place_approach]
+        goal_msg.inbeam_approach = [55.10, -51.78, 124.84, -73.16, 52.24, 180.0]
+        goal_msg.inbeam_approach = [x / 180 * math.pi for x in goal_msg.inbeam_approach]
 
-        goal_msg.place = [63.84, -43.13, 98.29, -55.25, 61.00, 180.0]
-        goal_msg.place = [x / 180 * math.pi for x in goal_msg.place]
+        goal_msg.inbeam = [63.84, -43.13, 98.29, -55.25, 61.00, 180.0]
+        goal_msg.inbeam = [x / 180 * math.pi for x in goal_msg.inbeam]
 
         goal_msg.sample_return = False
 
@@ -40,14 +38,11 @@ class SimpleClient(Node):
         """Send a working goal."""
         goal_msg = FidPoseControlMsg.Goal()
 
-        goal_msg.pickup_approach = [55.10, -51.78, 124.84, -73.16, 52.24, 180.0]
-        goal_msg.pickup_approach = [x / 180 * math.pi for x in goal_msg.pickup_approach]
+        goal_msg.inbeam_approach = [55.10, -51.78, 124.84, -73.16, 52.24, 180.0]
+        goal_msg.inbeam_approach = [x / 180 * math.pi for x in goal_msg.inbeam_approach]
 
-        goal_msg.pickup = [63.84, -43.13, 98.29, -55.25, 61.00, 180.0]
-        goal_msg.pickup = [x / 180 * math.pi for x in goal_msg.pickup]
-
-        goal_msg.place_approach = [293.24, -77.05, 119.62, -43.57, 199.87, 180.0]
-        goal_msg.place_approach = [x / 180 * math.pi for x in goal_msg.place_approach]
+        goal_msg.inbeam = [63.84, -43.13, 98.29, -55.25, 61.00, 180.0]
+        goal_msg.inbeam = [x / 180 * math.pi for x in goal_msg.inbeam]
 
         goal_msg.sample_return = True
 
@@ -72,8 +67,8 @@ def main(args=None):
     rclpy.init(args=args)
 
     client = SimpleClient()
-    # client.send_pickup_goal()
-    client.send_retrun_sample_goal()
+    client.send_pickup_goal()
+    # client.send_retrun_sample_goal()
 
     rclpy.spin(client)
 

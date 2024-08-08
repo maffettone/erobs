@@ -57,6 +57,7 @@ void PdfBeamtimeFidPoseServer::execute(
   moveit::core::MoveItErrorCode fsm_results;
   progress_ = 0.0;
   goal_home_ = node_->get_parameter("home_angles").as_double_array();
+  pickup_approach_ = node_->get_parameter("pickup_approach_angles").as_double_array();
   feedback->status = get_action_completion_percentage();
 
   RCLCPP_INFO(
@@ -80,8 +81,11 @@ void PdfBeamtimeFidPoseServer::execute(
         RCLCPP_ERROR(node_->get_logger(), "Goal aborted !");
         return;
       }
-
-      fsm_results = run_fsm(fidpose_goal);
+      if (fidpose_goal->sample_return) {
+        fsm_results = run_return_fsm(fidpose_goal);
+      } else {
+        fsm_results = run_fsm(fidpose_goal);
+      }
       if (!fsm_results && inner_state_machine_->get_internal_state() != Internal_State::PAUSED) {
         // Abort the execution if move_group_ fails except when paused
         results->success = false;
@@ -126,98 +130,69 @@ moveit::core::MoveItErrorCode PdfBeamtimeFidPoseServer::run_fsm(
       // Moves the robot to pickup approach.
       // If success: change state, increment progress, reset internel state
       motion_results = inner_state_machine_->open_gripper();
-      if (motion_results == moveit::core::MoveItErrorCode::SUCCESS) {
-        inner_state_machine_->set_internal_state(Internal_State::RESTING);
-      } else {
-        break;
-      }
+      if (motion_results == moveit::core::MoveItErrorCode::FAILURE) {break;}
+      inner_state_machine_->set_internal_state(Internal_State::RESTING);
+
       motion_results = inner_state_machine_->move_robot(
-        move_group_interface_,
-        goal->pickup_approach);
-      if (motion_results == moveit::core::MoveItErrorCode::SUCCESS) {
-        set_current_state(State::PICKUP_APPROACH);
-        inner_state_machine_->set_internal_state(Internal_State::RESTING);
-        progress_ = progress_ + 1.0;
-      }
+        move_group_interface_, pickup_approach_);
+      if (motion_results == moveit::core::MoveItErrorCode::FAILURE) {break;}
+
+      set_current_state(State::PICKUP_APPROACH);
+      inner_state_machine_->set_internal_state(Internal_State::RESTING);
+      progress_ = progress_ + 1.0;
       break;
 
     case State::PICKUP_APPROACH: {
         // Moves the robot to pickup in two steps
         // 1. Adust the wrist 3 and wrist 2 positions to face the gripper towards the sample
-        if (!goal->sample_return) {
-          std::pair<double, double> new_wrist_angles = tf_utilities_->get_wrist_elbow_alignment(
-            move_group_interface_);
-          adjusted_pickup_ = goal->pickup_approach;
-          adjusted_pickup_[4] = new_wrist_angles.first;
-          // adjusted_pickup_[5] = new_wrist_angles.second;
+        std::pair<double, double> new_wrist_angles = tf_utilities_->get_wrist_elbow_alignment(
+          move_group_interface_);
+        adjusted_pickup_ = pickup_approach_;
+        adjusted_pickup_[4] = new_wrist_angles.first;
 
-          motion_results = inner_state_machine_->move_robot(
-            move_group_interface_,
-            adjusted_pickup_);
+        motion_results = inner_state_machine_->move_robot(move_group_interface_, adjusted_pickup_);
+        if (motion_results == moveit::core::MoveItErrorCode::FAILURE) {break;}
+        inner_state_machine_->set_internal_state(Internal_State::RESTING);
 
-          if (motion_results == moveit::core::MoveItErrorCode::SUCCESS) {
-            inner_state_machine_->set_internal_state(Internal_State::RESTING);
-          } else {
-            break;
-          }
+        // 2. Cartesian move the robot to pick up position
+        // 2.1 Adjust the z distance
+        motion_results = inner_state_machine_->move_robot_cartesian(
+          move_group_interface_, tf_utilities_->get_pickup_action_z_adj(
+            move_group_interface_));
+        if (motion_results == moveit::core::MoveItErrorCode::FAILURE) {break;}
+        inner_state_machine_->set_internal_state(Internal_State::RESTING);
 
-          // 2. Cartesian move the robot to pick up position
-          std::vector<geometry_msgs::msg::Pose> z_adj_poses =
-            tf_utilities_->get_pickup_action_z_adj(
-            move_group_interface_);
-          motion_results = inner_state_machine_->move_robot_cartesian(
-            move_group_interface_,
-            z_adj_poses);
+        // 2.2 Cartesian move to pre-pickup location in front of the sample
+        motion_results = inner_state_machine_->move_robot_cartesian(
+          move_group_interface_, tf_utilities_->get_pickup_action_pre_pickup(
+            move_group_interface_));
+        if (motion_results == moveit::core::MoveItErrorCode::FAILURE) {break;}
+        inner_state_machine_->set_internal_state(Internal_State::RESTING);
 
-          if (motion_results == moveit::core::MoveItErrorCode::SUCCESS) {
-            inner_state_machine_->set_internal_state(Internal_State::RESTING);
-          } else {
-            break;
-          }
+        // Save the joint angles for the pre-pickup. Use this for moving the sample back
+        inner_state_machine_->set_internal_state(Internal_State::RESTING);
+        move_group_interface_.getCurrentState()->copyJointGroupPositions(
+          move_group_interface_.getCurrentState()->getRobotModel()->getJointModelGroup(
+            "ur_arm"),
+          pre_pickup_approach_joints_);
 
-          std::vector<geometry_msgs::msg::Pose> pre_pickup_poses =
-            tf_utilities_->get_pickup_action_pre_pickup(
-            move_group_interface_);
-          motion_results = inner_state_machine_->move_robot_cartesian(
-            move_group_interface_,
-            pre_pickup_poses);
+        // 2.3 Cartesian move to pickup
+        motion_results = inner_state_machine_->move_robot_cartesian(
+          move_group_interface_, tf_utilities_->get_pickup_action_pickup(
+            move_group_interface_));
 
-          if (motion_results == moveit::core::MoveItErrorCode::SUCCESS) {
-            inner_state_machine_->set_internal_state(Internal_State::RESTING);
-            move_group_interface_.getCurrentState()->copyJointGroupPositions(
-              move_group_interface_.getCurrentState()->getRobotModel()->getJointModelGroup(
-                "ur_arm"),
-              pickup_approach_joints_);
-          } else {
-            break;
-          }
+        if (motion_results == moveit::core::MoveItErrorCode::FAILURE) {break;}
 
-          std::vector<geometry_msgs::msg::Pose> pickup_poses =
-            tf_utilities_->get_pickup_action_pickup(
-            move_group_interface_);
-          motion_results = inner_state_machine_->move_robot_cartesian(
-            move_group_interface_,
-            pickup_poses);
-        } else {
-          // Returning the sample. Do joint movement
-          motion_results = inner_state_machine_->move_robot(
-            move_group_interface_,
-            goal->pickup);
-        }
+        // Save the joint angles for the pickup.
+        move_group_interface_.getCurrentState()->copyJointGroupPositions(
+          move_group_interface_.getCurrentState()->getRobotModel()->getJointModelGroup(
+            "ur_arm"),
+          pickup_joints_);
 
-        if (motion_results == moveit::core::MoveItErrorCode::SUCCESS) {
-          set_current_state(State::PICKUP);
-          inner_state_machine_->set_internal_state(Internal_State::RESTING);
-          // Save the pose here
-          if (!goal->sample_return) {
-            move_group_interface_.getCurrentState()->copyJointGroupPositions(
-              move_group_interface_.getCurrentState()->getRobotModel()->getJointModelGroup(
-                "ur_arm"),
-              pickup_joints_);
-            pickup_pose_saved = true;
-          }
-          progress_ = progress_ + 1.0;
-        }
+        // State propagation
+        inner_state_machine_->set_internal_state(Internal_State::RESTING);
+        set_current_state(State::PICKUP);
+        progress_ = progress_ + 1.0;
       }
       break;
 
@@ -238,36 +213,38 @@ moveit::core::MoveItErrorCode PdfBeamtimeFidPoseServer::run_fsm(
       break;
 
     case State::GRASP_SUCCESS:
-      if (!goal->sample_return) {
-        // Successfully grasped. Do pickup retreat
-        motion_results = inner_state_machine_->move_robot(
-          move_group_interface_,
-          adjusted_pickup_);
-      } else {
-        motion_results = inner_state_machine_->move_robot(
-          move_group_interface_,
-          goal->pickup_approach);
-      }
+      // if (!goal->sample_return) {
+      // Successfully grasped. Do pickup retreat
+      motion_results = inner_state_machine_->move_robot(
+        move_group_interface_, pre_pickup_approach_joints_);
+      if (motion_results == moveit::core::MoveItErrorCode::FAILURE) {break;}
+      inner_state_machine_->set_internal_state(Internal_State::RESTING);
 
-      if (motion_results == moveit::core::MoveItErrorCode::SUCCESS) {
-        set_current_state(State::PICKUP_RETREAT);
-        inner_state_machine_->set_internal_state(Internal_State::RESTING);
-        progress_ = progress_ + 1.0;
-      }
+      motion_results = inner_state_machine_->move_robot(
+        move_group_interface_, adjusted_pickup_);
+      if (motion_results == moveit::core::MoveItErrorCode::FAILURE) {break;}
+      inner_state_machine_->set_internal_state(Internal_State::RESTING);
+
+      inner_state_machine_->set_internal_state(Internal_State::RESTING);
+      set_current_state(State::PICKUP_RETREAT);
+      progress_ = progress_ + 1.0;
+
       break;
 
     case State::GRASP_FAILURE:
       // Gripper did not close. failed. move to Pickup approach
-      if (!goal->sample_return) {
-        // Successfully grasped. Do pickup retreat
-        motion_results = inner_state_machine_->move_robot(
-          move_group_interface_,
-          adjusted_pickup_);
-      } else {
-        motion_results = inner_state_machine_->move_robot(
-          move_group_interface_,
-          goal->pickup_approach);
+      // if (!goal->sample_return) {
+      motion_results = inner_state_machine_->move_robot(
+        move_group_interface_, pre_pickup_approach_joints_);
+      if (motion_results == moveit::core::MoveItErrorCode::FAILURE) {
+        progress_ = progress_ - 1.0;
+        break;
       }
+      inner_state_machine_->set_internal_state(Internal_State::RESTING);
+
+      motion_results = inner_state_machine_->move_robot(
+        move_group_interface_, pickup_approach_);
+
       if (motion_results == moveit::core::MoveItErrorCode::SUCCESS) {
         set_current_state(State::PICKUP_APPROACH);
         inner_state_machine_->set_internal_state(Internal_State::RESTING);
@@ -279,38 +256,24 @@ moveit::core::MoveItErrorCode PdfBeamtimeFidPoseServer::run_fsm(
       // Sample in hand. Move to place approach.
       motion_results = inner_state_machine_->move_robot(
         move_group_interface_,
-        goal->place_approach);
-      if (motion_results == moveit::core::MoveItErrorCode::SUCCESS) {
-        set_current_state(State::PLACE_APPROACH);
-        inner_state_machine_->set_internal_state(Internal_State::RESTING);
-        progress_ = progress_ + 1.0;
-      }
+        goal->inbeam_approach);
+      if (motion_results == moveit::core::MoveItErrorCode::FAILURE) {break;}
+      inner_state_machine_->set_internal_state(Internal_State::RESTING);
+      set_current_state(State::PLACE_APPROACH);
+      progress_ = progress_ + 1.0;
+
       break;
 
     case State::PLACE_APPROACH: {
         // Move sample to place
-        if (!goal->sample_return) {
-          motion_results = inner_state_machine_->move_robot(
-            move_group_interface_,
-            goal->place);
-        } else {
-          motion_results = inner_state_machine_->move_robot(
-            move_group_interface_,
-            pickup_approach_joints_);
-          if (motion_results == moveit::core::MoveItErrorCode::SUCCESS) {
-            inner_state_machine_->set_internal_state(Internal_State::RESTING);
-          } else {
-            break;
-          }
-          motion_results = inner_state_machine_->move_robot(
-            move_group_interface_,
-            pickup_joints_);
-        }
-        if (motion_results == moveit::core::MoveItErrorCode::SUCCESS) {
-          set_current_state(State::PLACE);
-          inner_state_machine_->set_internal_state(Internal_State::RESTING);
-          progress_ = progress_ + 1.0;
-        }
+        motion_results = inner_state_machine_->move_robot(
+          move_group_interface_,
+          goal->inbeam);
+
+        if (motion_results == moveit::core::MoveItErrorCode::FAILURE) {break;}
+        set_current_state(State::PLACE);
+        inner_state_machine_->set_internal_state(Internal_State::RESTING);
+        progress_ = progress_ + 1.0;
       }
       break;
 
@@ -331,39 +294,183 @@ moveit::core::MoveItErrorCode PdfBeamtimeFidPoseServer::run_fsm(
 
     case State::RELEASE_SUCCESS:
       // Sample was successfully released.
-      if (!goal->sample_return) {
-        motion_results = inner_state_machine_->move_robot(
-          move_group_interface_,
-          goal->place_approach);
-      } else {
-        motion_results = inner_state_machine_->move_robot(
-          move_group_interface_,
-          pickup_approach_joints_);
-        if (motion_results == moveit::core::MoveItErrorCode::SUCCESS) {
-          inner_state_machine_->set_internal_state(Internal_State::RESTING);
-        } else {
-          break;
-        }
-        motion_results = inner_state_machine_->move_robot(
-          move_group_interface_,
-          goal->place_approach);
-      }
-      if (motion_results == moveit::core::MoveItErrorCode::SUCCESS) {
-        set_current_state(State::PLACE_RETREAT);
-        inner_state_machine_->set_internal_state(Internal_State::RESTING);
-        progress_ = progress_ + 1.0;
-      }
+      motion_results = inner_state_machine_->move_robot(
+        move_group_interface_,
+        goal->inbeam_approach);
+
+      if (motion_results == moveit::core::MoveItErrorCode::FAILURE) {break;}
+      inner_state_machine_->set_internal_state(Internal_State::RESTING);
+      set_current_state(State::PLACE_RETREAT);
+      progress_ = progress_ + 1.0;
+
       break;
 
     case State::PLACE_RETREAT:
       // Move back to rest/home position
       motion_results = inner_state_machine_->move_robot(
         move_group_interface_, goal_home_);
-      if (motion_results == moveit::core::MoveItErrorCode::SUCCESS) {
-        set_current_state(State::HOME);
+      if (motion_results == moveit::core::MoveItErrorCode::FAILURE) {break;}
+      set_current_state(State::HOME);
+      inner_state_machine_->set_internal_state(Internal_State::RESTING);
+      progress_ = progress_ + 1.0;
+      break;
+
+    default:
+      break;
+  }
+  return motion_results;
+}
+
+
+moveit::core::MoveItErrorCode PdfBeamtimeFidPoseServer::run_return_fsm(
+  std::shared_ptr<const pdf_beamtime_interfaces::action::FidPoseControlMsg_Goal> goal)
+{
+  RCLCPP_INFO(
+    node_->get_logger(), "Executing state %s",
+    external_state_names_[static_cast<int>(current_state_)].c_str());
+  moveit::core::MoveItErrorCode motion_results = moveit::core::MoveItErrorCode::FAILURE;
+  switch (current_state_) {
+    case State::HOME:
+      // Moves the robot to pickup approach.
+      // If success: change state, increment progress, reset internel state
+      motion_results = inner_state_machine_->open_gripper();
+      if (motion_results == moveit::core::MoveItErrorCode::FAILURE) {break;}
+      inner_state_machine_->set_internal_state(Internal_State::RESTING);
+
+      motion_results = inner_state_machine_->move_robot(
+        move_group_interface_, goal->inbeam_approach);
+      if (motion_results == moveit::core::MoveItErrorCode::FAILURE) {break;}
+
+      set_current_state(State::PICKUP_APPROACH);
+      inner_state_machine_->set_internal_state(Internal_State::RESTING);
+      progress_ = progress_ + 1.0;
+      break;
+
+    case State::PICKUP_APPROACH: {
+        // Moves the robot to inbeam
+        motion_results = inner_state_machine_->move_robot(
+          move_group_interface_, goal->inbeam);
+
+        if (motion_results == moveit::core::MoveItErrorCode::FAILURE) {break;}
+        // State propagation
         inner_state_machine_->set_internal_state(Internal_State::RESTING);
+        set_current_state(State::PICKUP);
         progress_ = progress_ + 1.0;
       }
+      break;
+
+    case State::PICKUP:
+      // Pick up object by closing gripper. If success: move to grasp success with progress.
+      // if fails, move to grasp_failure
+      if (this->gripper_present_) {
+        motion_results = inner_state_machine_->close_gripper();
+        if (motion_results == moveit::core::MoveItErrorCode::SUCCESS) {
+          progress_ = progress_ + 1.0;
+          set_current_state(State::GRASP_SUCCESS);
+          inner_state_machine_->set_internal_state(Internal_State::RESTING);
+        } else {
+          set_current_state(State::GRASP_FAILURE);
+          inner_state_machine_->set_internal_state(Internal_State::RESTING);
+        }
+      }
+      break;
+
+    case State::GRASP_SUCCESS:
+      // if (!goal->sample_return) {
+      // Successfully grasped. Do pickup retreat to inbeam approach
+      motion_results = inner_state_machine_->move_robot(
+        move_group_interface_, goal->inbeam_approach);
+      inner_state_machine_->set_internal_state(Internal_State::RESTING);
+      set_current_state(State::PICKUP_RETREAT);
+      progress_ = progress_ + 1.0;
+      break;
+
+    case State::GRASP_FAILURE:
+      // Gripper did not close. failed. move to Pickup approach
+      motion_results = inner_state_machine_->move_robot(
+        move_group_interface_, goal->inbeam_approach);
+      if (motion_results == moveit::core::MoveItErrorCode::SUCCESS) {
+        set_current_state(State::PICKUP_APPROACH);
+        inner_state_machine_->set_internal_state(Internal_State::RESTING);
+      }
+      progress_ = progress_ - 1.0;
+      break;
+
+    case State::PICKUP_RETREAT:
+      // Sample in hand. Move to place approach.
+      motion_results = inner_state_machine_->move_robot(
+        move_group_interface_,
+        goal->inbeam_approach);
+      if (motion_results == moveit::core::MoveItErrorCode::FAILURE) {break;}
+      inner_state_machine_->set_internal_state(Internal_State::RESTING);
+      set_current_state(State::PLACE_APPROACH);
+      progress_ = progress_ + 1.0;
+
+      break;
+
+    case State::PLACE_APPROACH: {
+        // Move sample to place
+        motion_results = inner_state_machine_->move_robot(
+          move_group_interface_,
+          pre_pickup_approach_joints_);
+        if (motion_results == moveit::core::MoveItErrorCode::FAILURE) {break;}
+        inner_state_machine_->set_internal_state(Internal_State::RESTING);
+
+        motion_results = inner_state_machine_->move_robot(
+          move_group_interface_,
+          pickup_joints_);
+        if (motion_results == moveit::core::MoveItErrorCode::FAILURE) {break;}
+
+        inner_state_machine_->set_internal_state(Internal_State::RESTING);
+        set_current_state(State::PLACE);
+        progress_ = progress_ + 1.0;
+      }
+      break;
+
+    case State::PLACE:
+      // Place the sample.
+      if (this->gripper_present_) {
+        motion_results = inner_state_machine_->open_gripper();
+        if (motion_results == moveit::core::MoveItErrorCode::SUCCESS) {
+          progress_ = progress_ + 1.0;
+          set_current_state(State::RELEASE_SUCCESS);
+          inner_state_machine_->set_internal_state(Internal_State::RESTING);
+        } else {
+          set_current_state(State::RELEASE_FAILURE);
+          inner_state_machine_->set_internal_state(Internal_State::RESTING);
+        }
+      }
+      break;
+
+    case State::RELEASE_SUCCESS:
+      // Sample was successfully released.
+      // if (!goal->sample_return) {
+      motion_results = inner_state_machine_->move_robot(
+        move_group_interface_,
+        pre_pickup_approach_joints_);
+
+      if (motion_results == moveit::core::MoveItErrorCode::FAILURE) {break;}
+      inner_state_machine_->set_internal_state(Internal_State::RESTING);
+
+      motion_results = inner_state_machine_->move_robot(
+        move_group_interface_,
+        pickup_approach_);
+
+      if (motion_results == moveit::core::MoveItErrorCode::FAILURE) {break;}
+      inner_state_machine_->set_internal_state(Internal_State::RESTING);
+      set_current_state(State::PLACE_RETREAT);
+      progress_ = progress_ + 1.0;
+
+      break;
+
+    case State::PLACE_RETREAT:
+      // Move back to rest/home position
+      motion_results = inner_state_machine_->move_robot(
+        move_group_interface_, goal_home_);
+      if (motion_results == moveit::core::MoveItErrorCode::FAILURE) {break;}
+      set_current_state(State::HOME);
+      inner_state_machine_->set_internal_state(Internal_State::RESTING);
+      progress_ = progress_ + 1.0;
       break;
 
     default:

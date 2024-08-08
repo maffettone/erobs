@@ -24,6 +24,9 @@ private:
   moveit::core::MoveItErrorCode run_fsm(
     std::shared_ptr<const pdf_beamtime_interfaces::action::FidPoseControlMsg_Goal> goal);
 
+  moveit::core::MoveItErrorCode run_return_fsm(
+    std::shared_ptr<const pdf_beamtime_interfaces::action::FidPoseControlMsg_Goal> goal);
+
   /// @brief Pointer to the inner state machine object
   TFUtilities * tf_utilities_;
   std::vector<double, std::allocator<double>> adjusted_pickup_;
@@ -31,6 +34,9 @@ private:
 
   /// @brief holds the current goal to be used by return_sample() function
   std::shared_ptr<const pdf_beamtime_interfaces::action::FidPoseControlMsg_Goal> fidpose_goal;
+
+  /// @brief records pickup approach state
+  std::vector<double, std::allocator<double>> pickup_approach_;
 
   rclcpp_action::Server<FidPoseControlMsg>::SharedPtr fidpose_action_server_;
 
@@ -49,6 +55,6 @@ private:
   void execute_cleanup();
 
   bool pickup_pose_saved = false;
-  std::vector<double> pickup_approach_joints_;
+  std::vector<double> pre_pickup_approach_joints_;
   std::vector<double> pickup_joints_;
 };
