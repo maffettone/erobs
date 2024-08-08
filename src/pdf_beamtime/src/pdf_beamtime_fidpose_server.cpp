@@ -82,9 +82,15 @@ void PdfBeamtimeFidPoseServer::execute(
         return;
       }
       if (fidpose_goal->sample_return) {
-        fsm_results = run_return_fsm(fidpose_goal);
+        if (pickup_pose_saved) {
+          fsm_results = run_return_fsm(fidpose_goal);
+        } else {
+          RCLCPP_ERROR(node_->get_logger(), "Pickup poses are not set!");
+          return;
+        }
       } else {
         fsm_results = run_fsm(fidpose_goal);
+        pickup_pose_saved = true;
       }
       if (!fsm_results && inner_state_machine_->get_internal_state() != Internal_State::PAUSED) {
         // Abort the execution if move_group_ fails except when paused
@@ -170,7 +176,6 @@ moveit::core::MoveItErrorCode PdfBeamtimeFidPoseServer::run_fsm(
         inner_state_machine_->set_internal_state(Internal_State::RESTING);
 
         // Save the joint angles for the pre-pickup. Use this for moving the sample back
-        inner_state_machine_->set_internal_state(Internal_State::RESTING);
         move_group_interface_.getCurrentState()->copyJointGroupPositions(
           move_group_interface_.getCurrentState()->getRobotModel()->getJointModelGroup(
             "ur_arm"),
@@ -313,6 +318,7 @@ moveit::core::MoveItErrorCode PdfBeamtimeFidPoseServer::run_fsm(
       set_current_state(State::HOME);
       inner_state_machine_->set_internal_state(Internal_State::RESTING);
       progress_ = progress_ + 1.0;
+      pickup_pose_saved = false;
       break;
 
     default:
@@ -410,6 +416,12 @@ moveit::core::MoveItErrorCode PdfBeamtimeFidPoseServer::run_return_fsm(
 
     case State::PLACE_APPROACH: {
         // Move sample to place
+        motion_results = inner_state_machine_->move_robot(
+          move_group_interface_,
+          pickup_approach_);
+        if (motion_results == moveit::core::MoveItErrorCode::FAILURE) {break;}
+        inner_state_machine_->set_internal_state(Internal_State::RESTING);
+
         motion_results = inner_state_machine_->move_robot(
           move_group_interface_,
           pre_pickup_approach_joints_);

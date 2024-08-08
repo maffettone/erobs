@@ -52,6 +52,16 @@ podman run -it --rm --network host --ipc=host --pid=host \
 `tool_communication.py` should not be called when `ur_control.launch.py` is called, but separately when the gripper is initiated.  The 5s delay allows socat creation before running the gripper service. 
 The gripper_service has two convenience scripts, `gripper_open.cpp` and `gripper_close.cpp` that will start up client nodes to send a request to the gripper service then promptly shutdown the client nodes.
 
+# Launch aruco_pose 
+```bash
+podman run -it --network host --ipc=host --pid=host \
+    --env ROS_DISTRO=$ROS_DISTRO \
+    ${GHCR_POINTER} \
+    /bin/sh -c "printenv && \
+    . /root/ws/install/setup.sh && \
+    . /opt/ros/${ROS_DISTRO}/setup.sh && \
+    ros2 launch aruco_pose aruco_pose.launch.py"
+```
 
 # Launch move_group
 ```bash
@@ -66,16 +76,6 @@ podman run -it --rm --network host --ipc=host --pid=host \
     ${GHCR_POINTER} \
     /bin/sh -c "printenv && . /opt/ros/${ROS_DISTRO}/setup.sh && . /root/ws/install/setup.sh && ros2 launch ur_moveit_config ur_moveit.launch.py ur_type:=${UR_TYPE} launch_rviz:=${LAUNCH_RVIZ} description_package:=${DESCRIPTION_PKG}  launch_servo:=false description_file:=${DESCRIPTION_FILE} moveit_config_package:=${CONFIG_PKG} moveit_config_file:=${CONFIG_FILE}"
 ```
-# Launch aruco_pose 
-```bash
-podman run -it --network host --ipc=host --pid=host \
-    --env ROS_DISTRO=$ROS_DISTRO \
-    ${GHCR_POINTER} \
-    /bin/sh -c "printenv && \
-    . /root/ws/install/setup.sh && \
-    . /opt/ros/${ROS_DISTRO}/setup.sh && \
-    ros2 launch aruco_pose aruco_pose.launch.py"
-```
 
 # Launch the pdf_beamtime_server
 ```bash
@@ -83,6 +83,14 @@ podman run -it --network host --ipc=host --pid=host \
     --env ROS_DISTRO=$ROS_DISTRO \
     ${GHCR_POINTER} \
     /bin/sh -c "printenv && . /opt/ros/${ROS_DISTRO}/setup.sh && . /root/ws/install/setup.sh && ros2 launch pdf_beamtime pdf_beamtime.launch.py"
+```
+
+# Launch the pdf_beamtime_fidpose_server
+```bash
+podman run -it --network host --ipc=host --pid=host \
+    --env ROS_DISTRO=$ROS_DISTRO \
+    ${GHCR_POINTER} \
+    /bin/sh -c "printenv && . /opt/ros/${ROS_DISTRO}/setup.sh && . /root/ws/install/setup.sh && ros2 launch pdf_beamtime pdf_beamtime_fidpose_server.launch.py"
 ```
 
 # Test base rotation for Emergency stop
