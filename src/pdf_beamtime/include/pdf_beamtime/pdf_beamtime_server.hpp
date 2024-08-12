@@ -24,6 +24,7 @@ BSD 3 Clause License. See LICENSE.txt for details.*/
 #include <pdf_beamtime_interfaces/srv/box_obstacle_msg.hpp>
 #include <pdf_beamtime_interfaces/srv/cylinder_obstacle_msg.hpp>
 #include <pdf_beamtime_interfaces/srv/bluesky_interrupt_msg.hpp>
+#include <pdf_beamtime_interfaces/srv/gripper_control_msg.hpp>
 #include <pdf_beamtime/inner_state_machine.hpp>
 #include <pdf_beamtime/state_enum.hpp>
 
@@ -44,9 +45,25 @@ public:
   rclcpp::node_interfaces::NodeBaseInterface::SharedPtr getNodeBaseInterface();
   rclcpp::node_interfaces::NodeBaseInterface::SharedPtr getInterruptNodeBaseInterface();
 
-private:
+protected:
   rclcpp::Node::SharedPtr node_;
+  /// @brief Pointer to the action server
+  rclcpp_action::Server<PickPlaceControlMsg>::SharedPtr action_server_;
+
+  virtual void handle_accepted(
+    const std::shared_ptr<rclcpp_action::ServerGoalHandle<PickPlaceControlMsg>> goal_handle);
+  // Action server related callbacks
+  virtual void execute(
+    const std::shared_ptr<rclcpp_action::ServerGoalHandle<PickPlaceControlMsg>> goal_handle);
+
+  /// @brief Performs the transitions for each State
+  virtual moveit::core::MoveItErrorCode run_fsm(
+    std::shared_ptr<const pdf_beamtime_interfaces::action::PickPlaceControlMsg_Goal> goal);
+
   rclcpp::Node::SharedPtr interrupt_node_;
+
+  // A separate node for the gripper
+  rclcpp::Node::SharedPtr gripper_node_;
 
   moveit::planning_interface::MoveGroupInterface move_group_interface_;
 
@@ -60,8 +77,6 @@ private:
   rclcpp::Service<DeleteObstacleMsg>::SharedPtr remove_obstacles_service_;
   rclcpp::Service<BlueskyInterruptMsg>::SharedPtr bluesky_interrupt_service_;
 
-  /// @brief Pointer to the action server
-  rclcpp_action::Server<PickPlaceControlMsg>::SharedPtr action_server_;
 
   /// @brief Pointer to the inner state machine object
   InnerStateMachine * inner_state_machine_;
@@ -99,20 +114,6 @@ private:
 /// @todo @ChandimaFernando Implement to see if gripper is attached
   bool gripper_present_ = false;
 
-  // Action server related callbacks
-  rclcpp_action::GoalResponse handle_goal(
-    const rclcpp_action::GoalUUID & uuid,
-    std::shared_ptr<const PickPlaceControlMsg::Goal> goal);
-
-  rclcpp_action::CancelResponse handle_cancel(
-    const std::shared_ptr<rclcpp_action::ServerGoalHandle<PickPlaceControlMsg>> goal_handle);
-
-  void handle_accepted(
-    const std::shared_ptr<rclcpp_action::ServerGoalHandle<PickPlaceControlMsg>> goal_handle);
-
-  void execute(
-    const std::shared_ptr<rclcpp_action::ServerGoalHandle<PickPlaceControlMsg>> goal_handle);
-
   /// @brief generates a vector of obstacles from a yaml file.
   /// @return a vector of CollisionObjects
   std::vector<moveit_msgs::msg::CollisionObject> create_env();
@@ -149,21 +150,27 @@ private:
   /// @brief Set the current state to the next state
   float get_action_completion_percentage();
 
-  /// @brief Performs the transitions for each State
-  moveit::core::MoveItErrorCode run_fsm(
-    std::shared_ptr<const pdf_beamtime_interfaces::action::PickPlaceControlMsg_Goal> goal);
+  rclcpp_action::GoalResponse handle_goal(
+    const rclcpp_action::GoalUUID & uuid,
+    std::shared_ptr<const PickPlaceControlMsg::Goal> goal);
+  rclcpp_action::CancelResponse handle_cancel(
+    const std::shared_ptr<rclcpp_action::ServerGoalHandle<PickPlaceControlMsg>> goal_handle);
+
+  // /// @brief Performs the transitions for each State
+  // moveit::core::MoveItErrorCode run_fsm(
+  //   std::shared_ptr<const pdf_beamtime_interfaces::action::PickPlaceControlMsg_Goal> goal);
 
   /// @brief Set the current state to HOME and move robot to home position
   bool reset_fsm();
 
   /// @brief Put back the sample
-  moveit::core::MoveItErrorCode return_sample();
+  virtual moveit::core::MoveItErrorCode return_sample();
 
   /// @brief Handles bluesky interrupt to PAUSE, STOP, ABORT, and HALT
   void handle_pause();
   void handle_stop();
   /// @brief returns the sample to where it was picked and ready robot to receive a new goal
-  void execute_cleanup();
+  virtual void execute_cleanup();
   void handle_abort();
   void handle_halt();
 

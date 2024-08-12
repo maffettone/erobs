@@ -12,6 +12,7 @@ find_package(rosidl_default_generators REQUIRED)
 # Generate interfaces for actions and services
 rosidl_generate_interfaces(${PROJECT_NAME}
   "action/PickPlaceControlMsg.action"
+  "action/FidPoseControlMsg.action"
   "srv/UpdateObstacleMsg.srv"
   "srv/DeleteObstacleMsg.srv"
   "srv/BoxObstacleMsg.srv"

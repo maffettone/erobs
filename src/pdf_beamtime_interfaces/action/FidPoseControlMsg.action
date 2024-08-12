@@ -1,0 +1,7 @@
+float64[] inbeam_approach
+float64[] inbeam
+bool sample_return
+---
+bool success
+---
+float64 status
