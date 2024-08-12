@@ -26,7 +26,11 @@ rclcpp_action::GoalResponse PdfBeamtimeFidPoseServer::fidpose_handle_goal(
   std::shared_ptr<const FidPoseControlMsg::Goal> goal)
 {
   (void)uuid;
-  return rclcpp_action::GoalResponse::ACCEPT_AND_EXECUTE;
+  if (goal->sample_return && !pickup_pose_saved) {
+    return rclcpp_action::GoalResponse::REJECT;
+  } else {
+    return rclcpp_action::GoalResponse::ACCEPT_AND_EXECUTE;
+  }
 }
 
 void PdfBeamtimeFidPoseServer::fidpose_handle_accepted(
@@ -81,19 +85,14 @@ void PdfBeamtimeFidPoseServer::execute(
         RCLCPP_ERROR(node_->get_logger(), "Goal aborted !");
         return;
       }
+
+      // Decide if it'a a return ot a place
       if (fidpose_goal->sample_return) {
-        if (pickup_pose_saved) {
-          fsm_results = run_return_fsm(fidpose_goal);
-        } else {
-          results->success = false;
-          goal_handle->abort(results);
-          RCLCPP_ERROR(node_->get_logger(), "Pickup poses are not set!");
-          return;
-        }
+        fsm_results = run_return_fsm(fidpose_goal);
       } else {
         fsm_results = run_fsm(fidpose_goal);
-        pickup_pose_saved = true;
       }
+
       if (!fsm_results && inner_state_machine_->get_internal_state() != Internal_State::PAUSED) {
         // Abort the execution if move_group_ fails except when paused
         results->success = false;
@@ -120,6 +119,7 @@ void PdfBeamtimeFidPoseServer::execute(
         set_current_state(State::HOME);
         results->success = true;
         goal_handle->succeed(results);
+        pickup_pose_saved = true;
         return;
       }
     }
