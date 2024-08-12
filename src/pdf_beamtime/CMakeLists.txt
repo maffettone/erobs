@@ -31,6 +31,7 @@ add_executable(pdf_beamtime_server src/beamtime_entrypoint.cpp src/pdf_beamtime_
 ament_target_dependencies(pdf_beamtime_server ${dependencies})
 
 add_executable(pdf_beamtime_fidpose_server
+    src/beamtime_fidpose_entrypoint.cpp
     src/pdf_beamtime_fidpose_server.cpp
     src/pdf_beamtime_server.cpp
     src/inner_state_machine.cpp
