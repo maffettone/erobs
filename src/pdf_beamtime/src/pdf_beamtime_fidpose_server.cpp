@@ -92,6 +92,13 @@ void PdfBeamtimeFidPoseServer::execute(
 
       // Decide if it'a a return ot a place
       if (fidpose_goal->sample_return) {
+        // Abort goal is asked to return to an unsaved storage location
+        if (pickup_storage_map_.find(fidpose_goal->sample_id) == pickup_storage_map_.end()) {
+          RCLCPP_ERROR(node_->get_logger(), "Unrecorded return location at storage");
+          results->success = false;
+          goal_handle->abort(results);
+          return;
+        }
         fsm_results = run_return_fsm(fidpose_goal);
       } else {
         fsm_results = run_fsm(fidpose_goal);
@@ -159,20 +166,14 @@ moveit::core::MoveItErrorCode PdfBeamtimeFidPoseServer::run_fsm(
         // Moves the robot to pickup in two steps
         // 1. Adust the wrist 3 and wrist 2 positions to face the gripper towards the sample
 
-        RCLCPP_INFO(node_->get_logger(), "breakpoint 0");
-
         std::pair<double, double> new_wrist_angles = tf_utilities_->get_wrist_elbow_alignment(
           move_group_interface_, sample_id);
         adjusted_pickup_ = pickup_approach_;
         adjusted_pickup_[4] = new_wrist_angles.first;
 
-        RCLCPP_INFO(node_->get_logger(), "breakpoint 1");
-
         motion_results = inner_state_machine_->move_robot(move_group_interface_, adjusted_pickup_);
         if (motion_results == moveit::core::MoveItErrorCode::FAILURE) {break;}
         inner_state_machine_->set_internal_state(Internal_State::RESTING);
-
-        RCLCPP_INFO(node_->get_logger(), "breakpoint 2");
 
         // 2. Cartesian move the robot to pick up position
         // 2.1 Adjust the z distance
@@ -181,8 +182,6 @@ moveit::core::MoveItErrorCode PdfBeamtimeFidPoseServer::run_fsm(
             move_group_interface_, sample_id));
         if (motion_results == moveit::core::MoveItErrorCode::FAILURE) {break;}
         inner_state_machine_->set_internal_state(Internal_State::RESTING);
-
-        RCLCPP_INFO(node_->get_logger(), "breakpoint 3");
 
         // 2.2 Cartesian move to pre-pickup location in front of the sample
         motion_results = inner_state_machine_->move_robot_cartesian(
@@ -210,6 +209,9 @@ moveit::core::MoveItErrorCode PdfBeamtimeFidPoseServer::run_fsm(
             "ur_arm"),
           pickup_joints_);
 
+        // Insert the saved joint positions to maps
+        pickup_storage_map_.insert_or_assign(sample_id, pickup_joints_);
+        pre_pickup_approach_storage_map_.insert_or_assign(sample_id, pre_pickup_approach_joints_);
         // State propagation
         inner_state_machine_->set_internal_state(Internal_State::RESTING);
         set_current_state(State::PICKUP);
@@ -234,7 +236,6 @@ moveit::core::MoveItErrorCode PdfBeamtimeFidPoseServer::run_fsm(
       break;
 
     case State::GRASP_SUCCESS:
-      // if (!goal->sample_return) {
       // Successfully grasped. Do pickup retreat
       motion_results = inner_state_machine_->move_robot(
         move_group_interface_, pre_pickup_approach_joints_);
@@ -347,6 +348,7 @@ moveit::core::MoveItErrorCode PdfBeamtimeFidPoseServer::run_fsm(
 moveit::core::MoveItErrorCode PdfBeamtimeFidPoseServer::run_return_fsm(
   std::shared_ptr<const pdf_beamtime_interfaces::action::FidPoseControlMsg_Goal> goal)
 {
+  sample_id = goal->sample_id;
   RCLCPP_INFO(
     node_->get_logger(), "Executing state %s",
     external_state_names_[static_cast<int>(current_state_)].c_str());
@@ -439,13 +441,14 @@ moveit::core::MoveItErrorCode PdfBeamtimeFidPoseServer::run_return_fsm(
 
         motion_results = inner_state_machine_->move_robot(
           move_group_interface_,
-          pre_pickup_approach_joints_);
+          pre_pickup_approach_storage_map_[sample_id]);
         if (motion_results == moveit::core::MoveItErrorCode::FAILURE) {break;}
         inner_state_machine_->set_internal_state(Internal_State::RESTING);
 
         motion_results = inner_state_machine_->move_robot(
           move_group_interface_,
-          pickup_joints_);
+          pickup_storage_map_[sample_id]);
+
         if (motion_results == moveit::core::MoveItErrorCode::FAILURE) {break;}
 
         inner_state_machine_->set_internal_state(Internal_State::RESTING);
@@ -473,7 +476,7 @@ moveit::core::MoveItErrorCode PdfBeamtimeFidPoseServer::run_return_fsm(
       // Sample was successfully released.
       motion_results = inner_state_machine_->move_robot(
         move_group_interface_,
-        pre_pickup_approach_joints_);
+        pre_pickup_approach_storage_map_[sample_id]);
 
       if (motion_results == moveit::core::MoveItErrorCode::FAILURE) {break;}
       inner_state_machine_->set_internal_state(Internal_State::RESTING);
