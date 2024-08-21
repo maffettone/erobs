@@ -16,6 +16,7 @@ BSD 3 Clause License. See LICENSE.txt for details.*/
 #include <cmath>
 #include <fstream>
 #include <vector>
+#include <unordered_map>
 
 #include <rclcpp/rclcpp.hpp>
 #include <opencv2/opencv.hpp>
@@ -61,6 +62,12 @@ private:
     std::make_shared<filters::MultiChannelMedianFilter<double>>();
 
   std::vector<double> median_filtered_rpyxyz;
+
+  std::unordered_map<int,
+    std::shared_ptr<filters::MultiChannelFilterBase<double>>> median_filters_map_;
+
+  std::unordered_map<int, std::vector<double>> median_filtered_rpyxyz_map_;
+
 
   /// @brief converts a rpy to a quaternion
   geometry_msgs::msg::Quaternion toQuaternion(double roll, double pitch, double yaw);

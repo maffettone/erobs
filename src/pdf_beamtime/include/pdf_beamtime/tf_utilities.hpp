@@ -29,8 +29,8 @@ private:
 
   std::shared_ptr<rclcpp::SyncParametersClient> parameters_client_;
 
-  std::string world_frame, sample_frame, grasping_point_on_gripper_frame, wrist_2_frame,
-    pre_pickup_approach_point_frame;
+  std::string world_frame, grasping_point_on_gripper_frame, wrist_2_frame,
+    pre_pickup_approach_point_frame_suffix_;
 
 public:
   explicit TFUtilities(const rclcpp::Node::SharedPtr node);
@@ -39,14 +39,14 @@ public:
   double degreesToRadians(double degrees);
 
   std::pair<double, double> get_wrist_elbow_alignment(
-    moveit::planning_interface::MoveGroupInterface & mgi);
+    moveit::planning_interface::MoveGroupInterface & mgi, int sample_id);
 
   std::vector<geometry_msgs::msg::Pose> get_pickup_action_z_adj(
-    moveit::planning_interface::MoveGroupInterface & mgi);
+    moveit::planning_interface::MoveGroupInterface & mgi, int sample_id);
 
   std::vector<geometry_msgs::msg::Pose> get_pickup_action_pre_pickup(
-    moveit::planning_interface::MoveGroupInterface & mgi);
+    moveit::planning_interface::MoveGroupInterface & mgi, int sample_id);
 
   std::vector<geometry_msgs::msg::Pose> get_pickup_action_pickup(
-    moveit::planning_interface::MoveGroupInterface & mgi);
+    moveit::planning_interface::MoveGroupInterface & mgi, int sample_id);
 };

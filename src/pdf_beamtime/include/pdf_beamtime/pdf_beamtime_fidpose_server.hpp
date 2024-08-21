@@ -57,4 +57,5 @@ private:
   bool pickup_pose_saved = false;
   std::vector<double> pre_pickup_approach_joints_;
   std::vector<double> pickup_joints_;
+  int sample_id = 0;
 };

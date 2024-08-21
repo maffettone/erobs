@@ -116,7 +116,9 @@ void ArucoPose::image_raw_callback(
 
   // Exclude instances where no markers are detected
   try {
-    if (!markerIds_.empty() && markerIds_.size() == 1) {
+
+    if (!markerIds_.empty()) {
+
       // rvecs: rotational vector
       // tvecs: translation vector
       std::vector<cv::Vec3d> rvecs, tvecs;
@@ -126,65 +128,90 @@ void ArucoPose::image_raw_callback(
         markerCorners_, physical_marker_size_, cameraMatrix_, distCoeffs_, rvecs, tvecs);
 
       cv::Mat R;
+
       //  Convert the rvecs to a rotation matrix
       for (size_t i = 0; i < rvecs.size(); ++i) {
         cv::Rodrigues(rvecs[i], R);
+
+        int id = markerIds_[i];
+
+        if (median_filters_map_.find(id) != median_filters_map_.end()) {
+
+        } else {
+          RCLCPP_INFO(this->LOGGER, "New ID found : %d ", id);
+
+          median_filters_map_.insert_or_assign(
+            id,
+            std::make_shared<filters::MultiChannelMedianFilter<double>>());
+
+          std::vector<double> vec = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+          median_filtered_rpyxyz_map_.insert_or_assign(id, vec);
+        }
+
+        // Access each element of the R matrix for easy rpy calculations
+        double r11 = R.at<double>(0, 0), r21 = R.at<double>(1, 0), r31 = R.at<double>(2, 0),
+          r32 = R.at<double>(2, 1), r33 = R.at<double>(2, 2);
+
+        double roll, pitch, yaw;
+
+        // rpy calculation
+        roll = std::atan2(r32, r33);
+        pitch = std::asin(-r31);
+        yaw = std::atan2(r21, r11);
+
+        auto tranlsation = tvecs[i];
+        // RCLCPP_INFO(this->LOGGER, "ID : %d, tranlsation[0] : %f ", id, tranlsation[0]);
+
+        // Construct the raw rpy_xyz of the marker
+        std::vector<double> raw_rpyxyz =
+        {roll, pitch, yaw, tranlsation[0], tranlsation[1], tranlsation[2]};
+
+        // Median filter gets applied
+        // median_filter_->update(raw_rpyxyz, median_filtered_rpyxyz);
+
+        median_filtered_rpyxyz = raw_rpyxyz;
+        // median_filters_map_[id]->update(raw_rpyxyz, median_filtered_rpyxyz);
+
+        // RCLCPP_INFO(
+        //   this->LOGGER, "ID : %d, median_filtered_rpyxyz_map_[id] : %f ", id,
+        //   median_filtered_rpyxyz_map_[id][0]);
+
+        // Add to the tf frame here for the sample
+        geometry_msgs::msg::TransformStamped transformStamped_tag;
+
+        transformStamped_tag.header.stamp = this->now();
+        transformStamped_tag.header.frame_id = this->get_parameter("camera_tf_frame").as_string();
+        transformStamped_tag.child_frame_id = std::to_string(id);
+
+        transformStamped_tag.transform.translation.x = median_filtered_rpyxyz[3] +
+          this->get_parameter("offset_on_marker_x").as_double();
+        transformStamped_tag.transform.translation.y = median_filtered_rpyxyz[4] +
+          this->get_parameter("offset_on_marker_y").as_double();
+        transformStamped_tag.transform.translation.z = median_filtered_rpyxyz[5];
+        transformStamped_tag.transform.rotation = toQuaternion(
+          median_filtered_rpyxyz[0],
+          median_filtered_rpyxyz[1],
+          median_filtered_rpyxyz[2]);
+
+        // Add a pre-pickup tf
+        geometry_msgs::msg::TransformStamped transformStamped_pre_pickup;
+        transformStamped_pre_pickup.header.stamp = this->now();
+        transformStamped_pre_pickup.header.frame_id = std::to_string(id);
+        transformStamped_pre_pickup.child_frame_id =
+          std::to_string(id) + "_" + this->get_parameter("pre_pickup_location.name").as_string();
+
+        transformStamped_pre_pickup.transform.translation.x = this->get_parameter(
+          "pre_pickup_location.x_adj").as_double();
+        transformStamped_pre_pickup.transform.translation.y = this->get_parameter(
+          "pre_pickup_location.y_adj").as_double();
+        transformStamped_pre_pickup.transform.translation.z = this->get_parameter(
+          "pre_pickup_location.z_adj").as_double();
+        transformStamped_pre_pickup.transform.rotation = toQuaternion(0, 0, 0);
+
+        static_broadcaster_.sendTransform(transformStamped_pre_pickup);
+        static_broadcaster_.sendTransform(transformStamped_tag);
+
       }
-
-      // Access each element of the R matrix for easy rpy calculations
-      double r11 = R.at<double>(0, 0), r21 = R.at<double>(1, 0), r31 = R.at<double>(2, 0),
-        r32 = R.at<double>(2, 1), r33 = R.at<double>(2, 2);
-
-      double roll, pitch, yaw;
-
-      // rpy calculation
-      roll = std::atan2(r32, r33);
-      pitch = std::asin(-r31);
-      yaw = std::atan2(r21, r11);
-
-      auto tranlsation = tvecs[0];
-
-      // Construct the raw rpy_xyz of the marker
-      std::vector<double> raw_rpyxyz =
-      {roll, pitch, yaw, tranlsation[0], tranlsation[1], tranlsation[2]};
-
-      // Median filter gets applied
-      median_filter_->update(raw_rpyxyz, median_filtered_rpyxyz);
-
-      // Add to the tf frame here for the sample
-      geometry_msgs::msg::TransformStamped transformStamped_tag;
-
-      transformStamped_tag.header.stamp = this->now();
-      transformStamped_tag.header.frame_id = this->get_parameter("camera_tf_frame").as_string();
-      transformStamped_tag.child_frame_id = this->get_parameter("sample_name").as_string();
-
-      transformStamped_tag.transform.translation.x = median_filtered_rpyxyz[3] +
-        this->get_parameter("offset_on_marker_x").as_double();
-      transformStamped_tag.transform.translation.y = median_filtered_rpyxyz[4] +
-        this->get_parameter("offset_on_marker_y").as_double();
-      transformStamped_tag.transform.translation.z = median_filtered_rpyxyz[5];
-      transformStamped_tag.transform.rotation = toQuaternion(
-        median_filtered_rpyxyz[0],
-        median_filtered_rpyxyz[1],
-        median_filtered_rpyxyz[2]);
-
-      // Add a pre-pickup tf
-      geometry_msgs::msg::TransformStamped transformStamped_pre_pickup;
-      transformStamped_pre_pickup.header.stamp = this->now();
-      transformStamped_pre_pickup.header.frame_id = this->get_parameter("sample_name").as_string();
-      transformStamped_pre_pickup.child_frame_id =
-        this->get_parameter("pre_pickup_location.name").as_string();
-
-      transformStamped_pre_pickup.transform.translation.x = this->get_parameter(
-        "pre_pickup_location.x_adj").as_double();
-      transformStamped_pre_pickup.transform.translation.y = this->get_parameter(
-        "pre_pickup_location.y_adj").as_double();
-      transformStamped_pre_pickup.transform.translation.z = this->get_parameter(
-        "pre_pickup_location.z_adj").as_double();
-      transformStamped_pre_pickup.transform.rotation = toQuaternion(0, 0, 0);
-
-      static_broadcaster_.sendTransform(transformStamped_pre_pickup);
-      static_broadcaster_.sendTransform(transformStamped_tag);
     }
 
     // Inner try-catch
