@@ -116,9 +116,7 @@ void ArucoPose::image_raw_callback(
 
   // Exclude instances where no markers are detected
   try {
-
     if (!markerIds_.empty()) {
-
       // rvecs: rotational vector
       // tvecs: translation vector
       std::vector<cv::Vec3d> rvecs, tvecs;
@@ -135,11 +133,8 @@ void ArucoPose::image_raw_callback(
 
         int id = markerIds_[i];
 
-        if (median_filters_map_.find(id) != median_filters_map_.end()) {
-
-        } else {
+        if (median_filters_map_.find(id) == median_filters_map_.end()) {
           RCLCPP_INFO(this->LOGGER, "New ID found : %d ", id);
-
           median_filters_map_.insert_or_assign(
             id,
             std::make_shared<filters::MultiChannelMedianFilter<double>>());
@@ -210,7 +205,6 @@ void ArucoPose::image_raw_callback(
 
         static_broadcaster_.sendTransform(transformStamped_pre_pickup);
         static_broadcaster_.sendTransform(transformStamped_tag);
-
       }
     }
 

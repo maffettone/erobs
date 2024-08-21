@@ -62,5 +62,4 @@ private:
 
   std::unordered_map<int, std::vector<double>> pickup_storage_map_;
   std::unordered_map<int, std::vector<double>> pre_pickup_approach_storage_map_;
-
 };
