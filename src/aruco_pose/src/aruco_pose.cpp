@@ -128,7 +128,8 @@ void ArucoPose::image_raw_callback(
           RCLCPP_INFO(this->LOGGER, "New ID found : %d ", id);
           median_filters_map_[id] = std::make_shared<filters::MultiChannelMedianFilter<double>>();
 
-          // Configure the median filter. 6 refers to the number of channels in the multi-channel filter
+          // Configure the median filter. 6 refers to the number of
+          // channels in the multi-channel filter
           // Note: it is necessary to have/declare a parameter named 'number_of_observations'
           // in the parameter server.
           median_filters_map_[id]->configure(
