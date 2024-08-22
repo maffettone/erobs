@@ -89,16 +89,6 @@ ArucoPose::ArucoPose()
     throw std::runtime_error("Invalid dictionary name");
   }
 
-  // Initial estimates
-  median_filtered_rpyxyz = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
-
-  // Configure the median filter. 6 refers to the number of channels in the multi-channel filter
-  // Note: it is necessary to have/declare a parameter named 'number_of_observations'
-  // in the parameter server.
-  median_filter_->configure(
-    6, "", "number_of_observations",
-    this->get_node_logging_interface(), this->get_node_parameters_interface());
-
   RCLCPP_INFO(LOGGER, "Pose estimator node started!");
 }
 
@@ -133,14 +123,20 @@ void ArucoPose::image_raw_callback(
 
         int id = markerIds_[i];
 
+        // If a unseen ID is found, add it to the filter map
         if (median_filters_map_.find(id) == median_filters_map_.end()) {
           RCLCPP_INFO(this->LOGGER, "New ID found : %d ", id);
-          median_filters_map_.insert_or_assign(
-            id,
-            std::make_shared<filters::MultiChannelMedianFilter<double>>());
+          median_filters_map_[id] = std::make_shared<filters::MultiChannelMedianFilter<double>>();
 
-          std::vector<double> vec = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
-          median_filtered_rpyxyz_map_.insert_or_assign(id, vec);
+          // Configure the median filter. 6 refers to the number of channels in the multi-channel filter
+          // Note: it is necessary to have/declare a parameter named 'number_of_observations'
+          // in the parameter server.
+          median_filters_map_[id]->configure(
+            6, "", "number_of_observations",
+            this->get_node_logging_interface(), this->get_node_parameters_interface());
+          median_filtered_rpyxyz_map_.insert_or_assign(
+            id, std::vector<double>
+            {0.0, 0.0, 0.0, 0.0, 0.0, 0.0});
         }
 
         // Access each element of the R matrix for easy rpy calculations
@@ -155,21 +151,14 @@ void ArucoPose::image_raw_callback(
         yaw = std::atan2(r21, r11);
 
         auto tranlsation = tvecs[i];
-        // RCLCPP_INFO(this->LOGGER, "ID : %d, tranlsation[0] : %f ", id, tranlsation[0]);
 
         // Construct the raw rpy_xyz of the marker
         std::vector<double> raw_rpyxyz =
         {roll, pitch, yaw, tranlsation[0], tranlsation[1], tranlsation[2]};
 
+        std::vector<double> median_filtered_rpyxyz = median_filtered_rpyxyz_map_[id];
         // Median filter gets applied
-        // median_filter_->update(raw_rpyxyz, median_filtered_rpyxyz);
-
-        median_filtered_rpyxyz = raw_rpyxyz;
-        // median_filters_map_[id]->update(raw_rpyxyz, median_filtered_rpyxyz);
-
-        // RCLCPP_INFO(
-        //   this->LOGGER, "ID : %d, median_filtered_rpyxyz_map_[id] : %f ", id,
-        //   median_filtered_rpyxyz_map_[id][0]);
+        median_filters_map_[id]->update(raw_rpyxyz, median_filtered_rpyxyz);
 
         // Add to the tf frame here for the sample
         geometry_msgs::msg::TransformStamped transformStamped_tag;

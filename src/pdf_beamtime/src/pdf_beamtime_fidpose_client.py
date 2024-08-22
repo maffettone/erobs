@@ -33,15 +33,13 @@ class SimpleClient(Node):
         self._action_client.wait_for_server()
         self._send_goal_future = self._action_client.send_goal_async(goal_msg, feedback_callback=self.feedback_callback)
 
-    def send_retrun_sample_goal(self):
+    def send_return_sample_goal(self):
         """Send a working goal."""
         goal_msg = FidPoseControlMsg.Goal()
 
-        goal_msg.inbeam_approach = [55.10, -51.78, 124.84, -73.16, 52.24, 180.0]
-        goal_msg.inbeam_approach = [x / 180 * math.pi for x in goal_msg.inbeam_approach]
+        goal_msg.inbeam_approach = [x / 180 * math.pi for x in [55.10, -51.78, 124.84, -73.16, 52.24, 180.0]]
 
-        goal_msg.inbeam = [63.84, -43.13, 98.29, -55.25, 61.00, 180.0]
-        goal_msg.inbeam = [x / 180 * math.pi for x in goal_msg.inbeam]
+        goal_msg.inbeam = [x / 180 * math.pi for x in [63.84, -43.13, 98.29, -55.25, 61.00, 180.0]]
 
         goal_msg.sample_return = True
         goal_msg.sample_id = 150
@@ -68,7 +66,7 @@ def main(args=None):
 
     client = SimpleClient()
     # client.send_pickup_goal()
-    client.send_retrun_sample_goal()
+    client.send_return_sample_goal()
 
     rclpy.spin(client)
 
