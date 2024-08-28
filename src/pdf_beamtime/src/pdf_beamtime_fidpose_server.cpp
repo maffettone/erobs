@@ -25,10 +25,14 @@ rclcpp_action::GoalResponse PdfBeamtimeFidPoseServer::fidpose_handle_goal(
   const rclcpp_action::GoalUUID & uuid,
   std::shared_ptr<const FidPoseControlMsg::Goal> goal)
 {
+  RCLCPP_INFO(node_->get_logger(), "Goal handle inside");
   (void)uuid;
   if (goal->sample_return && !pickup_pose_saved) {
+    RCLCPP_INFO(node_->get_logger(), "Goal reject");
     return rclcpp_action::GoalResponse::REJECT;
   } else {
+    RCLCPP_INFO(node_->get_logger(), "Goal accept and execute");
+
     return rclcpp_action::GoalResponse::ACCEPT_AND_EXECUTE;
   }
 }
@@ -88,6 +92,13 @@ void PdfBeamtimeFidPoseServer::execute(
 
       // Decide if it'a a return ot a place
       if (fidpose_goal->sample_return) {
+        // Abort goal is asked to return to an unsaved storage location
+        if (pickup_storage_map_.find(fidpose_goal->sample_id) == pickup_storage_map_.end()) {
+          RCLCPP_ERROR(node_->get_logger(), "Unrecorded return location at storage");
+          results->success = false;
+          goal_handle->abort(results);
+          return;
+        }
         fsm_results = run_return_fsm(fidpose_goal);
       } else {
         fsm_results = run_fsm(fidpose_goal);
@@ -119,7 +130,6 @@ void PdfBeamtimeFidPoseServer::execute(
         set_current_state(State::HOME);
         results->success = true;
         goal_handle->succeed(results);
-        pickup_pose_saved = true;
         return;
       }
     }
@@ -133,6 +143,8 @@ moveit::core::MoveItErrorCode PdfBeamtimeFidPoseServer::run_fsm(
     node_->get_logger(), "Executing state %s",
     external_state_names_[static_cast<int>(current_state_)].c_str());
   moveit::core::MoveItErrorCode motion_results = moveit::core::MoveItErrorCode::FAILURE;
+
+  sample_id = goal->sample_id;
   switch (current_state_) {
     case State::HOME:
       // Moves the robot to pickup approach.
@@ -153,8 +165,9 @@ moveit::core::MoveItErrorCode PdfBeamtimeFidPoseServer::run_fsm(
     case State::PICKUP_APPROACH: {
         // Moves the robot to pickup in two steps
         // 1. Adust the wrist 3 and wrist 2 positions to face the gripper towards the sample
+
         std::pair<double, double> new_wrist_angles = tf_utilities_->get_wrist_elbow_alignment(
-          move_group_interface_);
+          move_group_interface_, sample_id);
         adjusted_pickup_ = pickup_approach_;
         adjusted_pickup_[4] = new_wrist_angles.first;
 
@@ -166,14 +179,14 @@ moveit::core::MoveItErrorCode PdfBeamtimeFidPoseServer::run_fsm(
         // 2.1 Adjust the z distance
         motion_results = inner_state_machine_->move_robot_cartesian(
           move_group_interface_, tf_utilities_->get_pickup_action_z_adj(
-            move_group_interface_));
+            move_group_interface_, sample_id));
         if (motion_results == moveit::core::MoveItErrorCode::FAILURE) {break;}
         inner_state_machine_->set_internal_state(Internal_State::RESTING);
 
         // 2.2 Cartesian move to pre-pickup location in front of the sample
         motion_results = inner_state_machine_->move_robot_cartesian(
           move_group_interface_, tf_utilities_->get_pickup_action_pre_pickup(
-            move_group_interface_));
+            move_group_interface_, sample_id));
         if (motion_results == moveit::core::MoveItErrorCode::FAILURE) {break;}
         inner_state_machine_->set_internal_state(Internal_State::RESTING);
 
@@ -186,7 +199,7 @@ moveit::core::MoveItErrorCode PdfBeamtimeFidPoseServer::run_fsm(
         // 2.3 Cartesian move to pickup
         motion_results = inner_state_machine_->move_robot_cartesian(
           move_group_interface_, tf_utilities_->get_pickup_action_pickup(
-            move_group_interface_));
+            move_group_interface_, sample_id));
 
         if (motion_results == moveit::core::MoveItErrorCode::FAILURE) {break;}
 
@@ -196,6 +209,9 @@ moveit::core::MoveItErrorCode PdfBeamtimeFidPoseServer::run_fsm(
             "ur_arm"),
           pickup_joints_);
 
+        // Insert the saved joint positions to maps
+        pickup_storage_map_.insert_or_assign(sample_id, pickup_joints_);
+        pre_pickup_approach_storage_map_.insert_or_assign(sample_id, pre_pickup_approach_joints_);
         // State propagation
         inner_state_machine_->set_internal_state(Internal_State::RESTING);
         set_current_state(State::PICKUP);
@@ -220,7 +236,6 @@ moveit::core::MoveItErrorCode PdfBeamtimeFidPoseServer::run_fsm(
       break;
 
     case State::GRASP_SUCCESS:
-      // if (!goal->sample_return) {
       // Successfully grasped. Do pickup retreat
       motion_results = inner_state_machine_->move_robot(
         move_group_interface_, pre_pickup_approach_joints_);
@@ -320,7 +335,7 @@ moveit::core::MoveItErrorCode PdfBeamtimeFidPoseServer::run_fsm(
       set_current_state(State::HOME);
       inner_state_machine_->set_internal_state(Internal_State::RESTING);
       progress_ = progress_ + 1.0;
-      pickup_pose_saved = false;
+      pickup_pose_saved = true;
       break;
 
     default:
@@ -333,6 +348,7 @@ moveit::core::MoveItErrorCode PdfBeamtimeFidPoseServer::run_fsm(
 moveit::core::MoveItErrorCode PdfBeamtimeFidPoseServer::run_return_fsm(
   std::shared_ptr<const pdf_beamtime_interfaces::action::FidPoseControlMsg_Goal> goal)
 {
+  sample_id = goal->sample_id;
   RCLCPP_INFO(
     node_->get_logger(), "Executing state %s",
     external_state_names_[static_cast<int>(current_state_)].c_str());
@@ -384,7 +400,6 @@ moveit::core::MoveItErrorCode PdfBeamtimeFidPoseServer::run_return_fsm(
       break;
 
     case State::GRASP_SUCCESS:
-      // if (!goal->sample_return) {
       // Successfully grasped. Do pickup retreat to inbeam approach
       motion_results = inner_state_machine_->move_robot(
         move_group_interface_, goal->inbeam_approach);
@@ -426,13 +441,14 @@ moveit::core::MoveItErrorCode PdfBeamtimeFidPoseServer::run_return_fsm(
 
         motion_results = inner_state_machine_->move_robot(
           move_group_interface_,
-          pre_pickup_approach_joints_);
+          pre_pickup_approach_storage_map_[sample_id]);
         if (motion_results == moveit::core::MoveItErrorCode::FAILURE) {break;}
         inner_state_machine_->set_internal_state(Internal_State::RESTING);
 
         motion_results = inner_state_machine_->move_robot(
           move_group_interface_,
-          pickup_joints_);
+          pickup_storage_map_[sample_id]);
+
         if (motion_results == moveit::core::MoveItErrorCode::FAILURE) {break;}
 
         inner_state_machine_->set_internal_state(Internal_State::RESTING);
@@ -458,10 +474,9 @@ moveit::core::MoveItErrorCode PdfBeamtimeFidPoseServer::run_return_fsm(
 
     case State::RELEASE_SUCCESS:
       // Sample was successfully released.
-      // if (!goal->sample_return) {
       motion_results = inner_state_machine_->move_robot(
         move_group_interface_,
-        pre_pickup_approach_joints_);
+        pre_pickup_approach_storage_map_[sample_id]);
 
       if (motion_results == moveit::core::MoveItErrorCode::FAILURE) {break;}
       inner_state_machine_->set_internal_state(Internal_State::RESTING);
@@ -485,6 +500,7 @@ moveit::core::MoveItErrorCode PdfBeamtimeFidPoseServer::run_return_fsm(
       set_current_state(State::HOME);
       inner_state_machine_->set_internal_state(Internal_State::RESTING);
       progress_ = progress_ + 1.0;
+      pickup_pose_saved = false;
       break;
 
     default:
@@ -547,7 +563,7 @@ void PdfBeamtimeFidPoseServer::execute_cleanup()
     case State::GRASP_FAILURE: {
         // Move back to pickup approach
         std::pair<double, double> new_wrist_angles = tf_utilities_->get_wrist_elbow_alignment(
-          move_group_interface_);
+          move_group_interface_, sample_id);
         adjusted_pickup_ = goal->pickup_approach;
         adjusted_pickup_[4] = new_wrist_angles.first;
         adjusted_pickup_[5] = new_wrist_angles.second;
@@ -560,7 +576,7 @@ void PdfBeamtimeFidPoseServer::execute_cleanup()
     case State::RELEASE_FAILURE:
     case State::RELEASE_SUCCESS: {
         std::pair<double, double> new_wrist_angles = tf_utilities_->get_wrist_elbow_alignment(
-          move_group_interface_);
+          move_group_interface_, sample_id);
         adjusted_place_ = goal->place_approach;
         adjusted_place_[4] = new_wrist_angles.first;
         adjusted_place_[5] = new_wrist_angles.second;

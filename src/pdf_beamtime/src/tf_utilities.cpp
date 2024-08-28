@@ -19,8 +19,7 @@ TFUtilities::TFUtilities(const rclcpp::Node::SharedPtr node)
     RCLCPP_INFO(tf_util_logger_, "Waiting for the parameters service to be available...");
   }
 
-  sample_frame = parameters_client_->get_parameter<std::string>("sample_name");
-  pre_pickup_approach_point_frame = parameters_client_->get_parameter<std::string>(
+  pre_pickup_approach_point_frame_suffix_ = parameters_client_->get_parameter<std::string>(
     "pre_pickup_location.name");
 
   world_frame = "world";
@@ -35,10 +34,14 @@ double TFUtilities::degreesToRadians(double degrees)
 }
 
 std::pair<double, double> TFUtilities::get_wrist_elbow_alignment(
-  moveit::planning_interface::MoveGroupInterface & mgi)
+  moveit::planning_interface::MoveGroupInterface & mgi, int sample_id)
 {
   tf2::Quaternion tf2_wrist_2_quaternion;
   tf2::Quaternion tf2_sample_quaternion;
+
+  std::string sample_frame = std::to_string(sample_id);
+  std::string pre_pickup_approach_point_frame = std::to_string(sample_id) + "_" +
+    pre_pickup_approach_point_frame_suffix_;
 
   geometry_msgs::msg::TransformStamped transform_world_to_sample;
   geometry_msgs::msg::TransformStamped transform_world_to_wrist_2;
@@ -78,13 +81,16 @@ std::pair<double, double> TFUtilities::get_wrist_elbow_alignment(
 }
 
 std::vector<geometry_msgs::msg::Pose> TFUtilities::get_pickup_action_z_adj(
-  moveit::planning_interface::MoveGroupInterface & mgi)
+  moveit::planning_interface::MoveGroupInterface & mgi, int sample_id)
 {
   // Define waypoints for Cartesian path
   std::vector<geometry_msgs::msg::Pose> waypoints;
   geometry_msgs::msg::TransformStamped transform_world_to_grasping_point;
   geometry_msgs::msg::TransformStamped transform_world_to_pickup_approach_point;
 
+  std::string sample_frame = std::to_string(sample_id);
+  std::string pre_pickup_approach_point_frame = std::to_string(sample_id) + "_" +
+    pre_pickup_approach_point_frame_suffix_;
   double z_dist_to_pickup_approach = 0.0;
 
   while (rclcpp::ok()) {
@@ -123,12 +129,16 @@ std::vector<geometry_msgs::msg::Pose> TFUtilities::get_pickup_action_z_adj(
 }
 
 std::vector<geometry_msgs::msg::Pose> TFUtilities::get_pickup_action_pre_pickup(
-  moveit::planning_interface::MoveGroupInterface & mgi)
+  moveit::planning_interface::MoveGroupInterface & mgi, int sample_id)
 {
   // Define waypoints for Cartesian path
   std::vector<geometry_msgs::msg::Pose> waypoints;
   geometry_msgs::msg::TransformStamped transform_world_to_grasping_point;
   geometry_msgs::msg::TransformStamped transform_world_to_pickup_approach_point;
+
+  std::string sample_frame = std::to_string(sample_id);
+  std::string pre_pickup_approach_point_frame = std::to_string(sample_id) + "_" +
+    pre_pickup_approach_point_frame_suffix_;
 
   double x_dist_to_pickup_approach = 0.0, y_dist_to_pickup_approach = 0.0;
 
@@ -180,12 +190,16 @@ std::vector<geometry_msgs::msg::Pose> TFUtilities::get_pickup_action_pre_pickup(
 }
 
 std::vector<geometry_msgs::msg::Pose> TFUtilities::get_pickup_action_pickup(
-  moveit::planning_interface::MoveGroupInterface & mgi)
+  moveit::planning_interface::MoveGroupInterface & mgi, int sample_id)
 {
   // Define waypoints for Cartesian path
   std::vector<geometry_msgs::msg::Pose> waypoints;
   geometry_msgs::msg::TransformStamped transform_world_to_sample;
   geometry_msgs::msg::TransformStamped transform_world_to_pickup_approach_point;
+
+  std::string sample_frame = std::to_string(sample_id);
+  std::string pre_pickup_approach_point_frame = std::to_string(sample_id) + "_" +
+    pre_pickup_approach_point_frame_suffix_;
 
   double x_dist_to_sample = 0.0, y_dist_to_sample = 0.0;
 

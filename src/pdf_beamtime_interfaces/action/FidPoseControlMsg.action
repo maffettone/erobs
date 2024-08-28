@@ -1,6 +1,7 @@
 float64[] inbeam_approach
 float64[] inbeam
 bool sample_return
+int32 sample_id
 ---
 bool success
 ---

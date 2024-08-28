@@ -5,6 +5,7 @@ BSD 3 Clause License. See LICENSE.txt for details.*/
 #include <memory>
 #include <string>
 #include <vector>
+#include <unordered_map>
 
 #include <pdf_beamtime/pdf_beamtime_server.hpp>
 #include <pdf_beamtime/tf_utilities.hpp>
@@ -57,4 +58,8 @@ private:
   bool pickup_pose_saved = false;
   std::vector<double> pre_pickup_approach_joints_;
   std::vector<double> pickup_joints_;
+  int sample_id = 0;
+
+  std::unordered_map<int, std::vector<double>> pickup_storage_map_;
+  std::unordered_map<int, std::vector<double>> pre_pickup_approach_storage_map_;
 };
