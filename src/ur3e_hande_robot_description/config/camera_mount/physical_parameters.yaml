@@ -1,0 +1,18 @@
+inertia_parameters:
+  mount_base_mass: 0.7
+
+  mount_base_width: 0.04
+  mount_base_length: 0.08
+  mount_base_height: 0.01
+
+  links:
+    mount_base:
+      width: 0.038
+      length: 0.1
+      height: 0.1
+
+  center_of_mass:
+    mount_cog:
+      x: 0.0
+      y: 0.0
+      z: 0.058
