@@ -1,10 +1,8 @@
 <?xml version="1.0"?>
-<robot xmlns:xacro="http://wiki.ros.org/xacro" name="$(arg name)">
+<robot xmlns:xacro="http://wiki.ros.org/xacro" name="hande_black">
 <!--Based on same file and version as the https://github.com/AcutronicRobotics/robotiq_modular_gripper/blob/4e708524e5dd20753f711686eb2cd1017a25a09e/robotiq_hande_gripper_description/urdf/robotiq_hande.urdf.xacro-->
-  <xacro:arg name="name" default="hande"/>
 
 <xacro:macro name="robotiq_hande" params="
-    name
     tf_prefix
     parent" >
 
@@ -142,6 +140,12 @@
     <link name="grasping_point_link">
     </link>
 
+    <joint name="robotiq_coupler_joint" type="fixed">
+      <origin xyz="0 0 -0.05" rpy="${pi} 0 ${-pi/2.0}" />
+      <parent link="${tf_prefix}robotiq_coupler"/>
+      <child link="${tf_prefix}robotiq_hande_base_link"/>
+    </joint>
+
     <joint name="${tf_prefix}joint_finger" type="fixed">
       <origin rpy="0 0 ${pi/2.0}" xyz="0 0 0.05"/>
       <parent link="${tf_prefix}robotiq_hande_base_link"/>
@@ -164,12 +168,6 @@
       <parent link="${tf_prefix}robotiq_hande_base_link"/>
       <child link="grasping_point_link"/>
       <axis xyz="0 0 0"/>
-    </joint>
-
-    <joint name="robotiq_coupler_joint" type="fixed">
-      <origin xyz="0 0 -0.05" rpy="${pi} 0 ${-pi/2.0}" />
-      <parent link="${tf_prefix}robotiq_coupler"/>
-      <child link="${tf_prefix}robotiq_hande_base_link"/>
     </joint>
 
 </xacro:macro>

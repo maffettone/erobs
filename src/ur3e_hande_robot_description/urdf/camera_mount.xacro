@@ -8,6 +8,7 @@
 
   <!-- Mass and Inertial properties -->
   <xacro:property name="mount_mass" value="${mount_physical_parameters['inertia_parameters']['mount_base_mass']}"/> <!-- Mass in kg -->
+  <xacro:property name="camera_mass" value="${mount_physical_parameters['inertia_parameters']['camera_mass']}"/> <!-- Mass in kg -->
 
   <!-- <xacro:property name="intertia_links" value="${mount_physical_parameters['links']}" scope="parent"/> -->
 
@@ -15,6 +16,12 @@
   <xacro:property name="mount_length" value="${mount_physical_parameters['inertia_parameters']['links']['mount_base']['length']}" scope="parent"/>  <!-- Length in meters -->
   <xacro:property name="mount_width" value="${mount_physical_parameters['inertia_parameters']['links']['mount_base']['width']}" scope="parent"/>   <!-- Width in meters -->
   <xacro:property name="mount_height" value="${mount_physical_parameters['inertia_parameters']['links']['mount_base']['height']}" scope="parent"/>  <!-- Height in meters -->
+
+  <!-- Dimensions of the camera -->
+  <xacro:property name="camera_length" value="${mount_physical_parameters['inertia_parameters']['links']['camera']['length']}" scope="parent"/>  <!-- Length in meters -->
+  <xacro:property name="camera_width" value="${mount_physical_parameters['inertia_parameters']['links']['camera']['width']}" scope="parent"/>   <!-- Width in meters -->
+  <xacro:property name="camera_height" value="${mount_physical_parameters['inertia_parameters']['links']['camera']['height']}" scope="parent"/>  <!-- Height in meters -->
+
 
   <xacro:property name="scaling_factor" value="0.0265"/>
 
@@ -52,6 +59,37 @@
     </xacro:rectangular_inertial>
 
   </link>
+
+  <xacro:property name="scaling_factor_cm" value="0.0009"/>
+
+  <link name="camera_base">
+    <visual>
+      <!-- <origin xyz="-0.013 0. 0." /> -->
+        <geometry>
+          <mesh filename="package://ur3e_hande_robot_description/meshes/camera_mount/visual/azure_kinect.dae" scale="${scaling_factor_cm} ${scaling_factor_cm} ${scaling_factor_cm}" />
+        </geometry>
+        <material name="Gazebo/Black">
+          <color rgba="0.1 0.1 0.1 1" />
+        </material>
+    </visual>
+
+    <collision>
+      <geometry>
+        <mesh filename="package://ur3e_hande_robot_description/meshes/camera_mount/collision/azure_kinect.stl" scale="${scaling_factor_cm} ${scaling_factor_cm} ${scaling_factor_cm}" />
+      </geometry>
+    </collision>
+
+    <xacro:rectangular_inertial length="${camera_length}"  width="${camera_width}"  height="${camera_height}" mass="${camera_mass}">
+        <origin xyz="0.0 0.0 0.0" rpy="0 0 0" />
+    </xacro:rectangular_inertial>
+
+  </link>
+
+   <joint name="camera_base_to_mount" type="fixed">
+    <parent link="mount" />
+    <child link="camera_base" />
+    <origin xyz="0. -0.055 0.0725" rpy="${pi/2} 0. 0." />
+  </joint> 
 
   </xacro:macro>
 
