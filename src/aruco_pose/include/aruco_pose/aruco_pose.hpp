@@ -4,12 +4,15 @@ BSD 3 Clause License. See LICENSE.txt for details.*/
 
 #include <cv_bridge/cv_bridge.h>
 #include <tf2_ros/static_transform_broadcaster.h>
+#include <tf2_ros/buffer.h>
+#include <tf2_ros/transform_listener.h>
 #include <tf2_ros/transform_broadcaster.h>
 #include <tf2/LinearMath/Quaternion.h>
 #include <tf2/LinearMath/Matrix3x3.h>
 
 #include <iostream>
 #include <thread>
+#include <chrono>
 #include <memory>
 #include <string>
 #include <map>
@@ -35,6 +38,11 @@ private:
 
   tf2_ros::StaticTransformBroadcaster static_broadcaster_;
   tf2_ros::TransformBroadcaster tf_broadcaster_;
+
+  std::thread flange_tracker_thread_;
+  double flange_x = 0.0, flange_y = 0.0, flange_z = 0.0, flange_qx = 0.0, flange_qy = 0.0,
+    flange_qz = 0.0, flange_qw = 0.0;
+  void flange_pose_tracker();
 
   rclcpp::Logger LOGGER;
 

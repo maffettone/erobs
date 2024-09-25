@@ -1,14 +1,14 @@
 aruco_pose:
   ros__parameters:
     cam_translation:
-      x: -0.005 # 0.0315 #  camera location w.r.t to camera in 4
-      y: 0.097 # 0.3206 #  + 0.2236 from base to the home
-      z: 0.075 # 0.769 #  + 0.694
+      x: 0.549 # robot location w.r.t to camera in 4
+      y: -0.392 
+      z: 0.08 
     cam_rotation: # These are expressed in RPY angles
-      cam_alpha: 0.0
+      cam_alpha: 270.0
       cam_beta: 0.0
-      cam_gamma: 0.0
-    camera_tf_frame: 'camera_visor'
+      cam_gamma: 90.0
+    camera_tf_frame: 'camera_base'
     sample_name: 'sample_1'
     pre_pickup_location: # Define x, y, z adjustments with respect to tag's coordinate reference frame for pre-pickup
       name: 'pre_pickup'
