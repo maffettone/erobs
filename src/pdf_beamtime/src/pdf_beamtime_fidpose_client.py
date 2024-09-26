@@ -2,6 +2,8 @@
 
 import math
 import time
+import redis
+import pdb
 
 import rclpy
 from rclpy.action import ActionClient
@@ -19,7 +21,7 @@ class SimpleClient(Node):
         self._action_client = ActionClient(self, FidPoseControlMsg, "pdf_beamtime_fidpose_action_server")
         self._goal_handle = None
 
-    def send_pickup_goal(self):
+    def send_pickup_goal(self, sample_id):
         """Send a working goal."""
         goal_msg = FidPoseControlMsg.Goal()
 
@@ -28,12 +30,15 @@ class SimpleClient(Node):
         goal_msg.inbeam = [x / 180 * math.pi for x in [63.84, -43.13, 98.29, -55.25, 61.00, 180.0]]
 
         goal_msg.sample_return = False
-        goal_msg.sample_id = 150
+
+        goal_msg.sample_id = sample_id
+
+        # goal_msg.sample_id = 150
 
         self._action_client.wait_for_server()
         self._send_goal_future = self._action_client.send_goal_async(goal_msg, feedback_callback=self.feedback_callback)
 
-    def send_return_sample_goal(self):
+    def send_return_sample_goal(self, sample_id):
         """Send a working goal."""
         goal_msg = FidPoseControlMsg.Goal()
 
@@ -42,7 +47,7 @@ class SimpleClient(Node):
         goal_msg.inbeam = [x / 180 * math.pi for x in [63.84, -43.13, 98.29, -55.25, 61.00, 180.0]]
 
         goal_msg.sample_return = True
-        goal_msg.sample_id = 150
+        goal_msg.sample_id = sample_id
 
         self._action_client.wait_for_server()
         self._send_goal_future = self._action_client.send_goal_async(goal_msg, feedback_callback=self.feedback_callback)
@@ -64,9 +69,17 @@ def main(args=None):
     """Python main."""
     rclpy.init(args=args)
 
+    redis_client = redis.Redis(host='192.168.56.1', port=6379, db=0)
+
+    tag_key = redis_client.hget('sample_name_index' ,'sample_2')
+    tag_key = tag_key.decode('utf-8')  # Decode from bytes to string
+    id = int(redis_client.hget(tag_key, 'id'))
+
+    print(f"ID of sample: {id.decode('utf-8')}")
+    
     client = SimpleClient()
-    # client.send_pickup_goal()
-    client.send_return_sample_goal()
+    client.send_pickup_goal(id)
+    # client.send_return_sample_goal(id)
 
     rclpy.spin(client)
 
