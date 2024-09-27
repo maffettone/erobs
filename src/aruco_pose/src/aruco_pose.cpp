@@ -222,13 +222,24 @@ void ArucoPose::image_raw_callback(
         // Median filter gets applied
         median_filters_map_[id]->update(raw_rpyxyz, median_filtered_rpyxyz);
 
-        RCLCPP_ERROR(this->LOGGER, "roll: %f ", roll);
-        RCLCPP_ERROR(this->LOGGER, "pitch: %f ", pitch);
-        RCLCPP_ERROR(this->LOGGER, "yaw: %f ", yaw);
-        RCLCPP_ERROR(this->LOGGER, "tranlsation[0]: %f ", tranlsation[0]);
-        RCLCPP_ERROR(this->LOGGER, "tranlsation[1]: %f ", tranlsation[1]);
-        RCLCPP_ERROR(this->LOGGER, "tranlsation[2]: %f ", tranlsation[2]);
+        // RCLCPP_ERROR(this->LOGGER, "roll: %f ", roll);
+        // RCLCPP_ERROR(this->LOGGER, "pitch: %f ", pitch);
+        // RCLCPP_ERROR(this->LOGGER, "yaw: %f ", yaw);
+        // RCLCPP_ERROR(this->LOGGER, "tranlsation[0]: %f ", tranlsation[0]);
+        // RCLCPP_ERROR(this->LOGGER, "tranlsation[1]: %f ", tranlsation[1]);
+        // RCLCPP_ERROR(this->LOGGER, "tranlsation[2]: %f ", tranlsation[2]);
 
+
+        geometry_msgs::msg::TransformStamped transformStamped_map;
+
+        transformStamped_map.header.stamp = this->now();
+        transformStamped_map.header.frame_id = "camera_base";
+        transformStamped_map.child_frame_id = this->get_parameter("camera_tf_frame").as_string();
+
+        transformStamped_map.transform.translation.x = -0.032;
+        transformStamped_map.transform.translation.y = 0.0;
+        transformStamped_map.transform.translation.z = 0.0;
+        transformStamped_map.transform.rotation = toQuaternion(0.0, 0.0, M_PI);
 
         // Add to the tf frame here for the sample
         geometry_msgs::msg::TransformStamped transformStamped_tag;
@@ -262,8 +273,9 @@ void ArucoPose::image_raw_callback(
           "pre_pickup_location.z_adj").as_double();
         transformStamped_pre_pickup.transform.rotation = toQuaternion(0, 0, 0);
 
-        static_broadcaster_.sendTransform(transformStamped_pre_pickup);
+        static_broadcaster_.sendTransform(transformStamped_map);
         static_broadcaster_.sendTransform(transformStamped_tag);
+        static_broadcaster_.sendTransform(transformStamped_pre_pickup);
       }
     }
 
