@@ -14,6 +14,6 @@ The finite state machine handles the state transitions for each of the 'goals' s
 
 ### Inner State Machine
 
-Each of the states in the Finite State Machine has 6 sub-states. These sub-states details out the fine-grain bahavior in each of the states. Below image is the state transition diagram for each sub-state (inner states)
+Each of the states in the Finite State Machine has 6 sub-states. These sub-states detail the fine-grain bahavior in each of the states, and enable the interaction with the Bluesky `RunEngine` [process controls and interruptions](http://blueskyproject.io/bluesky/main/state-machine.html#interruptions). The image below shows the state transition diagram for each sub-state (inner states).
 
 <img src="./images/pdf_beamtime_arch_inner_FSM.png" alt="Finite State Machine" width="800">
