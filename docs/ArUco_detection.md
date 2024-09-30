@@ -8,7 +8,7 @@ When a new tag is detected, it is added to the transform server. They are unique
 
 <img src="./images/transform_tree.png" alt="Multi-aruco detection" width="1000">
 
-Custom action-server message `FidPoseControlMsg.action` now has an extra field to insert which sample holder tagged by the tag ID needs to be picked. 
+Custom action-server message `FidPoseControlMsg.action` has an extra field to insert which sample holder tagged by the tag ID needs to be picked. 
 
 <img src="./images/select_pick_place.gif" alt="Multi-aruco detection" width="300">
 
