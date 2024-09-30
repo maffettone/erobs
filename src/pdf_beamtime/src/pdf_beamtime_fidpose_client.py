@@ -33,8 +33,6 @@ class SimpleClient(Node):
 
         goal_msg.sample_id = sample_id
 
-        # goal_msg.sample_id = 150
-
         self._action_client.wait_for_server()
         self._send_goal_future = self._action_client.send_goal_async(goal_msg, feedback_callback=self.feedback_callback)
 
@@ -69,13 +67,11 @@ def main(args=None):
     """Python main."""
     rclpy.init(args=args)
 
+    sample_name = "sample_1"
+    # Read sample ID from the redis server
     redis_client = redis.Redis(host='192.168.56.1', port=6379, db=0)
-
-    tag_key = redis_client.hget('sample_name_index' ,'sample_2')
-    tag_key = tag_key.decode('utf-8')  # Decode from bytes to string
+    tag_key = redis_client.hget('sample_name_index', sample_name).decode('utf-8')
     id = int(redis_client.hget(tag_key, 'id'))
-
-    print(f"ID of sample: {id.decode('utf-8')}")
     
     client = SimpleClient()
     client.send_pickup_goal(id)

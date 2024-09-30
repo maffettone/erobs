@@ -26,3 +26,23 @@ In the current implementation, this topic's publish rate is defined in the Azure
 Median pose estimation is a multi-value estimation, where it estimates the median of the 6 DoF pose returned by the camera. 
 
 For each DoF, it maintains a moving window of size 10 (can be changed via the parameter `number_of_observations` ) to calculate the median. When the detection rate is 5Hz and upon moving the sample or the detected object to a new pose, it takes a minimum of 1.2 seconds to return the correct pose for the updated pose. As a good practice, it is better to wait for the whole 2 seconds. 
+
+
+# Connection to the Redis DB
+
+Redis is used to store the aruco tag ID and real-world sample information. At present, each entry has four properties. They are:
+- id  -> tag ID of the printed tag from AruCo marker library
+- family  -> dictionary of tag used [DICT_APRILTAG_36h11, DICT_6X6_250, etc... ]
+- size  -> physical size of the marker
+- sample_names  -> unique name to identify the sample used with the tag
+
+Run the Redis container with the following command (make sure to have the correct binding for the local storage):
+```bash 
+podman run --name redis-container --network host -d -v /home/wfernando1/Documents/Environments/Workspaces/redis/data/:/data -p 6379:6379 redis
+```
+
+Run the following if the command line interface is needed:
+
+```bash
+podman exec -it redis-container redis-cli
+```
