@@ -32,7 +32,7 @@ Complete guide to ArUco markers are in [this link](https://docs.opencv.org/4.x/d
 
 In our work, we use the marker family 'tag36h11', which is a family of tags which are detectable by both ArUco and AprilTag detection. [This link](https://github.com/AprilRobotics/apriltag-imgs/tree/master/tag36h11) points to the AprilTag GitHub repository that hosts pre-generated images.
 
-Prior to detection, printed out tags (of equal size) needs to be measured precisley and recorded under the paramater `physical_marker_size`.
+Prior to detection, printed out tags (of equal size) need to be measured precisely and recorded under the paramater `physical_marker_size`.
 
 ## Tag detection
 When there are multiple tags present, function `estimatePoseSingleMarkers()` estimates pose of all the detected markers seperatley. At present, we only estimate the pose when only one marker is present, ignoring the cases where no-marker or more than one marker are present.
