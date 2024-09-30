@@ -8,7 +8,7 @@ The following command runs a container with this image without opening up the co
 podman run -it --privileged azure-kinect:latest /bin/bash -c "Xvfb :1 -screen 0 2560x1440x16 & . /opt/ros/humble/setup.bash && . /root/ws/install/setup.sh && ros2 launch azure_kinect_ros_driver driver.launch.py" 
 ```
 
-Following command executes the image opening up a the container to the host network.
+The following command runs a container with this image using the host network as the container network.
 ```bash
 podman run -it --volume="/dev/bus/usb:/dev/bus/usb" --rm --network host --ipc=host --pid=host azure-kinect:latest /bin/bash -c "Xvfb :2 -screen 0 2560x1440x16 & . /opt/ros/humble/setup.bash && . /root/ws/install/setup.sh && ros2 launch azure_kinect_ros_driver driver.launch.py depth_mode:=NFOV_UNBINNED  point_cloud_in_depth_frame:=false"
 ```
