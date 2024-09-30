@@ -1,6 +1,6 @@
 # Sample Placement
 
-Placement of the sample holder has to satisfy two criterion in oder to be successfully picked up by the gripper.
+On conducting an exploratory study with the Azure Kinect  mounted at a fixed position away from the and level to the table-top, we found that the position of the sample holder has to satisfy two criterion in oder to be successfully picked up by the gripper.
 1. The fiducial tag has to be visible to the camera
 2. Sample holder has to be facing an angle that is viable for the robotic arm to approach the sample holder face-on.
 
