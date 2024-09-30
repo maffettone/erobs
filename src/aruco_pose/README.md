@@ -22,7 +22,7 @@ For Azure kinect, they can be found when running the ROS2 camera node and explai
 
 Parameters ```cam_translation.x```, ```cam_translation.y```, and ```cam_translation.z``` are measures from the base of the robot and in the robot's coordinate world. 
 
-Hint: Use the robot arm to determin the x and y axis of the robot by moving the robot along ```x=0``` and ```y=0``` Cartesian lines. Next use a tape measure to measure the distance from each x and y axises to the camera lense.
+Hint: Use the robot arm to determine the x and y axis of the robot by moving the robot along ```x=0``` and ```y=0``` Cartesian lines. Next use a tape measure to measure the distance (projections) from each x and y axises to the camera lens.
 
 ## ArUco markers
 
