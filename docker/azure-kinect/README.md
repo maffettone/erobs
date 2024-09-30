@@ -1,4 +1,4 @@
-Build the docker / podman image
+Build the image
 ```bash
 podman build -t azure-kinect:latest .
 ```
