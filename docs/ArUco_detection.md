@@ -12,6 +12,6 @@ Custom action-server message `FidPoseControlMsg.action` has an extra field to in
 
 <img src="./images/select_pick_place.gif" alt="Multi-aruco detection" width="300">
 
-On returning the sample holder, the user has the option to return to a different storage given that the sample holder has previously being pickup up. Below is the second part of the above video where the sample holder being return to a different location:
+On returning the sample holder, the user has the option to return to a different storage given that the sample holder has previously being pickup up. This ensures that the message type is consistent in both the pickup and return, and all arguments of the message are interpreted. Below is the second part of the above video where the sample holder being return to a different location:
 
 <img src="./images/return_to_another_pickup.gif" alt="Multi-aruco detection" width="300">
