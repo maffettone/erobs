@@ -85,10 +85,19 @@
 
   </link>
 
-   <joint name="camera_base_to_mount" type="fixed">
+  <link name="camera_base_map">
+  </link>
+
+  <joint name="camera_base_to_mount" type="fixed">
     <parent link="mount" />
     <child link="camera_base" />
     <origin xyz="0. -0.09 0.0725" rpy="${pi/2} 0. 0." />
+  </joint> 
+
+  <joint name="camera_base_to_camera_base_map" type="fixed">
+    <parent link="camera_base" />
+    <child link="camera_base_map" />
+    <origin xyz="0. 0.0 0.0315" rpy="${pi/2} 0. 0." />
   </joint> 
 
   </xacro:macro>
