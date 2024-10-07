@@ -59,8 +59,8 @@ PdfBeamtimeServer::PdfBeamtimeServer(
     std::bind(
       &PdfBeamtimeServer::bluesky_interrupt_cb, this, _1, _2));
 
-  move_group_interface_.setMaxVelocityScalingFactor(0.03);
-  move_group_interface_.setMaxAccelerationScalingFactor(0.03);
+  move_group_interface_.setMaxVelocityScalingFactor(0.1);
+  move_group_interface_.setMaxAccelerationScalingFactor(0.1);
 }
 
 void PdfBeamtimeServer::bluesky_interrupt_cb(

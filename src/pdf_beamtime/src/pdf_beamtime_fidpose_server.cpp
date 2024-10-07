@@ -306,7 +306,6 @@ moveit::core::MoveItErrorCode PdfBeamtimeFidPoseServer::run_fsm(
       break;
 
     case State::PICKUP_RETREAT:
-      break;
       // Sample in hand. Move to place approach.
       motion_results = inner_state_machine_->move_robot(
         move_group_interface_,
