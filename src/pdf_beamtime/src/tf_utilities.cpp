@@ -33,17 +33,63 @@ double TFUtilities::degreesToRadians(double degrees)
   return degrees * M_PI / 180.0;
 }
 
-std::pair<double, double> TFUtilities::get_wrist_elbow_alignment(
+geometry_msgs::msg::TransformStamped TFUtilities::get_sample_pose(
   moveit::planning_interface::MoveGroupInterface & mgi, int sample_id)
 {
-  tf2::Quaternion tf2_wrist_2_quaternion;
-  tf2::Quaternion tf2_sample_quaternion;
+  geometry_msgs::msg::TransformStamped sample_pose;
 
   std::string sample_frame = std::to_string(sample_id);
   std::string pre_pickup_approach_point_frame = std::to_string(sample_id) + "_" +
     pre_pickup_approach_point_frame_suffix_;
+  while (rclcpp::ok()) {
+    try {
+      sample_pose =
+        tf_buffer_->lookupTransform(world_frame, sample_frame, tf2::TimePointZero);
 
-  geometry_msgs::msg::TransformStamped transform_world_to_sample;
+      break;
+    } catch (tf2::TransformException & ex) {
+    }
+  }
+
+  return sample_pose;
+}
+
+geometry_msgs::msg::TransformStamped TFUtilities::get_sample_pre_pickup_pose(
+  moveit::planning_interface::MoveGroupInterface & mgi, int sample_id)
+{
+  geometry_msgs::msg::TransformStamped pre_pickup_pose;
+
+  std::string sample_frame = std::to_string(sample_id);
+  std::string pre_pickup_approach_point_frame = std::to_string(sample_id) + "_" +
+    pre_pickup_approach_point_frame_suffix_;
+  while (rclcpp::ok()) {
+    try {
+      pre_pickup_pose =
+        tf_buffer_->lookupTransform(
+        world_frame, pre_pickup_approach_point_frame,
+        tf2::TimePointZero);
+
+      break;
+    } catch (tf2::TransformException & ex) {
+    }
+  }
+
+  return pre_pickup_pose;
+}
+
+
+std::pair<double, double> TFUtilities::get_wrist_elbow_alignment(
+  moveit::planning_interface::MoveGroupInterface & mgi,
+  geometry_msgs::msg::TransformStamped sample_pose)
+{
+  tf2::Quaternion tf2_wrist_2_quaternion;
+  tf2::Quaternion tf2_sample_quaternion;
+
+  // std::string sample_frame = std::to_string(sample_id);
+  // std::string pre_pickup_approach_point_frame = std::to_string(sample_id) + "_" +
+  //   pre_pickup_approach_point_frame_suffix_;
+
+  geometry_msgs::msg::TransformStamped transform_world_to_sample = sample_pose;
   geometry_msgs::msg::TransformStamped transform_world_to_wrist_2;
 
   double wrist_2_roll, wrist_2_pitch, wrist_2_yaw;
@@ -51,8 +97,8 @@ std::pair<double, double> TFUtilities::get_wrist_elbow_alignment(
 
   while (rclcpp::ok()) {
     try {
-      transform_world_to_sample =
-        tf_buffer_->lookupTransform(world_frame, sample_frame, tf2::TimePointZero);
+      // transform_world_to_sample =
+      //   tf_buffer_->lookupTransform(world_frame, sample_frame, tf2::TimePointZero);
       transform_world_to_wrist_2 =
         tf_buffer_->lookupTransform(world_frame, wrist_2_frame, tf2::TimePointZero);
 
@@ -81,16 +127,17 @@ std::pair<double, double> TFUtilities::get_wrist_elbow_alignment(
 }
 
 std::vector<geometry_msgs::msg::Pose> TFUtilities::get_pickup_action_z_adj(
-  moveit::planning_interface::MoveGroupInterface & mgi, int sample_id)
+  moveit::planning_interface::MoveGroupInterface & mgi,
+  geometry_msgs::msg::TransformStamped sample_pose)
 {
   // Define waypoints for Cartesian path
   std::vector<geometry_msgs::msg::Pose> waypoints;
   geometry_msgs::msg::TransformStamped transform_world_to_grasping_point;
-  geometry_msgs::msg::TransformStamped transform_world_to_pickup_approach_point;
+  geometry_msgs::msg::TransformStamped transform_world_to_sample = sample_pose;
 
-  std::string sample_frame = std::to_string(sample_id);
-  std::string pre_pickup_approach_point_frame = std::to_string(sample_id) + "_" +
-    pre_pickup_approach_point_frame_suffix_;
+  // std::string sample_frame = std::to_string(sample_id);
+  // std::string pre_pickup_approach_point_frame = std::to_string(sample_id) + "_" +
+  //   pre_pickup_approach_point_frame_suffix_;
   double z_dist_to_pickup_approach = 0.0;
 
   while (rclcpp::ok()) {
@@ -100,21 +147,21 @@ std::vector<geometry_msgs::msg::Pose> TFUtilities::get_pickup_action_z_adj(
         grasping_point_on_gripper_frame,
         tf2::TimePointZero);
 
-      transform_world_to_pickup_approach_point = tf_buffer_->lookupTransform(
-        world_frame,
-        pre_pickup_approach_point_frame,
-        tf2::TimePointZero);
+      // transform_world_to_sample = tf_buffer_->lookupTransform(
+      //   world_frame,
+      //   sample_frame,
+      //   tf2::TimePointZero);
 
       z_dist_to_pickup_approach =
-        transform_world_to_pickup_approach_point.transform.translation.z -
+        transform_world_to_sample.transform.translation.z -
         (transform_world_to_grasping_point.transform.translation.z);
 
       break;
     } catch (tf2::TransformException & ex) {
       RCLCPP_ERROR(
         tf_util_logger_, "Could not transform %s to %s: %s",
-        grasping_point_on_gripper_frame.c_str(),
-        sample_frame.c_str(), ex.what());
+        world_frame.c_str(), grasping_point_on_gripper_frame.c_str(),
+        ex.what());
     }
   }
 
@@ -129,16 +176,17 @@ std::vector<geometry_msgs::msg::Pose> TFUtilities::get_pickup_action_z_adj(
 }
 
 std::vector<geometry_msgs::msg::Pose> TFUtilities::get_pickup_action_pre_pickup(
-  moveit::planning_interface::MoveGroupInterface & mgi, int sample_id)
+  moveit::planning_interface::MoveGroupInterface & mgi,
+  geometry_msgs::msg::TransformStamped pre_pickup_pose)
 {
   // Define waypoints for Cartesian path
   std::vector<geometry_msgs::msg::Pose> waypoints;
   geometry_msgs::msg::TransformStamped transform_world_to_grasping_point;
-  geometry_msgs::msg::TransformStamped transform_world_to_pickup_approach_point;
+  geometry_msgs::msg::TransformStamped transform_world_to_pickup_approach_point = pre_pickup_pose;
 
-  std::string sample_frame = std::to_string(sample_id);
-  std::string pre_pickup_approach_point_frame = std::to_string(sample_id) + "_" +
-    pre_pickup_approach_point_frame_suffix_;
+  // std::string sample_frame = std::to_string(sample_id);
+  // std::string pre_pickup_approach_point_frame = std::to_string(sample_id) + "_" +
+  //   pre_pickup_approach_point_frame_suffix_;
 
   double x_dist_to_pickup_approach = 0.0, y_dist_to_pickup_approach = 0.0;
 
@@ -149,10 +197,10 @@ std::vector<geometry_msgs::msg::Pose> TFUtilities::get_pickup_action_pre_pickup(
         grasping_point_on_gripper_frame,
         tf2::TimePointZero);
 
-      transform_world_to_pickup_approach_point = tf_buffer_->lookupTransform(
-        world_frame,
-        pre_pickup_approach_point_frame,
-        tf2::TimePointZero);
+      // transform_world_to_pickup_approach_point = tf_buffer_->lookupTransform(
+      //   world_frame,
+      //   pre_pickup_approach_point_frame,
+      //   tf2::TimePointZero);
 
       x_dist_to_pickup_approach =
         transform_world_to_pickup_approach_point.transform.translation.x -
@@ -165,10 +213,27 @@ std::vector<geometry_msgs::msg::Pose> TFUtilities::get_pickup_action_pre_pickup(
     } catch (tf2::TransformException & ex) {
       RCLCPP_ERROR(
         tf_util_logger_, "Could not transform %s to %s: %s",
-        grasping_point_on_gripper_frame.c_str(),
-        sample_frame.c_str(), ex.what());
+        world_frame.c_str(),
+        grasping_point_on_gripper_frame.c_str(), ex.what());
     }
   }
+
+  // RCLCPP_INFO(tf_util_logger_, "x_dist_to_pickup_approach: %f", x_dist_to_pickup_approach);
+  // RCLCPP_INFO(tf_util_logger_, "y_dist_to_pickup_approach: %f", y_dist_to_pickup_approach);
+  // RCLCPP_INFO(
+  //   tf_util_logger_,
+  //   "transform_world_to_pickup_approach_point.transform.translation.x: %f",
+  //   transform_world_to_pickup_approach_point.transform.translation.x);
+  // RCLCPP_INFO(
+  //   tf_util_logger_, "transform_world_to_grasping_point.transform.translation.x: %f",
+  //   transform_world_to_grasping_point.transform.translation.x);
+  // RCLCPP_INFO(
+  //   tf_util_logger_,
+  //   "transform_world_to_pickup_approach_point.transform.translation.y : %f",
+  //   transform_world_to_pickup_approach_point.transform.translation.y);
+  // RCLCPP_INFO(
+  //   tf_util_logger_, "transform_world_to_grasping_point.transform.translation.y: %f",
+  //   transform_world_to_grasping_point.transform.translation.y);
 
   geometry_msgs::msg::Pose target_pose = mgi.getCurrentPose().pose;
 
@@ -190,41 +255,50 @@ std::vector<geometry_msgs::msg::Pose> TFUtilities::get_pickup_action_pre_pickup(
 }
 
 std::vector<geometry_msgs::msg::Pose> TFUtilities::get_pickup_action_pickup(
-  moveit::planning_interface::MoveGroupInterface & mgi, int sample_id)
+  moveit::planning_interface::MoveGroupInterface & mgi,
+  geometry_msgs::msg::TransformStamped pre_pickup_pose,
+  geometry_msgs::msg::TransformStamped sample_pose)
 {
   // Define waypoints for Cartesian path
   std::vector<geometry_msgs::msg::Pose> waypoints;
-  geometry_msgs::msg::TransformStamped transform_world_to_sample;
-  geometry_msgs::msg::TransformStamped transform_world_to_pickup_approach_point;
+  geometry_msgs::msg::TransformStamped transform_world_to_sample = sample_pose;
+  geometry_msgs::msg::TransformStamped transform_world_to_pickup_approach_point = pre_pickup_pose;
 
-  std::string sample_frame = std::to_string(sample_id);
-  std::string pre_pickup_approach_point_frame = std::to_string(sample_id) + "_" +
-    pre_pickup_approach_point_frame_suffix_;
+  // std::string sample_frame = std::to_string(sample_id);
+  // std::string pre_pickup_approach_point_frame = std::to_string(sample_id) + "_" +
+  //   pre_pickup_approach_point_frame_suffix_;
 
   double x_dist_to_sample = 0.0, y_dist_to_sample = 0.0;
 
-  while (rclcpp::ok()) {
-    try {
-      transform_world_to_sample =
-        tf_buffer_->lookupTransform(world_frame, sample_frame, tf2::TimePointZero);
-      transform_world_to_pickup_approach_point = tf_buffer_->lookupTransform(
-        world_frame,
-        pre_pickup_approach_point_frame,
-        tf2::TimePointZero);
 
-      x_dist_to_sample = transform_world_to_sample.transform.translation.x -
-        transform_world_to_pickup_approach_point.transform.translation.x;
-      y_dist_to_sample = transform_world_to_sample.transform.translation.y -
-        transform_world_to_pickup_approach_point.transform.translation.y;
+  x_dist_to_sample = transform_world_to_sample.transform.translation.x -
+    transform_world_to_pickup_approach_point.transform.translation.x;
+  y_dist_to_sample = transform_world_to_sample.transform.translation.y -
+    transform_world_to_pickup_approach_point.transform.translation.y;
 
-      break;
-    } catch (tf2::TransformException & ex) {
-      RCLCPP_ERROR(
-        tf_util_logger_, "Could not transform %s to %s: %s",
-        grasping_point_on_gripper_frame.c_str(),
-        sample_frame.c_str(), ex.what());
-    }
-  }
+
+  // while (rclcpp::ok()) {
+  //   try {
+  //     transform_world_to_sample =
+  //       tf_buffer_->lookupTransform(world_frame, sample_frame, tf2::TimePointZero);
+  //     transform_world_to_pickup_approach_point = tf_buffer_->lookupTransform(
+  //       world_frame,
+  //       pre_pickup_approach_point_frame,
+  //       tf2::TimePointZero);
+
+  //     x_dist_to_sample = transform_world_to_sample.transform.translation.x -
+  //       transform_world_to_pickup_approach_point.transform.translation.x;
+  //     y_dist_to_sample = transform_world_to_sample.transform.translation.y -
+  //       transform_world_to_pickup_approach_point.transform.translation.y;
+
+  //     break;
+  //   } catch (tf2::TransformException & ex) {
+  //     RCLCPP_ERROR(
+  //       tf_util_logger_, "Could not transform %s to %s: %s",
+  //       grasping_point_on_gripper_frame.c_str(),
+  //       sample_frame.c_str(), ex.what());
+  //   }
+  // }
 
   geometry_msgs::msg::Pose target_pose = mgi.getCurrentPose().pose;
 

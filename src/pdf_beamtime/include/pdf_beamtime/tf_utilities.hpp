@@ -39,14 +39,26 @@ public:
   double degreesToRadians(double degrees);
 
   std::pair<double, double> get_wrist_elbow_alignment(
-    moveit::planning_interface::MoveGroupInterface & mgi, int sample_id);
+    moveit::planning_interface::MoveGroupInterface & mgi,
+    geometry_msgs::msg::TransformStamped sample_pose);
 
   std::vector<geometry_msgs::msg::Pose> get_pickup_action_z_adj(
-    moveit::planning_interface::MoveGroupInterface & mgi, int sample_id);
+    moveit::planning_interface::MoveGroupInterface & mgi,
+    geometry_msgs::msg::TransformStamped sample_pose);
 
   std::vector<geometry_msgs::msg::Pose> get_pickup_action_pre_pickup(
-    moveit::planning_interface::MoveGroupInterface & mgi, int sample_id);
+    moveit::planning_interface::MoveGroupInterface & mgi,
+    geometry_msgs::msg::TransformStamped pre_pickup_pose);
 
   std::vector<geometry_msgs::msg::Pose> get_pickup_action_pickup(
+    moveit::planning_interface::MoveGroupInterface & mgi,
+    geometry_msgs::msg::TransformStamped pre_pickup_pose,
+    geometry_msgs::msg::TransformStamped sample_pose);
+
+  geometry_msgs::msg::TransformStamped get_sample_pose(
     moveit::planning_interface::MoveGroupInterface & mgi, int sample_id);
+
+  geometry_msgs::msg::TransformStamped get_sample_pre_pickup_pose(
+    moveit::planning_interface::MoveGroupInterface & mgi, int sample_id);
+
 };

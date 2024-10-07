@@ -3,6 +3,7 @@ BSD 3 Clause License. See LICENSE.txt for details.*/
 #include <pdf_beamtime/pdf_beamtime_fidpose_server.hpp>
 
 using namespace std::placeholders;
+using namespace std::chrono_literals;
 
 PdfBeamtimeFidPoseServer::PdfBeamtimeFidPoseServer(
   const std::string & move_group_name = "ur_manipulator",
@@ -153,9 +154,12 @@ moveit::core::MoveItErrorCode PdfBeamtimeFidPoseServer::run_fsm(
       if (motion_results == moveit::core::MoveItErrorCode::FAILURE) {break;}
       inner_state_machine_->set_internal_state(Internal_State::RESTING);
 
+      rclcpp::sleep_for(3s);
+
       motion_results = inner_state_machine_->move_robot(
         move_group_interface_, pickup_approach_);
       if (motion_results == moveit::core::MoveItErrorCode::FAILURE) {break;}
+      rclcpp::sleep_for(3s);
 
       set_current_state(State::PICKUP_APPROACH);
       inner_state_machine_->set_internal_state(Internal_State::RESTING);
@@ -163,32 +167,59 @@ moveit::core::MoveItErrorCode PdfBeamtimeFidPoseServer::run_fsm(
       break;
 
     case State::PICKUP_APPROACH: {
-        // Moves the robot to pickup in two steps
-        // 1. Adust the wrist 3 and wrist 2 positions to face the gripper towards the sample
-
-        std::pair<double, double> new_wrist_angles = tf_utilities_->get_wrist_elbow_alignment(
+        // Moves the robot to pickup in multiple steps
+        // 0. Camera ready stage
+        rclcpp::sleep_for(5s);
+        geometry_msgs::msg::TransformStamped sample_pose_ = tf_utilities_->get_sample_pose(
           move_group_interface_, sample_id);
+        geometry_msgs::msg::TransformStamped pre_pickup_pose_ =
+          tf_utilities_->get_sample_pre_pickup_pose(
+          move_group_interface_, sample_id);
+
+        RCLCPP_INFO(
+          node_->get_logger(), "pre_pickup_pose_.transform.translation.x: %f",
+          pre_pickup_pose_.transform.translation.x);
+
+        RCLCPP_INFO(
+          node_->get_logger(), "pre_pickup_pose_.transform.translation.y: %f",
+          pre_pickup_pose_.transform.translation.y);
+
+        RCLCPP_INFO(
+          node_->get_logger(), "sample_pose_.transform.translation.x: %f",
+          sample_pose_.transform.translation.x);
+
+        RCLCPP_INFO(
+          node_->get_logger(), "sample_pose_.transform.translation.y: %f",
+          sample_pose_.transform.translation.y);
+
+        // 1. Adust the wrist 3 and wrist 2 positions to face the gripper towards the sample
+        std::pair<double, double> new_wrist_angles = tf_utilities_->get_wrist_elbow_alignment(
+          move_group_interface_, sample_pose_);
         adjusted_pickup_ = pickup_approach_;
         adjusted_pickup_[4] = new_wrist_angles.first;
+        rclcpp::sleep_for(5s);
 
         motion_results = inner_state_machine_->move_robot(move_group_interface_, adjusted_pickup_);
         if (motion_results == moveit::core::MoveItErrorCode::FAILURE) {break;}
         inner_state_machine_->set_internal_state(Internal_State::RESTING);
+        rclcpp::sleep_for(3s);
 
         // 2. Cartesian move the robot to pick up position
         // 2.1 Adjust the z distance
         motion_results = inner_state_machine_->move_robot_cartesian(
           move_group_interface_, tf_utilities_->get_pickup_action_z_adj(
-            move_group_interface_, sample_id));
+            move_group_interface_, sample_pose_));
         if (motion_results == moveit::core::MoveItErrorCode::FAILURE) {break;}
         inner_state_machine_->set_internal_state(Internal_State::RESTING);
+        rclcpp::sleep_for(3s);
 
         // 2.2 Cartesian move to pre-pickup location in front of the sample
         motion_results = inner_state_machine_->move_robot_cartesian(
           move_group_interface_, tf_utilities_->get_pickup_action_pre_pickup(
-            move_group_interface_, sample_id));
+            move_group_interface_, pre_pickup_pose_));
         if (motion_results == moveit::core::MoveItErrorCode::FAILURE) {break;}
         inner_state_machine_->set_internal_state(Internal_State::RESTING);
+        rclcpp::sleep_for(3s);
 
         // Save the joint angles for the pre-pickup. Use this for moving the sample back
         move_group_interface_.getCurrentState()->copyJointGroupPositions(
@@ -199,7 +230,7 @@ moveit::core::MoveItErrorCode PdfBeamtimeFidPoseServer::run_fsm(
         // 2.3 Cartesian move to pickup
         motion_results = inner_state_machine_->move_robot_cartesian(
           move_group_interface_, tf_utilities_->get_pickup_action_pickup(
-            move_group_interface_, sample_id));
+            move_group_interface_, pre_pickup_pose_, sample_pose_));
 
         if (motion_results == moveit::core::MoveItErrorCode::FAILURE) {break;}
 
@@ -220,6 +251,7 @@ moveit::core::MoveItErrorCode PdfBeamtimeFidPoseServer::run_fsm(
       break;
 
     case State::PICKUP:
+      break;
       // Pick up object by closing gripper. If success: move to grasp success with progress.
       // if fails, move to grasp_failure
       if (this->gripper_present_) {
@@ -562,8 +594,11 @@ void PdfBeamtimeFidPoseServer::execute_cleanup()
     case State::PICKUP:
     case State::GRASP_FAILURE: {
         // Move back to pickup approach
-        std::pair<double, double> new_wrist_angles = tf_utilities_->get_wrist_elbow_alignment(
+        rclcpp::sleep_for(5s);
+        geometry_msgs::msg::TransformStamped sample_pose_ = tf_utilities_->get_sample_pose(
           move_group_interface_, sample_id);
+        std::pair<double, double> new_wrist_angles = tf_utilities_->get_wrist_elbow_alignment(
+          move_group_interface_, sample_pose_);
         adjusted_pickup_ = goal->pickup_approach;
         adjusted_pickup_[4] = new_wrist_angles.first;
         adjusted_pickup_[5] = new_wrist_angles.second;
@@ -575,8 +610,11 @@ void PdfBeamtimeFidPoseServer::execute_cleanup()
 
     case State::RELEASE_FAILURE:
     case State::RELEASE_SUCCESS: {
-        std::pair<double, double> new_wrist_angles = tf_utilities_->get_wrist_elbow_alignment(
+        rclcpp::sleep_for(5s);
+        geometry_msgs::msg::TransformStamped sample_pose_ = tf_utilities_->get_sample_pose(
           move_group_interface_, sample_id);
+        std::pair<double, double> new_wrist_angles = tf_utilities_->get_wrist_elbow_alignment(
+          move_group_interface_, sample_pose_);
         adjusted_place_ = goal->place_approach;
         adjusted_place_[4] = new_wrist_angles.first;
         adjusted_place_[5] = new_wrist_angles.second;

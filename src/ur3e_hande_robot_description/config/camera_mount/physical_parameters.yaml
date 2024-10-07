@@ -1,5 +1,5 @@
 inertia_parameters:
-  mount_base_mass: 0.14
+  mount_base_mass: 0.1137
   camera_mass: 0.440
 
   links:

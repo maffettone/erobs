@@ -50,7 +50,7 @@
 
     <link name="${tf_prefix}robotiq_coupler">
       <inertial>
-        <mass value="0.168" />
+        <mass value="0.100" />
         <inertia 
           ixx="6.17674E-05" ixy="0.0" ixz="0.0" 
           iyy="6.17674E-05" iyz="0.0" 
@@ -90,9 +90,15 @@
           <mesh filename="package://ur3e_hande_robot_description/meshes/hande_black/hande.stl" scale="1 1 1"/>
         </geometry>
       </collision>
-      <xacro:cylinder_inertial radius="${hande_base_inertia_radius}" length="${hande_base_inertia_length}"  mass="${hande_base_mass}">
+      <inertia 
+          ixx="0.005341" ixy="0.0" ixz="0.0" 
+          iyx="0.0"  iyy="0.005447" iyz="0.0" 
+          izx="0.0"  izy="0.0" izz="0.000636"
+        />
+      </inertial>      
+      <!-- <xacro:cylinder_inertial radius="${hande_base_inertia_radius}" length="${hande_base_inertia_length}"  mass="${hande_base_mass}">
         <origin xyz="0.0 0.0 ${-0.5 * hande_base_inertia_length}" rpy="0 0 0" />
-      </xacro:cylinder_inertial>
+      </xacro:cylinder_inertial> -->
     </link>
 
     <link name="${tf_prefix}left_finger">
@@ -111,9 +117,9 @@
           <mesh filename="package://ur3e_hande_robot_description/meshes/hande/collision/finger_1.stl" scale="0.001 0.001 0.001"/>
         </geometry>
       </collision>
-      <xacro:cylinder_inertial radius="${left_finger_inertia_radius}" length="${left_finger_inertia_length}"  mass="${left_finger_mass}">
+      <!-- <xacro:cylinder_inertial radius="${left_finger_inertia_radius}" length="${left_finger_inertia_length}"  mass="${left_finger_mass}">
         <origin xyz="0.0 0.0 ${-0.5 * left_finger_inertia_length}" rpy="0 0 0" />
-      </xacro:cylinder_inertial>
+      </xacro:cylinder_inertial> -->
     </link>
 
     <link name="${tf_prefix}right_finger">
@@ -132,9 +138,9 @@
           <mesh filename="package://ur3e_hande_robot_description/meshes/hande/collision/finger_2.stl" scale="0.001 0.001 0.001"/>
         </geometry>
       </collision>
-      <xacro:cylinder_inertial radius="${right_finger_inertia_radius}" length="${right_finger_inertia_length}"  mass="${right_finger_mass}">
+      <!-- <xacro:cylinder_inertial radius="${right_finger_inertia_radius}" length="${right_finger_inertia_length}"  mass="${right_finger_mass}">
         <origin xyz="0.0 0.0 ${-0.5 * right_finger_inertia_length}" rpy="0 0 0" />
-      </xacro:cylinder_inertial>
+      </xacro:cylinder_inertial> -->
     </link>
 
     <link name="grasping_point_link">
