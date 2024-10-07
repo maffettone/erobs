@@ -176,21 +176,21 @@ moveit::core::MoveItErrorCode PdfBeamtimeFidPoseServer::run_fsm(
           tf_utilities_->get_sample_pre_pickup_pose(
           move_group_interface_, sample_id);
 
-        RCLCPP_INFO(
-          node_->get_logger(), "pre_pickup_pose_.transform.translation.x: %f",
-          pre_pickup_pose_.transform.translation.x);
+        // RCLCPP_INFO(
+        //   node_->get_logger(), "pre_pickup_pose_.transform.translation.x: %f",
+        //   pre_pickup_pose_.transform.translation.x);
 
-        RCLCPP_INFO(
-          node_->get_logger(), "pre_pickup_pose_.transform.translation.y: %f",
-          pre_pickup_pose_.transform.translation.y);
+        // RCLCPP_INFO(
+        //   node_->get_logger(), "pre_pickup_pose_.transform.translation.y: %f",
+        //   pre_pickup_pose_.transform.translation.y);
 
-        RCLCPP_INFO(
-          node_->get_logger(), "sample_pose_.transform.translation.x: %f",
-          sample_pose_.transform.translation.x);
+        // RCLCPP_INFO(
+        //   node_->get_logger(), "sample_pose_.transform.translation.x: %f",
+        //   sample_pose_.transform.translation.x);
 
-        RCLCPP_INFO(
-          node_->get_logger(), "sample_pose_.transform.translation.y: %f",
-          sample_pose_.transform.translation.y);
+        // RCLCPP_INFO(
+        //   node_->get_logger(), "sample_pose_.transform.translation.y: %f",
+        //   sample_pose_.transform.translation.y);
 
         // 1. Adust the wrist 3 and wrist 2 positions to face the gripper towards the sample
         std::pair<double, double> new_wrist_angles = tf_utilities_->get_wrist_elbow_alignment(
@@ -251,7 +251,6 @@ moveit::core::MoveItErrorCode PdfBeamtimeFidPoseServer::run_fsm(
       break;
 
     case State::PICKUP:
-      break;
       // Pick up object by closing gripper. If success: move to grasp success with progress.
       // if fails, move to grasp_failure
       if (this->gripper_present_) {
@@ -307,6 +306,7 @@ moveit::core::MoveItErrorCode PdfBeamtimeFidPoseServer::run_fsm(
       break;
 
     case State::PICKUP_RETREAT:
+      break;
       // Sample in hand. Move to place approach.
       motion_results = inner_state_machine_->move_robot(
         move_group_interface_,

@@ -236,20 +236,23 @@ std::vector<geometry_msgs::msg::Pose> TFUtilities::get_pickup_action_pre_pickup(
   //   transform_world_to_grasping_point.transform.translation.y);
 
   geometry_msgs::msg::Pose target_pose = mgi.getCurrentPose().pose;
+  target_pose.position.x += x_dist_to_pickup_approach;
+  target_pose.position.y += y_dist_to_pickup_approach;
 
-  int N = 10;
-  // Calculate incremental distances
-  double x_increment = x_dist_to_pickup_approach / N;
-  double y_increment = y_dist_to_pickup_approach / N;
+  waypoints.push_back(target_pose);
+  // int N = 10;
+  // // Calculate incremental distances
+  // double x_increment = x_dist_to_pickup_approach / N;
+  // double y_increment = y_dist_to_pickup_approach / N;
 
-  // Loop to move in segments
-  for (int i = 0; i < N; ++i) {
-    target_pose.position.x += x_increment;
-    target_pose.position.y += y_increment;
+  // // Loop to move in segments
+  // for (int i = 0; i < N; ++i) {
+  //   target_pose.position.x += x_increment;
+  //   target_pose.position.y += y_increment;
 
-    // Set the new target pose
-    waypoints.push_back(target_pose);
-  }
+  //   // Set the new target pose
+  //   waypoints.push_back(target_pose);
+  // }
 
   return waypoints;
 }

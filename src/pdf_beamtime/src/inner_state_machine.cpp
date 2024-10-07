@@ -22,6 +22,9 @@ moveit::core::MoveItErrorCode InnerStateMachine::move_robot(
   moveit::core::MoveItErrorCode return_error_code = moveit::core::MoveItErrorCode::FAILURE;
   joint_goal_ = joint_goal;
 
+  mgi.setMaxVelocityScalingFactor(0.03);
+  mgi.setMaxAccelerationScalingFactor(0.03);
+
   switch (internal_state_enum_) {
     case Internal_State::RESTING:
     case Internal_State::CLEANUP: {
@@ -61,6 +64,8 @@ moveit::core::MoveItErrorCode InnerStateMachine::move_robot_cartesian(
   std::vector<geometry_msgs::msg::Pose> target_pose)
 {
   moveit::core::MoveItErrorCode return_error_code = moveit::core::MoveItErrorCode::FAILURE;
+  mgi.setMaxVelocityScalingFactor(0.03);
+  mgi.setMaxAccelerationScalingFactor(0.03);
 
   switch (internal_state_enum_) {
     case Internal_State::RESTING:
