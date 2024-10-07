@@ -90,15 +90,8 @@
           <mesh filename="package://ur3e_hande_robot_description/meshes/hande_black/hande.stl" scale="1 1 1"/>
         </geometry>
       </collision>
-            <!-- <inertial>
-        <inertial
-            ixx="0.005341" ixy="0.0" ixz="0.0" 
-            iyy="0.005447" iyz="0.0" 
-            izz="0.000636"
-        />
-      </inertial> -->
       <xacro:cylinder_inertial radius="${hande_base_inertia_radius}" length="${hande_base_inertia_length}"  mass="${hande_base_mass}">
-        <origin xyz="0.0 0.0 ${-0.5 * hande_base_inertia_length}" rpy="0 0 0" />
+        <origin xyz="${hande_base_cog}" rpy="0 0 0" />
       </xacro:cylinder_inertial>
     </link>
 
@@ -119,7 +112,7 @@
         </geometry>
       </collision>
       <xacro:cylinder_inertial radius="${left_finger_inertia_radius}" length="${left_finger_inertia_length}"  mass="${left_finger_mass}">
-        <origin xyz="0.0 0.0 ${-0.5 * left_finger_inertia_length}" rpy="0 0 0" />
+        <origin xyz="${finger_cog}" rpy="0 0 0" />
       </xacro:cylinder_inertial>
     </link>
 
@@ -140,7 +133,7 @@
         </geometry>
       </collision>
       <xacro:cylinder_inertial radius="${right_finger_inertia_radius}" length="${right_finger_inertia_length}"  mass="${right_finger_mass}">
-        <origin xyz="0.0 0.0 ${-0.5 * right_finger_inertia_length}" rpy="0 0 0" />
+        <origin xyz="${finger_cog}" rpy="0 0 0" />
       </xacro:cylinder_inertial>
     </link>
 

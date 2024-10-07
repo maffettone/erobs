@@ -17,4 +17,8 @@ inertia_parameters:
     mount_cog:
       x: 0.0
       y: 0.0
-      z: 0.058
+      z: 0.02
+    camera_cog:
+      x: 0.0
+      y: 0.0
+      z: 0.07
