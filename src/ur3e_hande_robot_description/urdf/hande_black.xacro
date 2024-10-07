@@ -164,7 +164,7 @@
     </joint>
 
     <joint name="${tf_prefix}grasping_point" type="fixed">
-      <origin rpy="0 0 0" xyz="0.0 0.0 0.095"/>
+      <origin rpy="0 0 0" xyz="0.0 0.0 0.09"/>
       <parent link="${tf_prefix}robotiq_hande_base_link"/>
       <child link="grasping_point_link"/>
       <axis xyz="0 0 0"/>

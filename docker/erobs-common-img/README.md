@@ -77,40 +77,6 @@ podman run -it --rm --network host --ipc=host --pid=host \
     /bin/sh -c "printenv && . /opt/ros/${ROS_DISTRO}/setup.sh && . /root/ws/install/setup.sh && ros2 launch ur_moveit_config ur_moveit.launch.py ur_type:=${UR_TYPE} launch_rviz:=${LAUNCH_RVIZ} description_package:=${DESCRIPTION_PKG}  launch_servo:=false description_file:=${DESCRIPTION_FILE} moveit_config_package:=${CONFIG_PKG} moveit_config_file:=${CONFIG_FILE}"
 ```
 
-# Launch All--In-One
-
-Execute the below code to run all the above ROS2 nodes in one podman container.
-
-(Note: the sleep commands in between provide an illusion of sequential execution of nodes which is helpful to notice  if one of the nodes fail to launch.)
-
-```bash
-podman run -it --rm --network host --ipc=host --pid=host \
-    --env ROBOT_IP=$ROBOT_IP \
-    --env UR_TYPE=$UR_TYPE \
-    --env ROS_DISTRO=$ROS_DISTRO \
-    --env DESCRIPTION_PKG=$DESCRIPTION_PKG \
-    --env DESCRIPTION_FILE=$DESCRIPTION_FILE \
-    --env CONFIG_PKG=$CONFIG_PKG \
-    --env CONFIG_FILE=$CONFIG_FILE \
-    ${GHCR_POINTER} \
-    /bin/bash -c ". /root/ws/install/setup.sh && \
-    . /opt/ros/${ROS_DISTRO}/setup.sh && \
-    ros2 launch ur_robot_driver ur_control.launch.py ur_type:=${UR_TYPE} robot_ip:=${ROBOT_IP} description_package:=${DESCRIPTION_PKG} description_file:=${DESCRIPTION_FILE} launch_rviz:=${LAUNCH_RVIZ} tool_voltage:=24 & \
-    sleep 2 && \
-    . /root/ws/install/setup.sh && \
-    ros2 launch aruco_pose aruco_pose.launch.py & \
-    sleep 5 && \
-    . /root/ws/install/setup.sh && \
-    ros2 launch ur_moveit_config ur_moveit.launch.py ur_type:=${UR_TYPE} launch_rviz:=${LAUNCH_RVIZ} description_package:=${DESCRIPTION_PKG}  launch_servo:=false description_file:=${DESCRIPTION_FILE} moveit_config_package:=${CONFIG_PKG} moveit_config_file:=${CONFIG_FILE} & \
-    . /root/ws/install/setup.sh && \
-    sleep 3 && \
-    ros2 run ur_robot_driver tool_communication.py --ros-args -p robot_ip:=${ROBOT_IP} & \
-    sleep 5 && \
-    . /root/ws/install/setup.sh && \
-    ros2 run gripper_service gripper_service &"
-```
-
-
 # Launch the pdf_beamtime_server
 ```bash
 podman run -it --network host --ipc=host --pid=host \
