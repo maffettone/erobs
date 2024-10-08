@@ -1,63 +1,85 @@
-version: '3'
+version: '3.8'
 
 services:
-  ursim:
-    image: ursim:latest
-    command: tail -f /dev/null
-    ports:
-      - 5900:5900
-      - 6080:6080
-    environment:
-      - ROBOT_MODEL=UR3
-    networks:
-      ursim_net:
-        ipv4_address: 192.168.56.101
-    volumes:
-      - ./ursim/programs:/ursim/programs
+  # ur_robot_driver:
+  #   image: ${GHCR_POINTER}
+  #   environment:
+  #     - ROBOT_IP=${ROBOT_IP}
+  #     - UR_TYPE=${UR_TYPE}
+  #     - ROS_DISTRO=${ROS_DISTRO}
+  #     - DESCRIPTION_PKG=${DESCRIPTION_PKG}
+  #     - DESCRIPTION_FILE=${DESCRIPTION_FILE}
+  #   network_mode: "host"
+  #   ipc: "host"
+  #   pid: "host"
+  #   entrypoint: >
+  #     /bin/sh -c "printenv && 
+  #     . /opt/ros/${ROS_DISTRO}/setup.sh && 
+  #     . /root/ws/install/setup.sh && 
+  #     ros2 launch ur_robot_driver ur_control.launch.py 
+  #     ur_type:=${UR_TYPE} 
+  #     robot_ip:=${ROBOT_IP} 
+  #     description_package:=${DESCRIPTION_PKG} 
+  #     description_file:=${DESCRIPTION_FILE} 
+  #     launch_rviz:=${LAUNCH_RVIZ} 
+  #     tool_voltage:=24"
 
-  urdriver:
-    image: ur-driver:latest
-    ports:
-      - 50001:50001
-      - 50002:50002
-      - 50003:50003
-      - 50004:50004
+  # tool_communication_and_gripper:
+  #   image: ${GHCR_POINTER}
+  #   environment:
+  #     - ROBOT_IP=${ROBOT_IP}
+  #     - ROS_DISTRO=${ROS_DISTRO}
+  #   network_mode: "host"
+  #   ipc: "host"
+  #   pid: "host"
+  #   entrypoint: >
+  #     /bin/bash -c ". /root/ws/install/setup.sh && 
+  #     . /opt/ros/${ROS_DISTRO}/setup.sh && 
+  #     ros2 run ur_robot_driver tool_communication.py --ros-args -p robot_ip:=${ROBOT_IP} & 
+  #     sleep 5 && 
+  #     . /root/ws/install/setup.sh && 
+  #     ros2 run gripper_service gripper_service"
+  #   depends_on:
+  #     - ur_robot_driver
+
+  # aruco_pose:
+  #   image: ${GHCR_POINTER}
+  #   environment:
+  #     - ROS_DISTRO=${ROS_DISTRO}
+  #   network_mode: "host"
+  #   ipc: "host"
+  #   pid: "host"
+  #   entrypoint: >
+  #     /bin/sh -c "printenv && 
+  #     . /root/ws/install/setup.sh && 
+  #     . /opt/ros/${ROS_DISTRO}/setup.sh && 
+  #     ros2 launch aruco_pose aruco_pose.launch.py"
+
+  ur_moveit:
+    image: ${GHCR_POINTER}
     environment:
-      - ROBOT_IP=192.168.56.101
-    networks:
-      ursim_net:
-        ipv4_address: 192.168.56.102
+      - ROBOT_IP=${ROBOT_IP}
+      - UR_TYPE=${UR_TYPE}
+      - ROS_DISTRO=${ROS_DISTRO}
+      - DESCRIPTION_PKG=${DESCRIPTION_PKG}
+      - DESCRIPTION_FILE=${DESCRIPTION_FILE}
+      - CONFIG_PKG=${CONFIG_PKG}
+      - CONFIG_FILE=${CONFIG_FILE}
+    network_mode: "host"
+    ipc: "host"
+    pid: "host"
+    entrypoint: >
+      /bin/sh -c "printenv && 
+      . /opt/ros/${ROS_DISTRO}/setup.sh && 
+      . /root/ws/install/setup.sh && 
+      ros2 launch ur_moveit_config ur_moveit.launch.py 
+      ur_type:=${UR_TYPE} 
+      launch_rviz:=${LAUNCH_RVIZ} 
+      description_package:=${DESCRIPTION_PKG} 
+      launch_servo:=false 
+      description_file:=${DESCRIPTION_FILE} 
+      moveit_config_package:=${CONFIG_PKG} 
+      moveit_config_file:=${CONFIG_FILE}"
     depends_on:
-      - ursim
-
-  urmoveit:
-    image: ur-moveit:latest
-    ports:
-      - 5901:5901
-    environment:
-      - ROBOT_IP=192.168.56.101
-      - LAUNCH_RVIZ=true
-    networks:
-      ursim_net:
-        ipv4_address: 192.168.56.103
-    depends_on:
-      - urdriver
-
-
-  urexample:
-    image: ur-example:latest
-    environment:
-      - ROBOT_IP=192.168.56.101
-    networks:
-      - ursim_net
-    depends_on:
-      - urdriver
-
-networks:
-  ursim_net:
-    ipam:
-      config:
-        - subnet: 192.168.56.0/24
-
-# Can be configured to use extrernal network as well
-# https://stackoverflow.com/questions/46461977/docker-compose-v3-static-ip
+      - aruco_pose
+      - ur_robot_driver

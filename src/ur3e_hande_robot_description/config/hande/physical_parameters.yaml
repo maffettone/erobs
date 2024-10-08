@@ -1,7 +1,7 @@
 # Physical parameters
 
 inertia_parameters:
-  hande_base_mass: 86387
+  hande_base_mass: 1.0
   left_finger_mass: 0.03804
   right_finger_mass: 0.03804
 

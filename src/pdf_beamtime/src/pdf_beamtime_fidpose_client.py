@@ -2,6 +2,8 @@
 
 import math
 import time
+import redis
+import pdb
 
 import rclpy
 from rclpy.action import ActionClient
@@ -19,30 +21,31 @@ class SimpleClient(Node):
         self._action_client = ActionClient(self, FidPoseControlMsg, "pdf_beamtime_fidpose_action_server")
         self._goal_handle = None
 
-    def send_pickup_goal(self):
+    def send_pickup_goal(self, sample_id):
         """Send a working goal."""
         goal_msg = FidPoseControlMsg.Goal()
 
         goal_msg.inbeam_approach = [x / 180 * math.pi for x in [55.10, -51.78, 124.84, -73.16, 52.24, 180.0]]
 
-        goal_msg.inbeam = [x / 180 * math.pi for x in [63.84, -43.13, 98.29, -55.25, 61.00, 180.0]]
+        goal_msg.inbeam = [x / 180 * math.pi for x in [63.84, -47.71, 98.22, -50.59, 61.00, 180.0]]
 
         goal_msg.sample_return = False
-        goal_msg.sample_id = 150
+
+        goal_msg.sample_id = sample_id
 
         self._action_client.wait_for_server()
         self._send_goal_future = self._action_client.send_goal_async(goal_msg, feedback_callback=self.feedback_callback)
 
-    def send_return_sample_goal(self):
+    def send_return_sample_goal(self, sample_id):
         """Send a working goal."""
         goal_msg = FidPoseControlMsg.Goal()
 
         goal_msg.inbeam_approach = [x / 180 * math.pi for x in [55.10, -51.78, 124.84, -73.16, 52.24, 180.0]]
 
-        goal_msg.inbeam = [x / 180 * math.pi for x in [63.84, -43.13, 98.29, -55.25, 61.00, 180.0]]
+        goal_msg.inbeam = [x / 180 * math.pi for x in [63.84, -47.71, 98.22, -50.59, 61.00, 180.0]]
 
         goal_msg.sample_return = True
-        goal_msg.sample_id = 150
+        goal_msg.sample_id = sample_id
 
         self._action_client.wait_for_server()
         self._send_goal_future = self._action_client.send_goal_async(goal_msg, feedback_callback=self.feedback_callback)
@@ -64,9 +67,15 @@ def main(args=None):
     """Python main."""
     rclpy.init(args=args)
 
+    sample_name = "sample_1"
+    # Read sample ID from the redis server
+    redis_client = redis.Redis(host='192.168.56.1', port=6379, db=0)
+    tag_key = redis_client.hget('sample_name_index', sample_name).decode('utf-8')
+    id = int(redis_client.hget(tag_key, 'id'))
+    
     client = SimpleClient()
-    # client.send_pickup_goal()
-    client.send_return_sample_goal()
+    client.send_pickup_goal(id)
+    # client.send_return_sample_goal(id)
 
     rclpy.spin(client)
 

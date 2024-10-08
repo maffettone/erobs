@@ -49,28 +49,6 @@ ArucoPose::ArucoPose()
 
   physical_marker_size_ = this->get_parameter("physical_marker_size").as_double();
 
-  double cam_alpha = this->get_parameter("cam_rotation.cam_alpha").as_double() / 180 * M_PI;
-  double cam_beta = this->get_parameter("cam_rotation.cam_beta").as_double() / 180 * M_PI;
-  double cam_gamma = this->get_parameter("cam_rotation.cam_gamma").as_double() / 180 * M_PI;
-
-  // Add the camera to tf server
-  camera_quaternion_.setRPY(cam_alpha, cam_beta, cam_gamma);
-
-  // Define the transform
-  geometry_msgs::msg::TransformStamped transformStamped;
-  transformStamped.header.stamp = this->now();
-  transformStamped.header.frame_id = "world";
-  transformStamped.child_frame_id = this->get_parameter("camera_tf_frame").as_string();
-  transformStamped.transform.translation.x = this->get_parameter("cam_translation.x").as_double();
-  transformStamped.transform.translation.y = this->get_parameter("cam_translation.y").as_double();
-  transformStamped.transform.translation.z = this->get_parameter("cam_translation.z").as_double();
-  transformStamped.transform.rotation.x = this->camera_quaternion_.x();
-  transformStamped.transform.rotation.y = this->camera_quaternion_.y();
-  transformStamped.transform.rotation.z = this->camera_quaternion_.z();
-  transformStamped.transform.rotation.w = this->camera_quaternion_.w();
-
-  static_broadcaster_.sendTransform(transformStamped);
-
   camera_subscription_ = this->create_subscription<sensor_msgs::msg::Image>(
     this->get_parameter("image_topic").as_string(), 5,
     std::bind(&ArucoPose::image_raw_callback, this, std::placeholders::_1));
@@ -161,6 +139,20 @@ void ArucoPose::image_raw_callback(
         // Median filter gets applied
         median_filters_map_[id]->update(raw_rpyxyz, median_filtered_rpyxyz);
 
+        // Add a tf to map the camera base to a hypothetical link in front of the camera
+        geometry_msgs::msg::TransformStamped transformStamped_map;
+        transformStamped_map.header.stamp = this->now();
+        transformStamped_map.header.frame_id = "camera_base";
+        transformStamped_map.child_frame_id = this->get_parameter("camera_tf_frame").as_string();
+
+        transformStamped_map.transform.translation.x =
+          this->get_parameter("cam_to_lense_x").as_double();
+        transformStamped_map.transform.translation.y =
+          this->get_parameter("cam_to_lense_y").as_double();
+        transformStamped_map.transform.translation.z =
+          this->get_parameter("cam_to_lense_z").as_double();
+        transformStamped_map.transform.rotation = toQuaternion(0.0, 0.0, M_PI);
+
         // Add to the tf frame here for the sample
         geometry_msgs::msg::TransformStamped transformStamped_tag;
 
@@ -193,8 +185,9 @@ void ArucoPose::image_raw_callback(
           "pre_pickup_location.z_adj").as_double();
         transformStamped_pre_pickup.transform.rotation = toQuaternion(0, 0, 0);
 
-        static_broadcaster_.sendTransform(transformStamped_pre_pickup);
+        static_broadcaster_.sendTransform(transformStamped_map);
         static_broadcaster_.sendTransform(transformStamped_tag);
+        static_broadcaster_.sendTransform(transformStamped_pre_pickup);
       }
     }
 

@@ -1,0 +1,24 @@
+inertia_parameters:
+  mount_base_mass: 0.1137
+  camera_mass: 0.440
+
+  links:
+    mount_base:
+      width: 0.0753
+      length: 0.1127
+      height: 0.04
+
+    camera:
+      width: 0.103
+      height: 0.039
+      length: 0.126
+
+  center_of_mass:
+    mount_cog:
+      x: 0.0
+      y: 0.0
+      z: 0.02
+    camera_cog:
+      x: 0.0
+      y: 0.0
+      z: 0.07
