@@ -154,7 +154,7 @@ std::vector<geometry_msgs::msg::Pose> TFUtilities::get_pickup_action_z_adj(
   geometry_msgs::msg::Pose target_pose = mgi.getCurrentPose().pose;
   // Move 2 cm down in the z direction
   target_pose.position.z += z_dist_to_pickup_approach;
-  target_pose.position.z += -0.02;
+  // target_pose.position.z += -0.02;
 
   waypoints.push_back(target_pose);
 
