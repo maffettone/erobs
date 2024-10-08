@@ -168,11 +168,10 @@ moveit::core::MoveItErrorCode PdfBeamtimeFidPoseServer::run_fsm(
         // 0. Camera ready stage
         // 5s delay is added to avoid using tfs when published while arm in motion
         rclcpp::sleep_for(5s);
-        geometry_msgs::msg::TransformStamped sample_pose_ = tf_utilities_->get_sample_pose(
-          move_group_interface_, sample_id);
+        geometry_msgs::msg::TransformStamped sample_pose_ =
+          tf_utilities_->get_sample_pose(sample_id);
         geometry_msgs::msg::TransformStamped pre_pickup_pose_ =
-          tf_utilities_->get_sample_pre_pickup_pose(
-          move_group_interface_, sample_id);
+          tf_utilities_->get_sample_pre_pickup_pose(sample_id);
 
         // 1. Adust the wrist 3 and wrist 2 positions to face the gripper towards the sample
         std::pair<double, double> new_wrist_angles = tf_utilities_->get_wrist_elbow_alignment(
@@ -570,8 +569,8 @@ void PdfBeamtimeFidPoseServer::execute_cleanup()
     case State::PICKUP:
     case State::GRASP_FAILURE: {
         // Move back to pickup approach
-        geometry_msgs::msg::TransformStamped sample_pose_ = tf_utilities_->get_sample_pose(
-          move_group_interface_, sample_id);
+        geometry_msgs::msg::TransformStamped sample_pose_ =
+          tf_utilities_->get_sample_pose(sample_id);
         std::pair<double, double> new_wrist_angles = tf_utilities_->get_wrist_elbow_alignment(
           move_group_interface_, sample_pose_);
         adjusted_pickup_ = goal->pickup_approach;
@@ -585,8 +584,8 @@ void PdfBeamtimeFidPoseServer::execute_cleanup()
 
     case State::RELEASE_FAILURE:
     case State::RELEASE_SUCCESS: {
-        geometry_msgs::msg::TransformStamped sample_pose_ = tf_utilities_->get_sample_pose(
-          move_group_interface_, sample_id);
+        geometry_msgs::msg::TransformStamped sample_pose_ =
+          tf_utilities_->get_sample_pose(sample_id);
         std::pair<double, double> new_wrist_angles = tf_utilities_->get_wrist_elbow_alignment(
           move_group_interface_, sample_pose_);
         adjusted_place_ = goal->place_approach;

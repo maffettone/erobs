@@ -60,9 +60,7 @@ public:
     geometry_msgs::msg::TransformStamped sample_pose);
 
   /// @brief get the sample pose
-  geometry_msgs::msg::TransformStamped get_sample_pose(
-    moveit::planning_interface::MoveGroupInterface & mgi, int sample_id);
+  geometry_msgs::msg::TransformStamped get_sample_pose(int sample_id);
   /// @brief get the pose of the pre-pickup position of the sample
-  geometry_msgs::msg::TransformStamped get_sample_pre_pickup_pose(
-    moveit::planning_interface::MoveGroupInterface & mgi, int sample_id);
+  geometry_msgs::msg::TransformStamped get_sample_pre_pickup_pose(int sample_id);
 };

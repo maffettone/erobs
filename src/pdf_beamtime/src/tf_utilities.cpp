@@ -27,14 +27,12 @@ TFUtilities::TFUtilities(const rclcpp::Node::SharedPtr node)
   wrist_2_frame = "wrist_2_link";
 }
 
-
 double TFUtilities::degreesToRadians(double degrees)
 {
   return degrees * M_PI / 180.0;
 }
 
-geometry_msgs::msg::TransformStamped TFUtilities::get_sample_pose(
-  moveit::planning_interface::MoveGroupInterface & mgi, int sample_id)
+geometry_msgs::msg::TransformStamped TFUtilities::get_sample_pose(int sample_id)
 {
   geometry_msgs::msg::TransformStamped sample_pose;
 
@@ -54,8 +52,7 @@ geometry_msgs::msg::TransformStamped TFUtilities::get_sample_pose(
   return sample_pose;
 }
 
-geometry_msgs::msg::TransformStamped TFUtilities::get_sample_pre_pickup_pose(
-  moveit::planning_interface::MoveGroupInterface & mgi, int sample_id)
+geometry_msgs::msg::TransformStamped TFUtilities::get_sample_pre_pickup_pose(int sample_id)
 {
   geometry_msgs::msg::TransformStamped pre_pickup_pose;
 
@@ -154,7 +151,7 @@ std::vector<geometry_msgs::msg::Pose> TFUtilities::get_pickup_action_z_adj(
   geometry_msgs::msg::Pose target_pose = mgi.getCurrentPose().pose;
   // Move 2 cm down in the z direction
   target_pose.position.z += z_dist_to_pickup_approach;
-  // target_pose.position.z += -0.02;
+  target_pose.position.z += -0.02;
 
   waypoints.push_back(target_pose);
 

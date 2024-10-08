@@ -71,7 +71,7 @@ moveit::core::MoveItErrorCode InnerStateMachine::move_robot_cartesian(
             // path_achieved_fraction, between 0.0 and 1.0, indicating the fraction of the path
             // achieved as described by the waypoints. Return -1.0 in case of error.
             double path_achieved_fraction = mgi.computeCartesianPath(
-              target_pose, 0.01, 0.0,
+              target_pose, 0.005, 0.0,
               plan.trajectory_);
             return std::make_pair(path_achieved_fraction, plan);
           }();

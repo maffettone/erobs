@@ -28,7 +28,7 @@ pdf_beamtime_server:
         h: 0.03 # height
         #w: 0.0 # pose, orientation 
         x: 0.0 # pose x
-        y: 0.59 # pose y
+        y: 0.69 # pose y
         z: 0.355 # pose z 
       holder_base_inbeam:
         type: 'BOX'
@@ -37,7 +37,7 @@ pdf_beamtime_server:
         h: 0.01 # height
         #w: 0.0 # pose, orientation 
         x: 0.006 # pose x
-        y: 0.56 # pose y
+        y: 0.66 # pose y
         z: 10.475 # pose z 
       holder_shaft_inbeam:  #holder_shaft_inbeam
         type: 'BOX'
@@ -46,7 +46,7 @@ pdf_beamtime_server:
         h: 0.04 # height
         #w: 0.0 # pose, orientation 
         x: 0.006 # pose x
-        y: 0.525 # pose y
+        y: 0.625 # pose y
         z: 0.40 # pose z 
       holder_head_inbeam:
         type: 'BOX'
@@ -55,7 +55,7 @@ pdf_beamtime_server:
         h: 0.02 # height
         #w: 0.0 # pose, orientation 
         x: 0.006 # pose x
-        y: 0.55 # pose y
+        y: 0.65 # pose y
         z: 0.435 # pose z 
       holder_base_storage:
         type: 'BOX'
@@ -64,7 +64,7 @@ pdf_beamtime_server:
         h: 0.01 # height
         #w: 0.0 # pose, orientation 
         x: -0.044 # pose x
-        y: -0.51 #-0.55 # pose y
+        y: -0.91 #-0.55 # pose y
         z: 10.035 # pose z 
       holder_shaft_storage: #holder_shaft_torage
         type: 'BOX'
@@ -73,7 +73,7 @@ pdf_beamtime_server:
         h: 0.04 # height
         #w: 0.0 # pose, orientation 
         x: -0.044 # pose x
-        y: -0.53 #-0.51 # pose y
+        y: -0.93 #-0.51 # pose y
         z: 0.06 # pose z 
       holder_head_storage:
         type: 'BOX'
@@ -82,5 +82,5 @@ pdf_beamtime_server:
         h: 0.02 # height
         #w: 0.0 # pose, orientation 
         x: -0.044 # pose x
-        y: -0.51 # pose y
+        y: -0.91 # pose y
         z: 10.09 # pose z 
