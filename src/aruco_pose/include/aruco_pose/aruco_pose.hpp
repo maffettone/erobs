@@ -79,7 +79,8 @@ private:
     "cam_translation.x", "cam_translation.y", "cam_translation.z",
     "cam_rotation.cam_alpha", "cam_rotation.cam_beta", "cam_rotation.cam_gamma",
     "pre_pickup_location.x_adj", "pre_pickup_location.y_adj", "pre_pickup_location.z_adj",
-    "offset_on_marker_x", "offset_on_marker_y", "physical_marker_size"
+    "offset_on_marker_x", "offset_on_marker_y", "physical_marker_size", "cam_to_lense_x",
+    "cam_to_lense_y", "cam_to_lense_z"
   };
 
   std::vector<std::string> string_params_ = {
