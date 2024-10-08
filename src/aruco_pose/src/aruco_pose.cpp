@@ -47,25 +47,7 @@ ArucoPose::ArucoPose()
     this->get_parameter("dist_coeffs.k5").as_double(),
     this->get_parameter("dist_coeffs.k6").as_double());
 
-  // flange_tracker_thread_ = std::thread(&ArucoPose::flange_pose_tracker, this);
-  // flange_tracker_thread_.detach();
-
   physical_marker_size_ = this->get_parameter("physical_marker_size").as_double();
-
-  // // Define the transform
-  // geometry_msgs::msg::TransformStamped transformStamped;
-  // transformStamped.header.stamp = this->now();
-  // transformStamped.header.frame_id = "world";
-  // transformStamped.child_frame_id = this->get_parameter("camera_tf_frame").as_string();
-  // transformStamped.transform.translation.x = this->get_parameter("cam_translation.x").as_double();
-  // transformStamped.transform.translation.y = this->get_parameter("cam_translation.y").as_double();
-  // transformStamped.transform.translation.z = this->get_parameter("cam_translation.z").as_double();
-  // transformStamped.transform.rotation.x = this->camera_quaternion_.x();
-  // transformStamped.transform.rotation.y = this->camera_quaternion_.y();
-  // transformStamped.transform.rotation.z = this->camera_quaternion_.z();
-  // transformStamped.transform.rotation.w = this->camera_quaternion_.w();
-
-  // static_broadcaster_.sendTransform(transformStamped);
 
   camera_subscription_ = this->create_subscription<sensor_msgs::msg::Image>(
     this->get_parameter("image_topic").as_string(), 5,
@@ -87,71 +69,6 @@ ArucoPose::ArucoPose()
 
   RCLCPP_INFO(LOGGER, "Pose estimator node started!");
 }
-
-// void ArucoPose::flange_pose_tracker()
-// {
-
-
-//   double cam_alpha = this->get_parameter("cam_rotation.cam_alpha").as_double() / 180 * M_PI;
-//   double cam_beta = this->get_parameter("cam_rotation.cam_beta").as_double() / 180 * M_PI;
-//   double cam_gamma = this->get_parameter("cam_rotation.cam_gamma").as_double() / 180 * M_PI;
-
-//   // Add the camera to tf server
-//   camera_quaternion_.setRPY(cam_alpha, cam_beta, cam_gamma);
-
-//   double cam_x = this->get_parameter("cam_translation.x").as_double();
-//   double cam_y = this->get_parameter("cam_translation.y").as_double();
-//   double cam_z = this->get_parameter("cam_translation.z").as_double();
-
-//   while (rclcpp::ok()) {
-//     try {
-//       auto tf_buffer_ = std::make_unique<tf2_ros::Buffer>(this->get_clock());
-//       // Need a seperate thread for this
-//       geometry_msgs::msg::TransformStamped transform_world_to_flange;
-
-//       transform_world_to_flange = tf_buffer_->lookupTransform(
-//         "world", "flange",
-//         tf2::TimePointZero);
-
-//       flange_x = transform_world_to_flange.transform.translation.x;
-//       flange_y = transform_world_to_flange.transform.translation.y;
-//       flange_z = transform_world_to_flange.transform.translation.z;
-//       flange_qx = transform_world_to_flange.transform.rotation.x;
-//       flange_qy = transform_world_to_flange.transform.rotation.y;
-//       flange_qz = transform_world_to_flange.transform.rotation.z;
-//       flange_qw = transform_world_to_flange.transform.rotation.w;
-
-//       geometry_msgs::msg::TransformStamped transformStamped;
-//       transformStamped.header.stamp = this->now();
-//       transformStamped.header.frame_id = "world";
-//       transformStamped.child_frame_id = this->get_parameter("camera_tf_frame").as_string();
-//       transformStamped.transform.translation.x =
-//         flange_x + cam_x;
-//       transformStamped.transform.translation.y =
-//         flange_y + cam_y;
-//       transformStamped.transform.translation.z =
-//         flange_z + cam_z;
-//       transformStamped.transform.rotation.x = flange_qx +
-//         camera_quaternion_.x();
-//       transformStamped.transform.rotation.y = flange_qy +
-//         camera_quaternion_.y();
-//       transformStamped.transform.rotation.z = flange_qz +
-//         camera_quaternion_.z();
-//       transformStamped.transform.rotation.w = flange_qw +
-//         camera_quaternion_.w();
-
-//       static_broadcaster_.sendTransform(transformStamped);
-
-//       break;
-//     } catch (tf2::TransformException & ex) {
-//     }
-
-//     RCLCPP_INFO(LOGGER, "Inside flange pose tacker!");
-//     std::this_thread::sleep_for(std::chrono::seconds(1));
-
-//   }
-
-// }
 
 void ArucoPose::image_raw_callback(
   const sensor_msgs::msg::Image::ConstSharedPtr & rgb_msg)
@@ -222,23 +139,18 @@ void ArucoPose::image_raw_callback(
         // Median filter gets applied
         median_filters_map_[id]->update(raw_rpyxyz, median_filtered_rpyxyz);
 
-        // RCLCPP_ERROR(this->LOGGER, "roll: %f ", roll);
-        // RCLCPP_ERROR(this->LOGGER, "pitch: %f ", pitch);
-        // RCLCPP_ERROR(this->LOGGER, "yaw: %f ", yaw);
-        // RCLCPP_ERROR(this->LOGGER, "tranlsation[0]: %f ", tranlsation[0]);
-        // RCLCPP_ERROR(this->LOGGER, "tranlsation[1]: %f ", tranlsation[1]);
-        // RCLCPP_ERROR(this->LOGGER, "tranlsation[2]: %f ", tranlsation[2]);
-
-
+        // Add a tf to map the camera base to a hypothetical link in front of the camera
         geometry_msgs::msg::TransformStamped transformStamped_map;
-
         transformStamped_map.header.stamp = this->now();
         transformStamped_map.header.frame_id = "camera_base";
         transformStamped_map.child_frame_id = this->get_parameter("camera_tf_frame").as_string();
 
-        transformStamped_map.transform.translation.x = -0.032;
-        transformStamped_map.transform.translation.y = 0.0;
-        transformStamped_map.transform.translation.z = 0.0;
+        transformStamped_map.transform.translation.x =
+          this->get_parameter("cam_to_lense_x").as_double();
+        transformStamped_map.transform.translation.y =
+          this->get_parameter("cam_to_lense_y").as_double();
+        transformStamped_map.transform.translation.z =
+          this->get_parameter("cam_to_lense_z").as_double();
         transformStamped_map.transform.rotation = toQuaternion(0.0, 0.0, M_PI);
 
         // Add to the tf frame here for the sample

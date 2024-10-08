@@ -42,7 +42,6 @@ private:
   std::thread flange_tracker_thread_;
   double flange_x = 0.0, flange_y = 0.0, flange_z = 0.0, flange_qx = 0.0, flange_qy = 0.0,
     flange_qz = 0.0, flange_qw = 0.0;
-  void flange_pose_tracker();
 
   rclcpp::Logger LOGGER;
 

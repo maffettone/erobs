@@ -154,12 +154,9 @@ moveit::core::MoveItErrorCode PdfBeamtimeFidPoseServer::run_fsm(
       if (motion_results == moveit::core::MoveItErrorCode::FAILURE) {break;}
       inner_state_machine_->set_internal_state(Internal_State::RESTING);
 
-      rclcpp::sleep_for(3s);
-
       motion_results = inner_state_machine_->move_robot(
         move_group_interface_, pickup_approach_);
       if (motion_results == moveit::core::MoveItErrorCode::FAILURE) {break;}
-      rclcpp::sleep_for(3s);
 
       set_current_state(State::PICKUP_APPROACH);
       inner_state_machine_->set_internal_state(Internal_State::RESTING);
@@ -169,6 +166,7 @@ moveit::core::MoveItErrorCode PdfBeamtimeFidPoseServer::run_fsm(
     case State::PICKUP_APPROACH: {
         // Moves the robot to pickup in multiple steps
         // 0. Camera ready stage
+        // 5s delay is added to avoid using tfs when published while arm in motion
         rclcpp::sleep_for(5s);
         geometry_msgs::msg::TransformStamped sample_pose_ = tf_utilities_->get_sample_pose(
           move_group_interface_, sample_id);
@@ -176,33 +174,15 @@ moveit::core::MoveItErrorCode PdfBeamtimeFidPoseServer::run_fsm(
           tf_utilities_->get_sample_pre_pickup_pose(
           move_group_interface_, sample_id);
 
-        // RCLCPP_INFO(
-        //   node_->get_logger(), "pre_pickup_pose_.transform.translation.x: %f",
-        //   pre_pickup_pose_.transform.translation.x);
-
-        // RCLCPP_INFO(
-        //   node_->get_logger(), "pre_pickup_pose_.transform.translation.y: %f",
-        //   pre_pickup_pose_.transform.translation.y);
-
-        // RCLCPP_INFO(
-        //   node_->get_logger(), "sample_pose_.transform.translation.x: %f",
-        //   sample_pose_.transform.translation.x);
-
-        // RCLCPP_INFO(
-        //   node_->get_logger(), "sample_pose_.transform.translation.y: %f",
-        //   sample_pose_.transform.translation.y);
-
         // 1. Adust the wrist 3 and wrist 2 positions to face the gripper towards the sample
         std::pair<double, double> new_wrist_angles = tf_utilities_->get_wrist_elbow_alignment(
           move_group_interface_, sample_pose_);
         adjusted_pickup_ = pickup_approach_;
         adjusted_pickup_[4] = new_wrist_angles.first;
-        rclcpp::sleep_for(5s);
 
         motion_results = inner_state_machine_->move_robot(move_group_interface_, adjusted_pickup_);
         if (motion_results == moveit::core::MoveItErrorCode::FAILURE) {break;}
         inner_state_machine_->set_internal_state(Internal_State::RESTING);
-        rclcpp::sleep_for(3s);
 
         // 2. Cartesian move the robot to pick up position
         // 2.1 Adjust the z distance
@@ -211,7 +191,6 @@ moveit::core::MoveItErrorCode PdfBeamtimeFidPoseServer::run_fsm(
             move_group_interface_, sample_pose_));
         if (motion_results == moveit::core::MoveItErrorCode::FAILURE) {break;}
         inner_state_machine_->set_internal_state(Internal_State::RESTING);
-        rclcpp::sleep_for(3s);
 
         // 2.2 Cartesian move to pre-pickup location in front of the sample
         motion_results = inner_state_machine_->move_robot_cartesian(
@@ -219,7 +198,6 @@ moveit::core::MoveItErrorCode PdfBeamtimeFidPoseServer::run_fsm(
             move_group_interface_, pre_pickup_pose_));
         if (motion_results == moveit::core::MoveItErrorCode::FAILURE) {break;}
         inner_state_machine_->set_internal_state(Internal_State::RESTING);
-        rclcpp::sleep_for(3s);
 
         // Save the joint angles for the pre-pickup. Use this for moving the sample back
         move_group_interface_.getCurrentState()->copyJointGroupPositions(
@@ -286,7 +264,6 @@ moveit::core::MoveItErrorCode PdfBeamtimeFidPoseServer::run_fsm(
 
     case State::GRASP_FAILURE:
       // Gripper did not close. failed. move to Pickup approach
-      // if (!goal->sample_return) {
       motion_results = inner_state_machine_->move_robot(
         move_group_interface_, pre_pickup_approach_joints_);
       if (motion_results == moveit::core::MoveItErrorCode::FAILURE) {
@@ -593,7 +570,6 @@ void PdfBeamtimeFidPoseServer::execute_cleanup()
     case State::PICKUP:
     case State::GRASP_FAILURE: {
         // Move back to pickup approach
-        rclcpp::sleep_for(5s);
         geometry_msgs::msg::TransformStamped sample_pose_ = tf_utilities_->get_sample_pose(
           move_group_interface_, sample_id);
         std::pair<double, double> new_wrist_angles = tf_utilities_->get_wrist_elbow_alignment(
@@ -609,7 +585,6 @@ void PdfBeamtimeFidPoseServer::execute_cleanup()
 
     case State::RELEASE_FAILURE:
     case State::RELEASE_SUCCESS: {
-        rclcpp::sleep_for(5s);
         geometry_msgs::msg::TransformStamped sample_pose_ = tf_utilities_->get_sample_pose(
           move_group_interface_, sample_id);
         std::pair<double, double> new_wrist_angles = tf_utilities_->get_wrist_elbow_alignment(

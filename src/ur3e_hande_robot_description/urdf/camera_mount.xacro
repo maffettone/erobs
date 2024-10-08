@@ -6,8 +6,6 @@
   <xacro:property name="mount_physical_params_file" value="$(find ur3e_hande_robot_description)/config/camera_mount/physical_parameters.yaml"/>
   <xacro:property name="mount_physical_parameters" value="${xacro.load_yaml(mount_physical_params_file)}"/>
 
-  <!-- <xacro:property name="sec_inertia_parameters" value="${mount_physical_parameters['inertia_parameters']}" /> -->
-
   <!-- Mass and Inertial properties -->
   <xacro:property name="mount_mass" value="${mount_physical_parameters['inertia_parameters']['mount_base_mass']}"/> <!-- Mass in kg -->
   <xacro:property name="camera_mass" value="${mount_physical_parameters['inertia_parameters']['camera_mass']}"/> <!-- Mass in kg -->
@@ -72,7 +70,6 @@
 
   <link name="camera_base">
     <visual>
-      <!-- <origin xyz="-0.013 0. 0." /> -->
         <geometry>
           <mesh filename="package://ur3e_hande_robot_description/meshes/camera_mount/visual/azure_kinect.dae" scale="${scaling_factor_cm} ${scaling_factor_cm} ${scaling_factor_cm}" />
         </geometry>

@@ -38,26 +38,31 @@ public:
   /// @brief converts degrees to radians
   double degreesToRadians(double degrees);
 
+  /// @brief Returns the wrist 2 & 3 angles to make the arm orthogonal to the sample holder
   std::pair<double, double> get_wrist_elbow_alignment(
     moveit::planning_interface::MoveGroupInterface & mgi,
     geometry_msgs::msg::TransformStamped sample_pose);
 
+  /// @brief Returns the pose to align the arm to the sample holder in z direction
   std::vector<geometry_msgs::msg::Pose> get_pickup_action_z_adj(
     moveit::planning_interface::MoveGroupInterface & mgi,
     geometry_msgs::msg::TransformStamped sample_pose);
 
+  /// @brief Returns the pose to move the arm to pre-pickup
   std::vector<geometry_msgs::msg::Pose> get_pickup_action_pre_pickup(
     moveit::planning_interface::MoveGroupInterface & mgi,
     geometry_msgs::msg::TransformStamped pre_pickup_pose);
 
+  /// @brief Returns the pose to move the arm to pickup
   std::vector<geometry_msgs::msg::Pose> get_pickup_action_pickup(
     moveit::planning_interface::MoveGroupInterface & mgi,
     geometry_msgs::msg::TransformStamped pre_pickup_pose,
     geometry_msgs::msg::TransformStamped sample_pose);
 
+  /// @brief get the sample pose
   geometry_msgs::msg::TransformStamped get_sample_pose(
     moveit::planning_interface::MoveGroupInterface & mgi, int sample_id);
-
+  /// @brief get the pose of the pre-pickup position of the sample
   geometry_msgs::msg::TransformStamped get_sample_pre_pickup_pose(
     moveit::planning_interface::MoveGroupInterface & mgi, int sample_id);
 

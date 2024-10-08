@@ -1,7 +1,7 @@
 pdf_beamtime_server:
   ros__parameters:
     update_toggle_value: 0.0
-    object_names: ['table', 'moving_platform']
+    object_names: ['table', 'moving_platform','inbeam_platform','holder_base_inbeam','holder_shaft_inbeam','holder_head_inbeam','holder_base_storage','holder_shaft_storage','holder_head_storage']
     objects:
       table:
         type: 'BOX'
@@ -21,4 +21,66 @@ pdf_beamtime_server:
         x: 0.0 # pose x
         y: 0.0 # pose y
         z: -0.015 # pose z
-
+      inbeam_platform:
+        type: 'BOX'
+        w: 0.30 # width
+        d: 0.10 # depth
+        h: 0.03 # height
+        #w: 0.0 # pose, orientation 
+        x: 0.0 # pose x
+        y: 0.59 # pose y
+        z: 0.355 # pose z 
+      holder_base_inbeam:
+        type: 'BOX'
+        w: 0.06 # width
+        d: 0.06 # depth
+        h: 0.01 # height
+        #w: 0.0 # pose, orientation 
+        x: 0.006 # pose x
+        y: 0.56 # pose y
+        z: 10.475 # pose z 
+      holder_shaft_inbeam:  #holder_shaft_inbeam
+        type: 'BOX'
+        w: 0.02 # width
+        d: 0.01 # depth
+        h: 0.04 # height
+        #w: 0.0 # pose, orientation 
+        x: 0.006 # pose x
+        y: 0.525 # pose y
+        z: 0.40 # pose z 
+      holder_head_inbeam:
+        type: 'BOX'
+        w: 0.08 # width
+        d: 0.01 # depth
+        h: 0.02 # height
+        #w: 0.0 # pose, orientation 
+        x: 0.006 # pose x
+        y: 0.55 # pose y
+        z: 0.435 # pose z 
+      holder_base_storage:
+        type: 'BOX'
+        w: 0.06 # width
+        d: 0.06 # depth
+        h: 0.01 # height
+        #w: 0.0 # pose, orientation 
+        x: -0.044 # pose x
+        y: -0.51 #-0.55 # pose y
+        z: 10.035 # pose z 
+      holder_shaft_storage: #holder_shaft_torage
+        type: 'BOX'
+        w: 0.02 # width
+        d: 0.01 # depth
+        h: 0.04 # height
+        #w: 0.0 # pose, orientation 
+        x: -0.044 # pose x
+        y: -0.53 #-0.51 # pose y
+        z: 0.06 # pose z 
+      holder_head_storage:
+        type: 'BOX'
+        w: 0.08 # width
+        d: 0.01 # depth
+        h: 0.02 # height
+        #w: 0.0 # pose, orientation 
+        x: -0.044 # pose x
+        y: -0.51 # pose y
+        z: 10.09 # pose z 
