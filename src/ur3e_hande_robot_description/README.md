@@ -30,7 +30,9 @@ This file creates the description for the ur3e robot and attaches the hande grip
 ```xml
 <xacro:include filename="$(find ur_description)/urdf/ur_macro.xacro"/>
 ```
-.
+
+**Azure Kinect .stl**
+Design for the Azure Kinect camera can be found in [Microsoft official github repo.](https://github.com/microsoft/Azure-Kinect-Sensor-SDK/tree/5f79890933e1c81e325633152b2f2799df825b8b/assets)
 
 ## Execution
 
