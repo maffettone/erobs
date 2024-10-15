@@ -140,32 +140,34 @@ void ArucoPose::image_raw_callback(
         median_filters_map_[id]->update(raw_rpyxyz, median_filtered_rpyxyz);
 
         // Add a tf to map the camera base to a hypothetical link in front of the camera
-        geometry_msgs::msg::TransformStamped transformStamped_map;
-        transformStamped_map.header.stamp = this->now();
-        transformStamped_map.header.frame_id = "camera_base";
-        transformStamped_map.child_frame_id = this->get_parameter("camera_tf_frame").as_string();
+        geometry_msgs::msg::TransformStamped transformStamped_image_reference_frame;
+        transformStamped_image_reference_frame.header.stamp = this->now();
+        transformStamped_image_reference_frame.header.frame_id = "camera_base";
+        transformStamped_image_reference_frame.child_frame_id = this->get_parameter(
+          "camera_tf_frame").as_string();
 
-        transformStamped_map.transform.translation.x =
-          this->get_parameter("cam_to_lense_x").as_double();
-        transformStamped_map.transform.translation.y =
-          this->get_parameter("cam_to_lense_y").as_double();
-        transformStamped_map.transform.translation.z =
-          this->get_parameter("cam_to_lense_z").as_double();
-        transformStamped_map.transform.rotation = toQuaternion(0.0, 0.0, M_PI);
+        transformStamped_image_reference_frame.transform.translation.x =
+          this->get_parameter("cam_to_lens_x").as_double();
+        transformStamped_image_reference_frame.transform.translation.y =
+          this->get_parameter("cam_to_lens_y").as_double();
+        transformStamped_image_reference_frame.transform.translation.z =
+          this->get_parameter("cam_to_lens_z").as_double();
+        transformStamped_image_reference_frame.transform.rotation = toQuaternion(0.0, 0.0, M_PI);
 
         // Add to the tf frame here for the sample
-        geometry_msgs::msg::TransformStamped transformStamped_tag;
+        geometry_msgs::msg::TransformStamped transformStamped_fiducial_marker;
 
-        transformStamped_tag.header.stamp = this->now();
-        transformStamped_tag.header.frame_id = this->get_parameter("camera_tf_frame").as_string();
-        transformStamped_tag.child_frame_id = std::to_string(id);
+        transformStamped_fiducial_marker.header.stamp = this->now();
+        transformStamped_fiducial_marker.header.frame_id =
+          this->get_parameter("camera_tf_frame").as_string();
+        transformStamped_fiducial_marker.child_frame_id = std::to_string(id);
 
-        transformStamped_tag.transform.translation.x = median_filtered_rpyxyz[3] +
+        transformStamped_fiducial_marker.transform.translation.x = median_filtered_rpyxyz[3] +
           this->get_parameter("offset_on_marker_x").as_double();
-        transformStamped_tag.transform.translation.y = median_filtered_rpyxyz[4] +
+        transformStamped_fiducial_marker.transform.translation.y = median_filtered_rpyxyz[4] +
           this->get_parameter("offset_on_marker_y").as_double();
-        transformStamped_tag.transform.translation.z = median_filtered_rpyxyz[5];
-        transformStamped_tag.transform.rotation = toQuaternion(
+        transformStamped_fiducial_marker.transform.translation.z = median_filtered_rpyxyz[5];
+        transformStamped_fiducial_marker.transform.rotation = toQuaternion(
           median_filtered_rpyxyz[0],
           median_filtered_rpyxyz[1],
           median_filtered_rpyxyz[2]);
@@ -185,8 +187,8 @@ void ArucoPose::image_raw_callback(
           "pre_pickup_location.z_adj").as_double();
         transformStamped_pre_pickup.transform.rotation = toQuaternion(0, 0, 0);
 
-        static_broadcaster_.sendTransform(transformStamped_map);
-        static_broadcaster_.sendTransform(transformStamped_tag);
+        static_broadcaster_.sendTransform(transformStamped_image_reference_frame);
+        static_broadcaster_.sendTransform(transformStamped_fiducial_marker);
         static_broadcaster_.sendTransform(transformStamped_pre_pickup);
       }
     }

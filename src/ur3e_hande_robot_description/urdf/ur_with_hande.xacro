@@ -102,7 +102,6 @@
 
     <!-- Call the robot gripper -->
     <xacro:robotiq_hande 
-     name="$(arg name)"
      tf_prefix="$(arg tf_prefix)"
      parent="world"
    />
@@ -110,8 +109,9 @@
     <!-- attach the gripper to the arm -->
     <joint name="$(arg tf_prefix)hande_to_wrist_flange" type="fixed">
       <parent link="$(arg tf_prefix)flange" />
-      <child link="$(arg tf_prefix)robotiq_hande_base_link" />
-      <origin xyz="0 0 0" rpy="${pi/2.0} 0 ${pi/2.0}" />
+      <!-- <child link="$(arg tf_prefix)robotiq_hande_base_link" /> -->
+      <child link="$(arg tf_prefix)robotiq_coupler" />
+      <origin xyz="0.005 0 0" rpy="-${pi/2.0} 0 ${pi/2.0}" />
     </joint>
 
 </robot>
