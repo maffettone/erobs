@@ -16,4 +16,3 @@ aruco_pose:
     cam_to_lens_x: -0.032
     cam_to_lens_y: 0.0
     cam_to_lens_z: 0.0
-    
