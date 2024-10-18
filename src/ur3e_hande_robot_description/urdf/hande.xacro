@@ -8,7 +8,6 @@
 
   <xacro:property name="hande_kinematics_params" value="$(find ur3e_hande_robot_description)/config/hande/default_kinematics.yaml"/>
   <xacro:property name="hande_physical_params" value="$(find ur3e_hande_robot_description)/config/hande/physical_parameters.yaml"/>
-  <!-- <xacro:property name="hande_visual_params" value="$(find ur3e_hande_robot_description)/config/hande/visual_parameters.yaml"/> -->
 
   <xacro:macro name="cylinder_inertial" params="radius length mass *origin">
     <inertial>

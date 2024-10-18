@@ -10,8 +10,6 @@
   <xacro:property name="mount_mass" value="${mount_physical_parameters['inertia_parameters']['mount_base_mass']}"/> <!-- Mass in kg -->
   <xacro:property name="camera_mass" value="${mount_physical_parameters['inertia_parameters']['camera_mass']}"/> <!-- Mass in kg -->
 
-  <!-- <xacro:property name="intertia_links" value="${mount_physical_parameters['links']}" scope="parent"/> -->
-
   <!-- Dimensions of the rectangular object -->
   <xacro:property name="mount_length" value="${mount_physical_parameters['inertia_parameters']['links']['mount_base']['length']}" scope="parent"/>  <!-- Length in meters -->
   <xacro:property name="mount_width" value="${mount_physical_parameters['inertia_parameters']['links']['mount_base']['width']}" scope="parent"/>   <!-- Width in meters -->
