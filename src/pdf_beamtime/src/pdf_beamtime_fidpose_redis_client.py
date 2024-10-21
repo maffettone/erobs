@@ -2,12 +2,14 @@
 
 import math
 import time
-import redis
+
 import rclpy
 from rclpy.action import ActionClient
 
 from rclpy.node import Node
 from pdf_beamtime_interfaces.action import FidPoseControlMsg
+
+import redis
 
 
 class SimpleClient(Node):
@@ -67,9 +69,9 @@ def main(args=None):
     sample_name = "sample_1"
 
     # Read sample ID from the redis server
-    redis_client = redis.Redis(host='192.168.56.1', port=6379, db=0)
-    tag_key = redis_client.hget('sample_name_index', sample_name).decode('utf-8')
-    tag_id = int(redis_client.hget(tag_key, 'id'))
+    redis_client = redis.Redis(host="192.168.56.1", port=6379, db=0)
+    tag_key = redis_client.hget("sample_name_index", sample_name).decode("utf-8")
+    tag_id = int(redis_client.hget(tag_key, "id"))
 
     client = SimpleClient()
     client.send_pickup_goal(tag_id)
