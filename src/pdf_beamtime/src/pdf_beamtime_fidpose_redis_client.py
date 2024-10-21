@@ -1,9 +1,9 @@
 """Copyright 2023 Brookhaven National Laboratory BSD 3 Clause License. See LICENSE.txt for details."""
 
+import redis
 import math
 import time
 
-import redis
 import rclpy
 from rclpy.action import ActionClient
 from rclpy.node import Node
