@@ -25,7 +25,7 @@ class SimpleClient(Node):
 
         goal_msg.inbeam_approach = [x / 180 * math.pi for x in [55.10, -51.78, 124.84, -73.16, 52.24, 180.0]]
 
-        goal_msg.inbeam = [x / 180 * math.pi for x in [63.84, -43.13, 98.29, -55.25, 61.00, 180.0]]
+        goal_msg.inbeam = [x / 180 * math.pi for x in [63.84, -47.71, 98.22, -50.59, 61.00, 180.0]]
 
         goal_msg.sample_return = False
         goal_msg.sample_id = 150
@@ -39,7 +39,7 @@ class SimpleClient(Node):
 
         goal_msg.inbeam_approach = [x / 180 * math.pi for x in [55.10, -51.78, 124.84, -73.16, 52.24, 180.0]]
 
-        goal_msg.inbeam = [x / 180 * math.pi for x in [63.84, -43.13, 98.29, -55.25, 61.00, 180.0]]
+        goal_msg.inbeam = [x / 180 * math.pi for x in [63.84, -47.71, 98.22, -50.59, 61.00, 180.0]]
 
         goal_msg.sample_return = True
         goal_msg.sample_id = 150

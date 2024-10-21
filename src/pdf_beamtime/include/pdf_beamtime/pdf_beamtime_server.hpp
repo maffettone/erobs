@@ -156,10 +156,6 @@ protected:
   rclcpp_action::CancelResponse handle_cancel(
     const std::shared_ptr<rclcpp_action::ServerGoalHandle<PickPlaceControlMsg>> goal_handle);
 
-  // /// @brief Performs the transitions for each State
-  // moveit::core::MoveItErrorCode run_fsm(
-  //   std::shared_ptr<const pdf_beamtime_interfaces::action::PickPlaceControlMsg_Goal> goal);
-
   /// @brief Set the current state to HOME and move robot to home position
   bool reset_fsm();
 

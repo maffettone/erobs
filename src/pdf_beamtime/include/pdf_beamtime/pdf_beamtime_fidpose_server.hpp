@@ -5,6 +5,7 @@ BSD 3 Clause License. See LICENSE.txt for details.*/
 #include <memory>
 #include <string>
 #include <vector>
+#include <chrono>
 #include <unordered_map>
 
 #include <pdf_beamtime/pdf_beamtime_server.hpp>
