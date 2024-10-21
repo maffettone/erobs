@@ -4,10 +4,10 @@ import math
 import time
 
 import rclpy
-import redis
-
 from rclpy.action import ActionClient
 from rclpy.node import Node
+
+import redis
 
 from pdf_beamtime_interfaces.action import FidPoseControlMsg
 
