@@ -7,9 +7,8 @@ import rclpy
 from rclpy.action import ActionClient
 from rclpy.node import Node
 
-import redis
-
 from pdf_beamtime_interfaces.action import FidPoseControlMsg
+import redis
 
 
 class SimpleClient(Node):
