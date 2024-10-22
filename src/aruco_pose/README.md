@@ -46,3 +46,45 @@ In the current implementation, this topic's publish rate is defined in the Azure
 Median pose estimation is a multi-value estimation, where it estimates the median of the 6 DoF pose returned by the camera. 
 
 For each DoF, it maintains a moving window of size 10 (can be changed via the parameter `number_of_observations` ) to calculate the median. When the detection rate is 5Hz and upon moving the sample or the detected object to a new pose, it takes a minimum of 1.2 seconds to return the correct pose for the updated pose. As a good practice, it is better to wait for the whole 2 seconds. 
+
+# Connection to the Redis DB
+
+Redis is used to store the aruco tag ID and real-world sample information. At present, each entry has four properties. They are:
+- id: integer tag ID of the printed tag from AruCo marker library
+  - e.g., 0
+- family: string key of AruCo tag type used 
+  - e.g., 'DICT_APRILTAG_36h11', 'DICT_6X6_250'
+- size  -> physical size of the marker in meters
+  - e.g., 0.02665
+- sample_names  -> unique string name to identify the sample used with the tag
+  - e.g., 'sample_1', 'guid:dkfb6lsm228mjd'
+
+Create a named volume `redis_data` if it doesn't exist with the following command. 
+```bash
+podman volume create redis_data
+```
+
+Run the Redis container with the following command:
+```bash 
+podman run --name redis-container --network host -d -v redis_data:/data -p 6379:6379 redis
+```
+
+## Insert new entires
+
+Run the following if the command line interface is needed:
+
+```bash
+podman exec -it redis-container redis-cli
+```
+
+New records can be inserted into the redis server with the following command. Note the below example assumes that each entry has four attributes: id, family, size, and sample_name.
+
+```bash
+HSET tag:1 id 0 family "DICT_APRILTAG_36h11" size 0.02665 sample_name sample_1
+```
+Below is a python code to insert new entry.
+```python
+import redis
+client = redis.Redis(host=IP_OF_THE_REDIS_SERVER, port=6379, db=0)
+client.hset("tag:1", mapping={"id": 0, "family": "DICT_APRILTAG_36h11", "size": 0.02665, "sample_name": "sample_1"})
+```
