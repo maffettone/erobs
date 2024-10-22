@@ -4,6 +4,8 @@ import redis
 
 # Connect to Redis
 # Note: Change the host IP to map your server.
+# Following command can be used to retrieve the host address of a redis server
+# podman container inspect -f '{{.NetworkSettings.IPAddress}}' redis-container
 client = redis.Redis(host="192.168.56.1", port=6379, db=0)
 
 # Step 1: Store tag data in Redis

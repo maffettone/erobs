@@ -59,9 +59,14 @@ Redis is used to store the aruco tag ID and real-world sample information. At pr
 - sample_names  -> unique string name to identify the sample used with the tag
   - e.g., 'sample_1', 'guid:dkfb6lsm228mjd'
 
-Run the Redis container with the following command (make sure to have the correct binding for the local storage):
+Create a named volume `redis_data` if it doesn't exist with the following command. 
+```bash
+podman volume create redis_data
+```
+
+Run the Redis container with the following command:
 ```bash 
-podman run --name redis-container --network host -d -v /home/wfernando1/Documents/Environments/Workspaces/redis/data/:/data -p 6379:6379 redis
+podman run --name redis-container --network host -d -v redis_data:/data -p 6379:6379 redis
 ```
 
 ## Insert new entires
@@ -77,5 +82,9 @@ New records can be inserted into the redis server with the following command. No
 ```bash
 HSET tag:1 id 0 family "DICT_APRILTAG_36h11" size 0.02665 sample_name sample_1
 ```
-
-Same procedure can be found in the file `aruoc_pose/src/redis_insert.py`
+Below is a python code to insert new entry.
+```python
+import redis
+client = redis.Redis(host=IP_OF_THE_REDIS_SERVER, port=6379, db=0)
+client.hset("tag:1", mapping={"id": 0, "family": "DICT_APRILTAG_36h11", "size": 0.02665, "sample_name": "sample_1"})
+```
