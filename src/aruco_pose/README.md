@@ -50,10 +50,14 @@ For each DoF, it maintains a moving window of size 10 (can be changed via the pa
 # Connection to the Redis DB
 
 Redis is used to store the aruco tag ID and real-world sample information. At present, each entry has four properties. They are:
-- id  -> tag ID of the printed tag from AruCo marker library
-- family  -> dictionary of tag used [DICT_APRILTAG_36h11, DICT_6X6_250, etc... ]
-- size  -> physical size of the marker
-- sample_names  -> unique name to identify the sample used with the tag
+- id: integer tag ID of the printed tag from AruCo marker library
+  - e.g., 0
+- family: string key of AruCo tag type used 
+  - e.g., 'DICT_APRILTAG_36h11', 'DICT_6X6_250'
+- size  -> physical size of the marker in meters
+  - e.g., 0.02665
+- sample_names  -> unique string name to identify the sample used with the tag
+  - e.g., 'sample_1', 'guid:dkfb6lsm228mjd'
 
 Run the Redis container with the following command (make sure to have the correct binding for the local storage):
 ```bash 
