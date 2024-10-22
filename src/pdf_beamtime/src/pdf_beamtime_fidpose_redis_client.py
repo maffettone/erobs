@@ -3,8 +3,8 @@
 import math
 import time
 
-import redis
 import rclpy
+import redis
 from rclpy.action import ActionClient
 from rclpy.node import Node
 
