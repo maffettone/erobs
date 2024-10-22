@@ -3,12 +3,12 @@
 import math
 import time
 
+import redis
 import rclpy
 from rclpy.action import ActionClient
 from rclpy.node import Node
 
 from pdf_beamtime_interfaces.action import FidPoseControlMsg
-import redis
 
 
 class SimpleClient(Node):
